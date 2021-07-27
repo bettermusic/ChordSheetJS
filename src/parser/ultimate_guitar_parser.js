@@ -6,8 +6,8 @@ import Tag, {
   END_OF_VERSE,
   START_OF_CHORUS,
   START_OF_VERSE,
-} from '../chord_sheet/tag';
-import ChordSheetParser from './chord_sheet_parser';
+} from '../chord_chart/tag';
+import ChordChartParser from './chord_chart_parser';
 
 const VERSE_LINE_REGEX = /^\[Verse.*]/;
 const CHORUS_LINE_REGEX = /^\[Chorus]/;
@@ -25,9 +25,9 @@ const endSectionTags = {
 
 /**
  * Parses an Ultimate Guitar chord sheet with metadata
- * Inherits from {@link ChordSheetParser}
+ * Inherits from {@link ChordChartParser}
  */
-class UltimateGuitarParser extends ChordSheetParser {
+class UltimateGuitarParser extends ChordChartParser {
   parseLine(line) {
     if (this.isSectionEnd()) {
       this.endSection();

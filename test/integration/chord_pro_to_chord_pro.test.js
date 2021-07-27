@@ -5,7 +5,7 @@ import {
 
 describe('chordpro e2e', () => {
   it('correctly parses and evaluates meta expressions', () => {
-    const chordSheet = `
+    const chordChart = `
 {title: A}
 {artist: B}
 %{title}
@@ -25,14 +25,14 @@ c is unset
 artist is B
 title is set and c is unset`.substring(1);
 
-    const song = new ChordProParser().parse(chordSheet);
+    const song = new ChordProParser().parse(chordChart);
     const formatted = new ChordProFormatter({ evaluate: true }).format(song);
 
     expect(formatted).toEqual(expectedEvaluation);
   });
 
   it('correctly parses and formats meta expressions', () => {
-    const chordSheet = `
+    const chordChart = `
 {title: A}
 {artist: B}
 %{title}
@@ -42,10 +42,10 @@ title is set and c is unset`.substring(1);
 %{artist|artist is %{}|artist is unset}
 %{title|title is set and c is %{c|set|unset}|title is unset}`.substring(1);
 
-    const song = new ChordProParser().parse(chordSheet);
+    const song = new ChordProParser().parse(chordChart);
     const formatted = new ChordProFormatter({ evaluate: false }).format(song);
 
-    expect(formatted).toEqual(chordSheet);
+    expect(formatted).toEqual(chordChart);
   });
 
   it('does not fail on empty chord sheet', () => {

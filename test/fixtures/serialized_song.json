@@ -1,5 +1,5 @@
 {
-  "type": "chordSheet",
+  "type": "chordChart",
   "lines": [
     {
       "type": "line",
@@ -17,7 +17,7 @@
         {
           "type": "tag",
           "name": "subtitle",
-          "value": "ChordSheetJS example version"
+          "value": "ChordChartJS example version"
         }
       ]
     },

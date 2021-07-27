@@ -5,7 +5,7 @@ import {
 
 describe('chordpro to chord sheet', () => {
   it('correctly parses and formats meta expressions', () => {
-    const chordSheet = `
+    const chordChart = `
 {title: A}
 {artist: B}
 %{title}
@@ -15,7 +15,7 @@ describe('chordpro to chord sheet', () => {
 %{artist|artist is %{}|artist is unset}
 %{title|title is set and c is %{c|set|unset}|title is unset}`.substring(1);
 
-    const expectedChordSheet = `
+    const expectedChordChart = `
 A
 
 A
@@ -25,34 +25,34 @@ c is unset
 artist is B
 title is set and c is unset`.substring(1);
 
-    const song = new ChordProParser().parse(chordSheet);
+    const song = new ChordProParser().parse(chordChart);
     const formatted = new TextFormatter().format(song);
 
-    expect(formatted).toEqual(expectedChordSheet);
+    expect(formatted).toEqual(expectedChordChart);
   });
 
   it('skips the chordpro header', () => {
-    const chordSheet = `
+    const chordChart = `
 {title: Let it be}
-{subtitle: ChordSheetJS example version}
+{subtitle: ChordChartJS example version}
 {Chorus}
 
 Let it [Am]be, let it [C/G]be, let it [F]be, let it [C]be
 [C]Whisper words of [G]wisdom, let it [F]be [C/E] [Dm] [C]`.substring(1);
 
-    const expectedChordSheet = `
+    const expectedChordChart = `
 LET IT BE
-ChordSheetJS example version
+ChordChartJS example version
 
        Am         C/G        F          C
 Let it be, let it be, let it be, let it be
 C                G              F  C/E Dm C
 Whisper words of wisdom, let it be`.substring(1);
 
-    const song = new ChordProParser().parse(chordSheet);
+    const song = new ChordProParser().parse(chordChart);
     const formatted = new TextFormatter().format(song);
 
-    expect(formatted).toEqual(expectedChordSheet);
+    expect(formatted).toEqual(expectedChordChart);
   });
 
   it('does not fail on empty chord sheet', () => {

@@ -9,11 +9,11 @@ import '../matchers';
 
 describe('UltimateGuitarParser', () => {
   it('starts and ends a single verse tag correctly', () => {
-    const chordSheetVerseTag = `
+    const chordChartVerseTag = `
 [Verse 1]`.substring(1);
 
     const parser = new UltimateGuitarParser({ preserveWhitespace: false });
-    const song = parser.parse(chordSheetVerseTag);
+    const song = parser.parse(chordChartVerseTag);
     const { lines } = song;
 
     expect(lines.length).toEqual(2);
@@ -26,7 +26,7 @@ describe('UltimateGuitarParser', () => {
   });
 
   it('parses a single verse correctly', () => {
-    const chordSheetVerse = `
+    const chordChartVerse = `
 [Verse 1]
 C     G               Am
 Lorem ipsum dolor sit amet,
@@ -34,7 +34,7 @@ C           G          F
 consectetur adipiscing elit.`.substring(1);
 
     const parser = new UltimateGuitarParser({ preserveWhitespace: false });
-    const song = parser.parse(chordSheetVerse);
+    const song = parser.parse(chordChartVerse);
     const { lines } = song;
 
     expect(lines.length).toEqual(4);
@@ -53,13 +53,13 @@ consectetur adipiscing elit.`.substring(1);
   });
 
   it('adds unknown sections as comments', () => {
-    const chordSheetInstrumental = `
+    const chordChartInstrumental = `
 [Instrumental]
 F  C Dm
 `.substring(1); // to do: support chords-only line with no following lyrics or empty line
 
     const parser = new UltimateGuitarParser({ preserveWhitespace: false });
-    const song = parser.parse(chordSheetInstrumental);
+    const song = parser.parse(chordChartInstrumental);
     const { lines } = song;
 
     expect(lines.length).toEqual(3);
@@ -74,12 +74,12 @@ F  C Dm
     expect(line2Items.length).toEqual(0);
   });
 
-  it('parses entire chordsheet with several sections correctly', () => {
-    const chordSheet = fs.readFileSync('./test/fixtures/ultimate_guitar_chordsheet.txt', 'utf8');
-    const expected = fs.readFileSync('./test/fixtures/ultimate_guitar_chordsheet_expected_chordpro_format.txt', 'utf8');
+  it('parses entire chordchart with several sections correctly', () => {
+    const chordChart = fs.readFileSync('./test/fixtures/ultimate_guitar_chordchart.txt', 'utf8');
+    const expected = fs.readFileSync('./test/fixtures/ultimate_guitar_chordchart_expected_chordpro_format.txt', 'utf8');
 
     const parser = new UltimateGuitarParser({ preserveWhitespace: false });
-    const song = parser.parse(chordSheet);
+    const song = parser.parse(chordChart);
     const result = new ChordProFormatter().format(song);
 
     expect(result).toEqual(expected);

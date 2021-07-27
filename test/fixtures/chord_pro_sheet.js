@@ -1,6 +1,6 @@
 export default `
 {title: Let it be}
-{subtitle: ChordSheetJS example version}
+{subtitle: ChordChartJS example version}
 {x_some_setting}
 {composer: John Lennon}
 {composer: Paul McCartney}

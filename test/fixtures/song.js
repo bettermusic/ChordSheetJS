@@ -9,7 +9,7 @@ export default createSong([
   ],
 
   [
-    createTag('subtitle', 'ChordSheetJS example version'),
+    createTag('subtitle', 'ChordChartJS example version'),
   ],
 
   [
@@ -98,5 +98,5 @@ export default createSong([
   ],
 ], {
   title: 'Let it be',
-  subtitle: 'ChordSheetJS example version',
+  subtitle: 'ChordChartJS example version',
 });

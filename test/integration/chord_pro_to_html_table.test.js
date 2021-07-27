@@ -5,7 +5,7 @@ import {
 
 describe('chordpro to HTML with TABLEs', () => {
   it('correctly parses and formats meta expressions', () => {
-    const chordSheet = `
+    const chordChart = `
 {title: A}
 {artist: B}
 %{title}
@@ -15,7 +15,7 @@ describe('chordpro to HTML with TABLEs', () => {
 %{artist|artist is %{}|artist is unset}
 %{title|title is set and c is %{c|set|unset}|title is unset}`.substring(1);
 
-    const expectedChordSheet = '<h1>A</h1>'
+    const expectedChordChart = '<h1>A</h1>'
       + '<div class="chord-sheet">'
         + '<div class="paragraph">'
           + '<table class="row">'
@@ -51,10 +51,10 @@ describe('chordpro to HTML with TABLEs', () => {
         + '</div>'
       + '</div>';
 
-    const song = new ChordProParser().parse(chordSheet);
+    const song = new ChordProParser().parse(chordChart);
     const formatted = new HtmlTableFormatter().format(song);
 
-    expect(formatted).toEqual(expectedChordSheet);
+    expect(formatted).toEqual(expectedChordChart);
   });
 
   it('does not fail on empty chord sheet', () => {

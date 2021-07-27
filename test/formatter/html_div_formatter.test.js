@@ -8,8 +8,8 @@ describe('HtmlDivFormatter', () => {
   it('formats a song to a html chord sheet correctly', () => {
     const formatter = new HtmlDivFormatter();
 
-    const expectedChordSheet = '<h1>Let it be</h1>'
-      + '<h2>ChordSheetJS example version</h2>'
+    const expectedChordChart = '<h1>Let it be</h1>'
+      + '<h2>ChordChartJS example version</h2>'
       + '<div class="chord-sheet">'
         + '<div class="paragraph">'
           + '<div class="row">'
@@ -102,7 +102,7 @@ describe('HtmlDivFormatter', () => {
         + '</div>'
       + '</div>';
 
-    expect(formatter.format(song)).toEqual(expectedChordSheet);
+    expect(formatter.format(song)).toEqual(expectedChordChart);
   });
 
   describe('with option renderBlankLines:false', () => {
@@ -119,7 +119,7 @@ describe('HtmlDivFormatter', () => {
         ],
       ]);
 
-      const expectedChordSheet = '<div class="chord-sheet">'
+      const expectedChordChart = '<div class="chord-sheet">'
           + '<div class="paragraph">'
             + '<div class="row">'
               + '<div class="column">'
@@ -140,7 +140,7 @@ describe('HtmlDivFormatter', () => {
 
       const formatter = new HtmlDivFormatter({ renderBlankLines: false });
 
-      expect(formatter.format(songWithBlankLine)).toEqual(expectedChordSheet);
+      expect(formatter.format(songWithBlankLine)).toEqual(expectedChordChart);
     });
   });
 

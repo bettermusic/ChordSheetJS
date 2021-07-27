@@ -1,5 +1,5 @@
-import ChordProPegParser from './chord_pro_peg_parser';
-import ChordSheetSerializer from '../chord_sheet_serializer';
+import ChordChartParser from './chord_chart_parser';
+import ChordChartSerializer from '../chord_chart_serializer';
 
 /**
  * Parses a ChordPro chord sheet
@@ -7,17 +7,17 @@ import ChordSheetSerializer from '../chord_sheet_serializer';
 class ChordProParser {
   /**
    * Parses a ChordPro chord sheet into a song
-   * @param {string} chordProChordSheet the ChordPro chord sheet
+   * @param {string} chordProChordChart the ChordPro chord sheet
    * @returns {Song} The parsed song
    */
-  parse(chordProChordSheet) {
+  parse(chordProChordChart) {
     /**
      * All warnings raised during parsing the ChordPro chord sheet
      * @member
      * @type {Array<ParserWarning>}
      */
-    const ast = ChordProPegParser.parse(chordProChordSheet);
-    this.song = new ChordSheetSerializer().deserialize(ast);
+    const ast = ChordChartParser.parse(chordProChordChart);
+    this.song = new ChordChartSerializer().deserialize(ast);
     return this.song;
   }
 

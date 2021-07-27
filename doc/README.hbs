@@ -1,4 +1,4 @@
-# ChordSheetJS [![Build Status](https://travis-ci.org/martijnversluis/ChordSheetJS.svg?branch=master)](https://travis-ci.org/martijnversluis/ChordSheetJS) [![npm version](https://badge.fury.io/js/chordsheetjs.svg)](https://badge.fury.io/js/chordsheetjs) [![Code Climate](https://codeclimate.com/github/martijnversluis/ChordSheetJS/badges/gpa.svg)](https://codeclimate.com/github/martijnversluis/ChordSheetJS)
+# ChordChartJS [![Build Status](https://travis-ci.org/martijnversluis/ChordChartJS.svg?branch=master)](https://travis-ci.org/martijnversluis/ChordChartJS) [![npm version](https://badge.fury.io/js/chordchartjs.svg)](https://badge.fury.io/js/chordchartjs) [![Code Climate](https://codeclimate.com/github/martijnversluis/ChordChartJS/badges/gpa.svg)](https://codeclimate.com/github/martijnversluis/ChordChartJS)
 
 A JavaScript library for parsing and formatting chord sheets
 
@@ -11,22 +11,22 @@ A JavaScript library for parsing and formatting chord sheets
 
 ## Installation
 
-`ChordSheetJS` is on npm, to install run:
+`ChordChartJS` is on npm, to install run:
 
 ```bash
-npm install chordsheetjs
+npm install chordchartjs
 ```
 
 Load with `import`:
 
 ```javascript
-import ChordSheetJS from 'chordsheetjs';
+import ChordChartJS from 'chordchartjs';
 ```
 
 or `require()`:
 
 ```javascript
-var ChordSheetJS = require('chordsheetjs').default;
+var ChordChartJS = require('chordchartjs').default;
 ```
 
 ## How to ...?
@@ -36,43 +36,43 @@ var ChordSheetJS = require('chordsheetjs').default;
 #### Regular chord sheets
 
 ```javascript
-const chordSheet = `
+const chordChart = `
        Am         C/G        F          C
 Let it be, let it be, let it be, let it be
 C                G              F  C/E Dm C
 Whisper words of wisdom, let it be`.substring(1);
 
-const parser = new ChordSheetJS.ChordSheetParser();
-const song = parser.parse(chordSheet);
+const parser = new ChordChartJS.ChordChartParser();
+const song = parser.parse(chordChart);
 ```
 
 #### Ultimate Guitar chord sheets
 
 ```javascript
-const chordSheet = `
+const chordChart = `
 [Chorus]
        Am         C/G        F          C
 Let it be, let it be, let it be, let it be
 C                G              F  C/E Dm C
 Whisper words of wisdom, let it be`.substring(1);
 
-const parser = new ChordSheetJS.UltimateGuitarParser();
-const song = parser.parse(chordSheet);
+const parser = new ChordChartJS.UltimateGuitarParser();
+const song = parser.parse(chordChart);
 ```
 
 #### Chord pro format
 
 ```javascript
-const chordSheet = `
+const chordChart = `
 {title: Let it be}
-{subtitle: ChordSheetJS example version}
+{subtitle: ChordChartJS example version}
 {Chorus}
 
 Let it [Am]be, let it [C/G]be, let it [F]be, let it [C]be
 [C]Whisper words of [G]wisdom, let it [F]be [C/E] [Dm] [C]`.substring(1);
 
-const parser = new ChordSheetJS.ChordProParser();
-const song = parser.parse(chordSheet);
+const parser = new ChordChartJS.ChordProParser();
+const song = parser.parse(chordChart);
 ```
 
 ### Display a parsed sheet
@@ -80,7 +80,7 @@ const song = parser.parse(chordSheet);
 #### Plain text format
 
 ```javascript
-const formatter = new ChordSheetJS.TextFormatter();
+const formatter = new ChordChartJS.TextFormatter();
 const disp = formatter.format(song);
 ```
 
@@ -89,21 +89,21 @@ const disp = formatter.format(song);
 ##### Table-based layout
 
 ```javascript
-const formatter = new ChordSheetJS.HtmlTableFormatter();
+const formatter = new ChordChartJS.HtmlTableFormatter();
 const disp = formatter.format(song);
 ```
 
 ##### Div-based layout
 
 ```javascript
-const formatter = new ChordSheetJS.HtmlDivFormatter();
+const formatter = new ChordChartJS.HtmlDivFormatter();
 const disp = formatter.format(song);
 ```
 
 #### Chord pro format
 
 ```javascript
-const formatter = new ChordSheetJS.ChordProFormatter();
+const formatter = new ChordChartJS.ChordProFormatter();
 const disp = formatter.format(song);
 ```
 
@@ -113,8 +113,8 @@ Chord sheets (`Song`s) can be serialized to plain JavaScript objects, which can 
 third-party libraries. The serialized object can also be deserialized back into a `Song`.
 
 ```javascript
-const serializedSong = new ChordSheetSerializer().serialize(song);
-const deserialized = new ChordSheetSerializer().deserialize(serializedSong);
+const serializedSong = new ChordChartSerializer().serialize(song);
+const deserialized = new ChordChartSerializer().deserialize(serializedSong);
 ```
 
 ### Add styling
@@ -127,8 +127,8 @@ HtmlTableFormatter.cssString();
 //   margin-bottom: 1em;
 // }
 
-HtmlTableFormatter.cssString('.chordSheetViewer');
-// .chordSheetViewer .paragraph {
+HtmlTableFormatter.cssString('.chordChartViewer');
+// .chordChartViewer .paragraph {
 //   margin-bottom: 1em;
 // }
 

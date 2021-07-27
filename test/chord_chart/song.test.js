@@ -1,6 +1,6 @@
 import {
   Song,
-  ChordSheetSerializer,
+  ChordChartSerializer,
 } from '../../src';
 
 import { createSong } from '../utilities';
@@ -104,9 +104,9 @@ describe('Song', () => {
 
   describe('#clone', () => {
     it('returns a clone of the song', () => {
-      const serializedExampleSong = new ChordSheetSerializer().serialize(exampleSong);
+      const serializedExampleSong = new ChordChartSerializer().serialize(exampleSong);
       const clone = exampleSong.clone();
-      const serializedClone = new ChordSheetSerializer().serialize(clone);
+      const serializedClone = new ChordChartSerializer().serialize(clone);
       expect(serializedClone).toEqual(serializedExampleSong);
     });
   });
@@ -124,10 +124,10 @@ describe('Song', () => {
   });
 
   it('can be serialized', () => {
-    expect(new ChordSheetSerializer().serialize(exampleSong)).toEqual(serializedSong);
+    expect(new ChordChartSerializer().serialize(exampleSong)).toEqual(serializedSong);
   });
 
   it('can be deserialized', () => {
-    expect(new ChordSheetSerializer().deserialize(serializedSong)).toEqual(exampleSong);
+    expect(new ChordChartSerializer().deserialize(serializedSong)).toEqual(exampleSong);
   });
 });

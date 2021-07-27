@@ -1,17 +1,17 @@
-import { ChordSheetParser } from '../../src';
+import { ChordChartParser } from '../../src';
 
 import '../matchers';
 
-const chordSheet = `
+const chordChart = `
        Am         C/G        F          C
 Let it be, let it be, let it be, let it be
 C                F  G           F  C/E Dm C
 Whisper words of wisdom, let it be`.substring(1);
 
-describe('ChordSheetParser', () => {
+describe('ChordChartParser', () => {
   it('parses a regular chord sheet correctly', () => {
-    const parser = new ChordSheetParser();
-    const song = parser.parse(chordSheet);
+    const parser = new ChordChartParser();
+    const song = parser.parse(chordChart);
     const { lines } = song;
 
     expect(lines.length).toEqual(2);
@@ -34,7 +34,7 @@ describe('ChordSheetParser', () => {
   });
 
   it('groups lines by paragraph', () => {
-    const chordSheetWithParagraphs = `
+    const chordChartWithParagraphs = `
        Am         C/G        F          C
 Let it be, let it be, let it be, let it be
 C                F  G           F  C/E Dm C
@@ -43,8 +43,8 @@ Whisper words of wisdom, let it be
 Am               Bb             F  C
 Whisper words of wisdom, let it be`.substring(1);
 
-    const parser = new ChordSheetParser();
-    const song = parser.parse(chordSheetWithParagraphs);
+    const parser = new ChordChartParser();
+    const song = parser.parse(chordChartWithParagraphs);
     const { paragraphs } = song;
 
     const paragraph0Lines = paragraphs[0].lines;
@@ -74,8 +74,8 @@ Whisper words of wisdom, let it be`.substring(1);
 
   describe('with option preserveWhitespace:true', () => {
     it('parses a regular chord sheet correctly', () => {
-      const parser = new ChordSheetParser({ preserveWhitespace: true });
-      const song = parser.parse(chordSheet);
+      const parser = new ChordChartParser({ preserveWhitespace: true });
+      const song = parser.parse(chordChart);
       const { lines } = song;
 
       expect(lines.length).toEqual(2);
@@ -100,8 +100,8 @@ Whisper words of wisdom, let it be`.substring(1);
 
   describe('with option preserveWhitespace:false', () => {
     it('parses a regular chord sheet correctly', () => {
-      const parser = new ChordSheetParser({ preserveWhitespace: false });
-      const song = parser.parse(chordSheet);
+      const parser = new ChordChartParser({ preserveWhitespace: false });
+      const song = parser.parse(chordChart);
       const { lines } = song;
 
       expect(lines.length).toEqual(2);

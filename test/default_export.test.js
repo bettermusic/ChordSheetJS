@@ -1,9 +1,9 @@
-import chordsheetjs from '../src';
+import chordchartjs from '../src';
 
 describe('default export', () => {
   [
     'ChordProParser',
-    'ChordSheetParser',
+    'ChordChartParser',
     'UltimateGuitarParser',
     'TextFormatter',
     'HtmlTableFormatter',
@@ -19,14 +19,14 @@ describe('default export', () => {
     'Ternary',
     'Composite',
     'Literal',
-    'ChordSheetSerializer',
+    'ChordChartSerializer',
     'CHORUS',
     'INDETERMINATE',
     'VERSE',
     'NONE',
   ].forEach((constantName) => {
     it(`contains ${constantName}`, () => {
-      expect(typeof chordsheetjs[constantName]).not.toEqual('undefined');
+      expect(typeof chordchartjs[constantName]).not.toEqual('undefined');
     });
   });
 });

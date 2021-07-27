@@ -1,7 +1,7 @@
-ChordSheet
+ChordChart
   = lines: LineWithNewline* line: Line? {
   return {
-    type: "chordSheet",
+    type: "chordChart",
     lines: [...lines, line]
   }
 }

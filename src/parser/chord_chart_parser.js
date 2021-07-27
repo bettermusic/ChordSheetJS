@@ -1,4 +1,4 @@
-import Song from '../chord_sheet/song';
+import Song from '../chord_chart/song';
 
 const WHITE_SPACE = /\s/;
 const CHORD_LINE_REGEX = /^\s*((([A-G])(#|b)?([^/\s]*)(\/([A-G])(#|b)?)?)(\s|$)+)+(\s|$)+/;
@@ -6,7 +6,7 @@ const CHORD_LINE_REGEX = /^\s*((([A-G])(#|b)?([^/\s]*)(\/([A-G])(#|b)?)?)(\s|$)+
 /**
  * Parses a normal chord sheet
  */
-class ChordSheetParser {
+class ChordChartParser {
   /**
    * Instantiate a chord sheet parser
    * @param {Object} options options
@@ -18,13 +18,13 @@ class ChordSheetParser {
 
   /**
    * Parses a chord sheet into a song
-   * @param {string} chordSheet The ChordPro chord sheet
+   * @param {string} chordChart The ChordPro chord sheet
    * @param {Object} options Optional parser options
    * @param {Song} options.song The {@link Song} to store the song data in
    * @returns {Song} The parsed song
    */
-  parse(chordSheet, { song = null } = {}) {
-    this.initialize(chordSheet, { song });
+  parse(chordChart, { song = null } = {}) {
+    this.initialize(chordChart, { song });
 
     while (this.hasNextLine()) {
       const line = this.readLine();
@@ -126,4 +126,4 @@ class ChordSheetParser {
   }
 }
 
-export default ChordSheetParser;
+export default ChordChartParser;

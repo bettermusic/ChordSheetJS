@@ -1,12 +1,12 @@
-import Literal from './chord_sheet/chord_pro/literal';
-import Song from './chord_sheet/song';
-import ChordLyricsPair from './chord_sheet/chord_lyrics_pair';
-import Tag from './chord_sheet/tag';
-import Comment from './chord_sheet/comment';
-import Ternary from './chord_sheet/chord_pro/ternary';
+import Literal from './chord_chart/chord_pro/literal';
+import Song from './chord_chart/song';
+import ChordLyricsPair from './chord_chart/chord_lyrics_pair';
+import Tag from './chord_chart/tag';
+import Comment from './chord_chart/comment';
+import Ternary from './chord_chart/chord_pro/ternary';
 import { presence } from './utilities';
 
-const CHORD_SHEET = 'chordSheet';
+const CHORD_CHART = 'chordChart';
 const CHORD_LYRICS_PAIR = 'chordLyricsPair';
 const TAG = 'tag';
 const COMMENT = 'comment';
@@ -16,7 +16,7 @@ const LINE = 'line';
 /**
  * Serializes a song into een plain object, and deserializes the serialized object back into a {@link Song}
  */
-class ChordSheetSerializer {
+class ChordChartSerializer {
   /**
    * Serializes the chord sheet to a plain object, which can be converted to any format like JSON, XML etc
    * Can be deserialized using {@link deserialize}
@@ -24,7 +24,7 @@ class ChordSheetSerializer {
    */
   serialize(song) {
     return {
-      type: CHORD_SHEET,
+      type: CHORD_CHART,
       lines: song.lines.map((line) => this.serializeLine(line)),
     };
   }
@@ -113,8 +113,8 @@ class ChordSheetSerializer {
     const { type } = astComponent;
 
     switch (type) {
-      case CHORD_SHEET:
-        return this.parseChordSheet(astComponent);
+      case CHORD_CHART:
+        return this.parseChordChart(astComponent);
       case CHORD_LYRICS_PAIR:
         return this.parseChordLyricsPair(astComponent);
       case TAG:
@@ -130,7 +130,7 @@ class ChordSheetSerializer {
     return null;
   }
 
-  parseChordSheet(astComponent) {
+  parseChordChart(astComponent) {
     const { lines } = astComponent;
     this.song = new Song();
     lines.forEach((line, index) => this.parseLine(line, index));
@@ -191,4 +191,4 @@ class ChordSheetSerializer {
   }
 }
 
-export default ChordSheetSerializer;
+export default ChordChartSerializer;

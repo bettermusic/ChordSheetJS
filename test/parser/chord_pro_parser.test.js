@@ -9,15 +9,15 @@ import '../matchers';
 
 describe('ChordProParser', () => {
   it('parses a ChordPro chord sheet correctly', () => {
-    const chordSheet = `
+    const chordChart = `
 {title: Let it be}
-{subtitle: ChordSheetJS example version}
+{subtitle: ChordChartJS example version}
 {Chorus}
 
 Let it [Am]be, let it [C/A][C/G#]be, let it [F]be, let it [C]be
 [C]Whisper words of [F]wis[G]dom, let it [F]be [C/E] [Dm] [C]`.substring(1);
 
-    const song = new ChordProParser().parse(chordSheet);
+    const song = new ChordProParser().parse(chordChart);
     const { lines } = song;
 
     expect(lines.length).toEqual(6);
@@ -26,7 +26,7 @@ Let it [Am]be, let it [C/A][C/G#]be, let it [F]be, let it [C]be
     expect(lines[0].items[0]).toBeTag('title', 'Let it be');
 
     expect(lines[1].items.length).toEqual(1);
-    expect(lines[1].items[0]).toBeTag('subtitle', 'ChordSheetJS example version');
+    expect(lines[1].items[0]).toBeTag('subtitle', 'ChordChartJS example version');
 
     expect(lines[2].items.length).toEqual(1);
     expect(lines[2].items[0]).toBeTag('Chorus', null);
@@ -52,56 +52,56 @@ Let it [Am]be, let it [C/A][C/G#]be, let it [F]be, let it [C]be
   });
 
   it('correctly parses a directive with special characters', () => {
-    const chordSheet = '{comment: Intro [Dm7] [F6/B] [Cmaj7] }';
-    const song = new ChordProParser().parse(chordSheet);
+    const chordChart = '{comment: Intro [Dm7] [F6/B] [Cmaj7] }';
+    const song = new ChordProParser().parse(chordChart);
 
     expect(song.lines[0].items[0]).toBeTag('comment', 'Intro [Dm7] [F6/B] [Cmaj7]');
   });
 
   it('correctly parses a directive containing curly brackets', () => {
-    const chordSheet = '{comment: Some {comment\\} }';
-    const song = new ChordProParser().parse(chordSheet);
+    const chordChart = '{comment: Some {comment\\} }';
+    const song = new ChordProParser().parse(chordChart);
 
     expect(song.lines[0].items[0]).toBeTag('comment', 'Some {comment}');
   });
 
   it('parses meta data', () => {
-    const chordSheet = `
+    const chordChart = `
 {title: Let it be}
-{subtitle: ChordSheetJS example version}`.substring(1);
+{subtitle: ChordChartJS example version}`.substring(1);
 
-    const song = new ChordProParser().parse(chordSheet);
+    const song = new ChordProParser().parse(chordChart);
 
     expect(song.title).toEqual('Let it be');
-    expect(song.subtitle).toEqual('ChordSheetJS example version');
+    expect(song.subtitle).toEqual('ChordChartJS example version');
   });
 
   it('parses custom meta data', () => {
-    const chordSheetWithCustomMetaData = `
+    const chordChartWithCustomMetaData = `
       {x_one_directive: Foo}
       {x_other_directive: Bar}
     `;
 
-    const song = new ChordProParser().parse(chordSheetWithCustomMetaData);
+    const song = new ChordProParser().parse(chordChartWithCustomMetaData);
 
     expect(song.metadata.x_one_directive).toEqual('Foo');
     expect(song.metadata.x_other_directive).toEqual('Bar');
   });
 
   it('can have multiple values for a meta directive', () => {
-    const chordSheetWithMultipleComposers = `
+    const chordChartWithMultipleComposers = `
       {composer: John}
       {composer: Jane}
     `;
 
-    const song = new ChordProParser().parse(chordSheetWithMultipleComposers);
+    const song = new ChordProParser().parse(chordChartWithMultipleComposers);
 
     expect(song.composer).toEqual(['John', 'Jane']);
   });
 
   it('correctly parses comments', () => {
-    const chordSheetWithComment = '# this is a comment\nLet it [Am]be, let it [C/G]be';
-    const song = new ChordProParser().parse(chordSheetWithComment);
+    const chordChartWithComment = '# this is a comment\nLet it [Am]be, let it [C/G]be';
+    const song = new ChordProParser().parse(chordChartWithComment);
 
     const line1Items = song.lines[0].items;
     expect(line1Items.length).toEqual(1);
@@ -110,14 +110,14 @@ Let it [Am]be, let it [C/A][C/G#]be, let it [F]be, let it [C]be
   });
 
   it('groups lines by paragraph', () => {
-    const chordSheetWithParagraphs = `
+    const chordChartWithParagraphs = `
 Let it [Am]be, let it [C/G]be, let it [F]be, let it [C]be
 [C]Whisper words of [F]wis[G]dom, let it [F]be [C/E] [Dm] [C]
 
 [Am]Whisper words of [Bb]wisdom, let it [F]be [C]`.substring(1);
 
     const parser = new ChordProParser();
-    const song = parser.parse(chordSheetWithParagraphs);
+    const song = parser.parse(chordChartWithParagraphs);
     const { paragraphs } = song;
 
     const paragraph0Lines = paragraphs[0].lines;
@@ -146,7 +146,7 @@ Let it [Am]be, let it [C/G]be, let it [F]be, let it [C]be
   });
 
   it('adds the type to lines', () => {
-    const markedChordSheet = `
+    const markedChordChart = `
 {start_of_verse}
 Let it [Am]be
 {end_of_verse}
@@ -156,7 +156,7 @@ Let it [F]be [C]
 {end_of_chorus}`.substring(1);
 
     const parser = new ChordProParser();
-    const song = parser.parse(markedChordSheet);
+    const song = parser.parse(markedChordChart);
     const lineTypes = song.lines.map((line) => line.type);
 
     expect(lineTypes).toEqual([VERSE, VERSE, VERSE, NONE, CHORUS, CHORUS, CHORUS]);
@@ -164,14 +164,14 @@ Let it [F]be [C]
   });
 
   it('allows escaped special characters in tags', () => {
-    const chordSheet = '{title: my \\{title\\}}';
-    const song = new ChordProParser().parse(chordSheet);
+    const chordChart = '{title: my \\{title\\}}';
+    const song = new ChordProParser().parse(chordChart);
     expect(song.title).toEqual('my {title}');
   });
 
   it('parses simple ternaries', () => {
-    const chordSheet = '%{title}';
-    const song = new ChordProParser().parse(chordSheet);
+    const chordChart = '%{title}';
+    const song = new ChordProParser().parse(chordChart);
     const expression = song.lines[0].items[0];
 
     expect(expression).toBeTernary({
@@ -183,8 +183,8 @@ Let it [F]be [C]
   });
 
   it('parses ternaries with a self-referencing true expression', () => {
-    const chordSheet = '%{artist|%{}}';
-    const song = new ChordProParser().parse(chordSheet);
+    const chordChart = '%{artist|%{}}';
+    const song = new ChordProParser().parse(chordChart);
     const expression = song.lines[0].items[0];
 
     expect(expression).toBeTernary({
@@ -203,8 +203,8 @@ Let it [F]be [C]
   });
 
   it('parses ternaries with value test', () => {
-    const chordSheet = '%{artist=X|artist is X|artist is not X}';
-    const song = new ChordProParser().parse(chordSheet);
+    const chordChart = '%{artist=X|artist is X|artist is not X}';
+    const song = new ChordProParser().parse(chordChart);
     const expression = song.lines[0].items[0];
 
     expect(expression).toBeTernary({
@@ -219,8 +219,8 @@ Let it [F]be [C]
   });
 
   it('parses nested ternaries', () => {
-    const chordSheet = '%{title|title is set and c is %{c|set|unset}|title is unset}';
-    const song = new ChordProParser().parse(chordSheet);
+    const chordChart = '%{title|title is set and c is %{c|set|unset}|title is unset}';
+    const song = new ChordProParser().parse(chordChart);
     const expression = song.lines[0].items[0];
 
     expect(expression).toBeTernary({
@@ -246,36 +246,36 @@ Let it [F]be [C]
   });
 
   it('Allows unescaped pipe characters outside of meta expressions', () => {
-    const chordSheet = '|: Let it be :|';
-    const song = new ChordProParser().parse(chordSheet);
+    const chordChart = '|: Let it be :|';
+    const song = new ChordProParser().parse(chordChart);
 
     expect(song.lines[0].items[0]).toBeChordLyricsPair('', '|: Let it be :|');
   });
 
   describe('it is forgiving to syntax errors', () => {
     it('allows dangling ]', () => {
-      const chordSheetWithError = `
+      const chordChartWithError = `
 Let it [Am]be
 [C]Whisper wor]ds of [F]wis[G]dom`;
 
-      new ChordProParser().parse(chordSheetWithError);
+      new ChordProParser().parse(chordChartWithError);
     });
 
     it('allows dangling }', () => {
-      const chordSheetWithError = `
+      const chordChartWithError = `
 Let it [Am]be
 [C]Whisper wor}ds of [F]wis[G]dom`;
 
-      new ChordProParser().parse(chordSheetWithError);
+      new ChordProParser().parse(chordChartWithError);
     });
   });
 
   describe('when encountering {end_of_chorus} while the current section type is not chorus', () => {
     it('adds a parser warning', () => {
-      const invalidChordSheet = '{end_of_chorus}';
+      const invalidChordChart = '{end_of_chorus}';
 
       const parser = new ChordProParser();
-      parser.parse(invalidChordSheet);
+      parser.parse(invalidChordChart);
 
       expect(parser.warnings).toHaveLength(1);
       expect(parser.warnings[0].toString()).toMatch(/unexpected.+end_of_chorus.+current.+none.+line 1/i);
@@ -284,10 +284,10 @@ Let it [Am]be
 
   describe('when encountering {end_of_verse} while the current section type is not verse', () => {
     it('adds a parser warning', () => {
-      const invalidChordSheet = '{end_of_verse}';
+      const invalidChordChart = '{end_of_verse}';
 
       const parser = new ChordProParser();
-      parser.parse(invalidChordSheet);
+      parser.parse(invalidChordChart);
 
       expect(parser.warnings).toHaveLength(1);
       expect(parser.warnings[0].toString()).toMatch(/unexpected.+end_of_verse.+current.+none.+line 1/i);
@@ -296,10 +296,10 @@ Let it [Am]be
 
   describe('when encountering {start_of_chorus} while the current section type is not none', () => {
     it('adds a parser warning', () => {
-      const invalidChordSheet = '{start_of_verse}\n{start_of_chorus}';
+      const invalidChordChart = '{start_of_verse}\n{start_of_chorus}';
 
       const parser = new ChordProParser();
-      parser.parse(invalidChordSheet);
+      parser.parse(invalidChordChart);
 
       expect(parser.warnings).toHaveLength(1);
       expect(parser.warnings[0].toString()).toMatch(/unexpected.+start_of_chorus.+current.+verse.+line 2/i);
@@ -308,10 +308,10 @@ Let it [Am]be
 
   describe('when encountering {start_of_chorus} while the current section type is not none', () => {
     it('adds a parser warning', () => {
-      const invalidChordSheet = '{start_of_chorus}\n{start_of_verse}';
+      const invalidChordChart = '{start_of_chorus}\n{start_of_verse}';
 
       const parser = new ChordProParser();
-      parser.parse(invalidChordSheet);
+      parser.parse(invalidChordChart);
 
       expect(parser.warnings).toHaveLength(1);
       expect(parser.warnings[0].toString()).toMatch(/unexpected.+start_of_verse.+current.+chorus.+line 2/i);

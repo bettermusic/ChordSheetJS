@@ -1,5 +1,5 @@
-import ChordLyricsPair from '../chord_sheet/chord_lyrics_pair';
-import Tag from '../chord_sheet/tag';
+import ChordLyricsPair from '../chord_chart/chord_lyrics_pair';
+import Tag from '../chord_chart/tag';
 import { hasChordContents, hasTextContents, padLeft } from '../utilities';
 
 /**

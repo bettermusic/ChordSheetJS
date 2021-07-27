@@ -1,7 +1,7 @@
-import Tag from '../chord_sheet/tag';
-import ChordLyricsPair from '../chord_sheet/chord_lyrics_pair';
-import Ternary from '../chord_sheet/chord_pro/ternary';
-import Literal from '../chord_sheet/chord_pro/literal';
+import Tag from '../chord_chart/tag';
+import ChordLyricsPair from '../chord_chart/chord_lyrics_pair';
+import Ternary from '../chord_chart/chord_pro/ternary';
+import Literal from '../chord_chart/chord_pro/literal';
 
 const NEW_LINE = '\n';
 

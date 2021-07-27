@@ -1,4 +1,4 @@
-# ChordSheetJS [![Build Status](https://travis-ci.org/martijnversluis/ChordSheetJS.svg?branch=master)](https://travis-ci.org/martijnversluis/ChordSheetJS) [![npm version](https://badge.fury.io/js/chordsheetjs.svg)](https://badge.fury.io/js/chordsheetjs) [![Code Climate](https://codeclimate.com/github/martijnversluis/ChordSheetJS/badges/gpa.svg)](https://codeclimate.com/github/martijnversluis/ChordSheetJS)
+# ChordChartJS [![Build Status](https://travis-ci.org/martijnversluis/ChordChartJS.svg?branch=master)](https://travis-ci.org/martijnversluis/ChordChartJS) [![npm version](https://badge.fury.io/js/chordchartjs.svg)](https://badge.fury.io/js/chordchartjs) [![Code Climate](https://codeclimate.com/github/martijnversluis/ChordChartJS/badges/gpa.svg)](https://codeclimate.com/github/martijnversluis/ChordChartJS)
 
 A JavaScript library for parsing and formatting chord sheets
 
@@ -11,22 +11,22 @@ A JavaScript library for parsing and formatting chord sheets
 
 ## Installation
 
-`ChordSheetJS` is on npm, to install run:
+`ChordChartJS` is on npm, to install run:
 
 ```bash
-npm install chordsheetjs
+npm install chordchartjs
 ```
 
 Load with `import`:
 
 ```javascript
-import ChordSheetJS from 'chordsheetjs';
+import ChordChartJS from 'chordchartjs';
 ```
 
 or `require()`:
 
 ```javascript
-var ChordSheetJS = require('chordsheetjs').default;
+var ChordChartJS = require('chordchartjs').default;
 ```
 
 ## How to ...?
@@ -36,43 +36,43 @@ var ChordSheetJS = require('chordsheetjs').default;
 #### Regular chord sheets
 
 ```javascript
-const chordSheet = `
+const chordChart = `
        Am         C/G        F          C
 Let it be, let it be, let it be, let it be
 C                G              F  C/E Dm C
 Whisper words of wisdom, let it be`.substring(1);
 
-const parser = new ChordSheetJS.ChordSheetParser();
-const song = parser.parse(chordSheet);
+const parser = new ChordChartJS.ChordChartParser();
+const song = parser.parse(chordChart);
 ```
 
 #### Ultimate Guitar chord sheets
 
 ```javascript
-const chordSheet = `
+const chordChart = `
 [Chorus]
        Am         C/G        F          C
 Let it be, let it be, let it be, let it be
 C                G              F  C/E Dm C
 Whisper words of wisdom, let it be`.substring(1);
 
-const parser = new ChordSheetJS.UltimateGuitarParser();
-const song = parser.parse(chordSheet);
+const parser = new ChordChartJS.UltimateGuitarParser();
+const song = parser.parse(chordChart);
 ```
 
 #### Chord pro format
 
 ```javascript
-const chordSheet = `
+const chordChart = `
 {title: Let it be}
-{subtitle: ChordSheetJS example version}
+{subtitle: ChordChartJS example version}
 {Chorus}
 
 Let it [Am]be, let it [C/G]be, let it [F]be, let it [C]be
 [C]Whisper words of [G]wisdom, let it [F]be [C/E] [Dm] [C]`.substring(1);
 
-const parser = new ChordSheetJS.ChordProParser();
-const song = parser.parse(chordSheet);
+const parser = new ChordChartJS.ChordProParser();
+const song = parser.parse(chordChart);
 ```
 
 ### Display a parsed sheet
@@ -80,7 +80,7 @@ const song = parser.parse(chordSheet);
 #### Plain text format
 
 ```javascript
-const formatter = new ChordSheetJS.TextFormatter();
+const formatter = new ChordChartJS.TextFormatter();
 const disp = formatter.format(song);
 ```
 
@@ -89,21 +89,21 @@ const disp = formatter.format(song);
 ##### Table-based layout
 
 ```javascript
-const formatter = new ChordSheetJS.HtmlTableFormatter();
+const formatter = new ChordChartJS.HtmlTableFormatter();
 const disp = formatter.format(song);
 ```
 
 ##### Div-based layout
 
 ```javascript
-const formatter = new ChordSheetJS.HtmlDivFormatter();
+const formatter = new ChordChartJS.HtmlDivFormatter();
 const disp = formatter.format(song);
 ```
 
 #### Chord pro format
 
 ```javascript
-const formatter = new ChordSheetJS.ChordProFormatter();
+const formatter = new ChordChartJS.ChordProFormatter();
 const disp = formatter.format(song);
 ```
 
@@ -113,8 +113,8 @@ Chord sheets (`Song`s) can be serialized to plain JavaScript objects, which can 
 third-party libraries. The serialized object can also be deserialized back into a `Song`.
 
 ```javascript
-const serializedSong = new ChordSheetSerializer().serialize(song);
-const deserialized = new ChordSheetSerializer().deserialize(serializedSong);
+const serializedSong = new ChordChartSerializer().serialize(song);
+const deserialized = new ChordChartSerializer().deserialize(serializedSong);
 ```
 
 ### Add styling
@@ -127,8 +127,8 @@ HtmlTableFormatter.cssString();
 //   margin-bottom: 1em;
 // }
 
-HtmlTableFormatter.cssString('.chordSheetViewer');
-// .chordSheetViewer .paragraph {
+HtmlTableFormatter.cssString('.chordChartViewer');
+// .chordChartViewer .paragraph {
 //   margin-bottom: 1em;
 // }
 
@@ -278,7 +278,7 @@ PDF conversion.</p>
 <dt><a href="#ChordProParser">ChordProParser</a></dt>
 <dd><p>Parses a ChordPro chord sheet</p>
 </dd>
-<dt><a href="#ChordSheetParser">ChordSheetParser</a></dt>
+<dt><a href="#ChordChartParser">ChordChartParser</a></dt>
 <dd><p>Parses a normal chord sheet</p>
 </dd>
 <dt><a href="#ParserWarning">ParserWarning</a></dt>
@@ -286,9 +286,9 @@ PDF conversion.</p>
 </dd>
 <dt><a href="#UltimateGuitarParser">UltimateGuitarParser</a></dt>
 <dd><p>Parses an Ultimate Guitar chord sheet with metadata
-Inherits from <a href="#ChordSheetParser">ChordSheetParser</a></p>
+Inherits from <a href="#ChordChartParser">ChordChartParser</a></p>
 </dd>
-<dt><a href="#ChordSheetSerializer">ChordSheetSerializer</a></dt>
+<dt><a href="#ChordChartSerializer">ChordChartSerializer</a></dt>
 <dd><p>Serializes a song into een plain object, and deserializes the serialized object back into a <a href="#Song">Song</a></p>
 </dd>
 </dl>
@@ -815,9 +815,9 @@ Formats a song into HTML.
 Generates basic CSS, optionally scoped within the provided selector, to use with output generated by
 [HtmlDivFormatter](#HtmlDivFormatter)
 
-For example, execute cssString('.chordSheetViewer') will result in CSS like:
+For example, execute cssString('.chordChartViewer') will result in CSS like:
 
-    .chordSheetViewer .paragraph {
+    .chordChartViewer .paragraph {
       margin-bottom: 1em;
     }
 
@@ -826,7 +826,7 @@ For example, execute cssString('.chordSheetViewer') will result in CSS like:
 
 | Param | Description |
 | --- | --- |
-| scope | the CSS scope to use, for example `.chordSheetViewer` |
+| scope | the CSS scope to use, for example `.chordChartViewer` |
 
 <a name="HtmlDivFormatter.cssObject"></a>
 
@@ -882,9 +882,9 @@ Formats a song into HTML.
 Generates basic CSS, optionally scoped within the provided selector, to use with output generated by
 [HtmlTableFormatter](#HtmlTableFormatter)
 
-For example, execute cssString('.chordSheetViewer') will result in CSS like:
+For example, execute cssString('.chordChartViewer') will result in CSS like:
 
-    .chordSheetViewer .paragraph {
+    .chordChartViewer .paragraph {
       margin-bottom: 1em;
     }
 
@@ -893,7 +893,7 @@ For example, execute cssString('.chordSheetViewer') will result in CSS like:
 
 | Param | Description |
 | --- | --- |
-| scope | the CSS scope to use, for example `.chordSheetViewer` |
+| scope | the CSS scope to use, for example `.chordChartViewer` |
 
 <a name="HtmlTableFormatter.cssObject"></a>
 
@@ -936,7 +936,7 @@ Parses a ChordPro chord sheet
 
 * [ChordProParser](#ChordProParser)
     * [.warnings](#ChordProParser+warnings) : [<code>Array.&lt;ParserWarning&gt;</code>](#ParserWarning)
-    * [.parse(chordProChordSheet)](#ChordProParser+parse) ⇒ [<code>Song</code>](#Song)
+    * [.parse(chordProChordChart)](#ChordProParser+parse) ⇒ [<code>Song</code>](#Song)
 
 <a name="ChordProParser+warnings"></a>
 
@@ -946,7 +946,7 @@ All warnings raised during parsing the ChordPro chord sheet
 **Kind**: instance property of [<code>ChordProParser</code>](#ChordProParser)  
 <a name="ChordProParser+parse"></a>
 
-### chordProParser.parse(chordProChordSheet) ⇒ [<code>Song</code>](#Song)
+### chordProParser.parse(chordProChordChart) ⇒ [<code>Song</code>](#Song)
 Parses a ChordPro chord sheet into a song
 
 **Kind**: instance method of [<code>ChordProParser</code>](#ChordProParser)  
@@ -954,22 +954,22 @@ Parses a ChordPro chord sheet into a song
 
 | Param | Type | Description |
 | --- | --- | --- |
-| chordProChordSheet | <code>string</code> | the ChordPro chord sheet |
+| chordProChordChart | <code>string</code> | the ChordPro chord sheet |
 
-<a name="ChordSheetParser"></a>
+<a name="ChordChartParser"></a>
 
-## ChordSheetParser
+## ChordChartParser
 Parses a normal chord sheet
 
 **Kind**: global class  
 
-* [ChordSheetParser](#ChordSheetParser)
-    * [new ChordSheetParser(options)](#new_ChordSheetParser_new)
-    * [.parse(chordSheet, options)](#ChordSheetParser+parse) ⇒ [<code>Song</code>](#Song)
+* [ChordChartParser](#ChordChartParser)
+    * [new ChordChartParser(options)](#new_ChordChartParser_new)
+    * [.parse(chordChart, options)](#ChordChartParser+parse) ⇒ [<code>Song</code>](#Song)
 
-<a name="new_ChordSheetParser_new"></a>
+<a name="new_ChordChartParser_new"></a>
 
-### new ChordSheetParser(options)
+### new ChordChartParser(options)
 Instantiate a chord sheet parser
 
 
@@ -978,17 +978,17 @@ Instantiate a chord sheet parser
 | options | <code>Object</code> | options |
 | options.preserveWhitespace | <code>boolean</code> | whether to preserve trailing whitespace for chords |
 
-<a name="ChordSheetParser+parse"></a>
+<a name="ChordChartParser+parse"></a>
 
-### chordSheetParser.parse(chordSheet, options) ⇒ [<code>Song</code>](#Song)
+### chordChartParser.parse(chordChart, options) ⇒ [<code>Song</code>](#Song)
 Parses a chord sheet into a song
 
-**Kind**: instance method of [<code>ChordSheetParser</code>](#ChordSheetParser)  
+**Kind**: instance method of [<code>ChordChartParser</code>](#ChordChartParser)  
 **Returns**: [<code>Song</code>](#Song) - The parsed song  
 
 | Param | Type | Description |
 | --- | --- | --- |
-| chordSheet | <code>string</code> | The ChordPro chord sheet |
+| chordChart | <code>string</code> | The ChordPro chord sheet |
 | options | <code>Object</code> | Optional parser options |
 | options.song | [<code>Song</code>](#Song) | The [Song](#Song) to store the song data in |
 
@@ -1034,34 +1034,34 @@ Returns a stringified version of the warning
 
 ## UltimateGuitarParser
 Parses an Ultimate Guitar chord sheet with metadata
-Inherits from [ChordSheetParser](#ChordSheetParser)
+Inherits from [ChordChartParser](#ChordChartParser)
 
 **Kind**: global class  
-<a name="ChordSheetSerializer"></a>
+<a name="ChordChartSerializer"></a>
 
-## ChordSheetSerializer
+## ChordChartSerializer
 Serializes a song into een plain object, and deserializes the serialized object back into a [Song](#Song)
 
 **Kind**: global class  
 
-* [ChordSheetSerializer](#ChordSheetSerializer)
-    * [.serialize()](#ChordSheetSerializer+serialize) ⇒
-    * [.deserialize(serializedSong)](#ChordSheetSerializer+deserialize) ⇒ [<code>Song</code>](#Song)
+* [ChordChartSerializer](#ChordChartSerializer)
+    * [.serialize()](#ChordChartSerializer+serialize) ⇒
+    * [.deserialize(serializedSong)](#ChordChartSerializer+deserialize) ⇒ [<code>Song</code>](#Song)
 
-<a name="ChordSheetSerializer+serialize"></a>
+<a name="ChordChartSerializer+serialize"></a>
 
-### chordSheetSerializer.serialize() ⇒
+### chordChartSerializer.serialize() ⇒
 Serializes the chord sheet to a plain object, which can be converted to any format like JSON, XML etc
 Can be deserialized using [deserialize](deserialize)
 
-**Kind**: instance method of [<code>ChordSheetSerializer</code>](#ChordSheetSerializer)  
+**Kind**: instance method of [<code>ChordChartSerializer</code>](#ChordChartSerializer)  
 **Returns**: object A plain JS object containing all chord sheet data  
-<a name="ChordSheetSerializer+deserialize"></a>
+<a name="ChordChartSerializer+deserialize"></a>
 
-### chordSheetSerializer.deserialize(serializedSong) ⇒ [<code>Song</code>](#Song)
+### chordChartSerializer.deserialize(serializedSong) ⇒ [<code>Song</code>](#Song)
 Deserializes a song that has been serialized using [serialize](serialize)
 
-**Kind**: instance method of [<code>ChordSheetSerializer</code>](#ChordSheetSerializer)  
+**Kind**: instance method of [<code>ChordChartSerializer</code>](#ChordChartSerializer)  
 **Returns**: [<code>Song</code>](#Song) - The deserialized song  
 
 | Param | Type | Description |
@@ -1217,5 +1217,5 @@ Generates basic CSS, scoped within the provided selector, to use with output gen
 
 | Param | Description |
 | --- | --- |
-| scope | the CSS scope to use, for example `.chordSheetViewer` |
+| scope | the CSS scope to use, for example `.chordChartViewer` |
 

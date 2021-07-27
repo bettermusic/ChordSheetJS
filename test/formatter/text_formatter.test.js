@@ -8,9 +8,9 @@ describe('TextFormatter', () => {
   it('formats a song to a text chord sheet correctly', () => {
     const formatter = new TextFormatter();
 
-    const expectedChordSheet = `
+    const expectedChordChart = `
 LET IT BE
-ChordSheetJS example version
+ChordChartJS example version
 
 Written by: John Lennon,Paul McCartney
 
@@ -23,17 +23,17 @@ Breakdown
 Am               Bb             F  C
 Whisper words of wisdom, let it be`.substring(1);
 
-    expect(formatter.format(song)).toEqual(expectedChordSheet);
+    expect(formatter.format(song)).toEqual(expectedChordChart);
   });
 
   it('omits the lyrics line when it is empty', () => {
     const formatter = new TextFormatter();
 
-    const expectedChordSheet = `
+    const expectedChordChart = `
 Intro:  C
        Am         C/G        F          C
 Let it be, let it be, let it be, let it be`.substring(1);
 
-    expect(formatter.format(songWithIntro)).toEqual(expectedChordSheet);
+    expect(formatter.format(songWithIntro)).toEqual(expectedChordChart);
   });
 });
