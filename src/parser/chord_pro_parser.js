@@ -1,4 +1,4 @@
-import ChordChartParser from './chord_chart_parser';
+import ChordProPegParser from './chord_pro_peg_parser';
 import ChordChartSerializer from '../chord_chart_serializer';
 
 /**
@@ -16,7 +16,7 @@ class ChordProParser {
      * @member
      * @type {Array<ParserWarning>}
      */
-    const ast = ChordChartParser.parse(chordProChordChart);
+    const ast = ChordProPegParser.parse(chordProChordChart);
     this.song = new ChordChartSerializer().deserialize(ast);
     return this.song;
   }
