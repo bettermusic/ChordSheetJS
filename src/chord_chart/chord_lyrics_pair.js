@@ -24,7 +24,7 @@ class ChordLyricsPair {
   }
 
   /**
-   * Indicates whether a ChordLyricsPair should be visible in a formatted chord sheet (except for ChordPro sheets)
+   * Indicates whether a ChordLyricsPair should be visible in a formatted chord chart (except for ChordPro sheets)
    * @returns {boolean}
    */
   isRenderable() {

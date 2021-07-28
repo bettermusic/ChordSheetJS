@@ -14,14 +14,14 @@ class ParserWarning {
     this.message = message;
 
     /**
-     * The chord sheet line number on which the warning occurred
+     * The chord chart line number on which the warning occurred
      * @member
      * @type {number}
      */
     this.lineNumber = lineNumber;
 
     /**
-     * The chord sheet column on which the warning occurred
+     * The chord chart column on which the warning occurred
      * @member
      * @type {number}
      */

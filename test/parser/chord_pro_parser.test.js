@@ -8,7 +8,7 @@ import {
 import '../matchers';
 
 describe('ChordProParser', () => {
-  it('parses a ChordPro chord sheet correctly', () => {
+  it('parses a ChordPro chord chart correctly', () => {
     const chordChart = `
 {title: Let it be}
 {subtitle: ChordChartJS example version}

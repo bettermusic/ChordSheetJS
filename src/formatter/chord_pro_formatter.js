@@ -6,7 +6,7 @@ import Literal from '../chord_chart/chord_pro/literal';
 const NEW_LINE = '\n';
 
 /**
- * Formats a song into a ChordPro chord sheet
+ * Formats a song into a ChordPro chord chart
  */
 class ChordProFormatter {
   /**
@@ -20,7 +20,7 @@ class ChordProFormatter {
   }
 
   /**
-   * Formats a song into a ChordPro chord sheet.
+   * Formats a song into a ChordPro chord chart.
    * @param {Song} song The song to be formatted
    * @returns {string} The ChordPro string
    */

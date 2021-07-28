@@ -1,6 +1,6 @@
 # ChordChartJS [![Build Status](https://travis-ci.org/martijnversluis/ChordChartJS.svg?branch=master)](https://travis-ci.org/martijnversluis/ChordChartJS) [![npm version](https://badge.fury.io/js/chordchartjs.svg)](https://badge.fury.io/js/chordchartjs) [![Code Climate](https://codeclimate.com/github/martijnversluis/ChordChartJS/badges/gpa.svg)](https://codeclimate.com/github/martijnversluis/ChordChartJS)
 
-A JavaScript library for parsing and formatting chord sheets
+A JavaScript library for parsing and formatting chord charts
 
 **Contents**
 
@@ -31,9 +31,9 @@ var ChordChartJS = require('chordchartjs').default;
 
 ## How to ...?
 
-### Parse chord sheet
+### Parse chord chart
 
-#### Regular chord sheets
+#### Regular chord charts
 
 ```javascript
 const chordChart = `
@@ -46,7 +46,7 @@ const parser = new ChordChartJS.ChordChartParser();
 const song = parser.parse(chordChart);
 ```
 
-#### Ultimate Guitar chord sheets
+#### Ultimate Guitar chord charts
 
 ```javascript
 const chordChart = `
@@ -242,7 +242,7 @@ subject to breaking changes between major versions.
 <dd><p>Represents a comment. See <a href="https://www.chordpro.org/chordpro/chordpro-file-format-specification/#overview">https://www.chordpro.org/chordpro/chordpro-file-format-specification/#overview</a></p>
 </dd>
 <dt><a href="#Line">Line</a></dt>
-<dd><p>Represents a line in a chord sheet, consisting of items of type ChordLyricsPair or Tag</p>
+<dd><p>Represents a line in a chord chart, consisting of items of type ChordLyricsPair or Tag</p>
 </dd>
 <dt><a href="#Metadata">Metadata</a></dt>
 <dd><p>Stores song metadata. Properties can be accessed using the get() method:</p>
@@ -251,16 +251,16 @@ metadata.get(&#39;author&#39;)   // =&gt; &#39;John&#39;</p>
 <p>See <a href="#Metadata+get">get</a></p>
 </dd>
 <dt><a href="#Paragraph">Paragraph</a></dt>
-<dd><p>Represents a paragraph of lines in a chord sheet</p>
+<dd><p>Represents a paragraph of lines in a chord chart</p>
 </dd>
 <dt><a href="#Song">Song</a></dt>
-<dd><p>Represents a song in a chord sheet. Currently a chord sheet can only have one song.</p>
+<dd><p>Represents a song in a chord chart. Currently a chord chart can only have one song.</p>
 </dd>
 <dt><a href="#Tag">Tag</a></dt>
 <dd><p>Represents a tag/directive. See <a href="https://www.chordpro.org/chordpro/chordpro-directives/">https://www.chordpro.org/chordpro/chordpro-directives/</a></p>
 </dd>
 <dt><a href="#ChordProFormatter">ChordProFormatter</a></dt>
-<dd><p>Formats a song into a ChordPro chord sheet</p>
+<dd><p>Formats a song into a ChordPro chord chart</p>
 </dd>
 <dt><a href="#HtmlDivFormatter">HtmlDivFormatter</a></dt>
 <dd><p>Formats a song into HTML. It uses DIVs to align lyrics with chords, which makes it useful for responsive web pages.</p>
@@ -273,19 +273,19 @@ metadata.get(&#39;author&#39;)   // =&gt; &#39;John&#39;</p>
 PDF conversion.</p>
 </dd>
 <dt><a href="#TextFormatter">TextFormatter</a></dt>
-<dd><p>Formats a song into a plain text chord sheet</p>
+<dd><p>Formats a song into a plain text chord chart</p>
 </dd>
 <dt><a href="#ChordProParser">ChordProParser</a></dt>
-<dd><p>Parses a ChordPro chord sheet</p>
+<dd><p>Parses a ChordPro chord chart</p>
 </dd>
 <dt><a href="#ChordChartParser">ChordChartParser</a></dt>
-<dd><p>Parses a normal chord sheet</p>
+<dd><p>Parses a normal chord chart</p>
 </dd>
 <dt><a href="#ParserWarning">ParserWarning</a></dt>
 <dd><p>Represents a parser warning, currently only used by ChordProParser.</p>
 </dd>
 <dt><a href="#UltimateGuitarParser">UltimateGuitarParser</a></dt>
-<dd><p>Parses an Ultimate Guitar chord sheet with metadata
+<dd><p>Parses an Ultimate Guitar chord chart with metadata
 Inherits from <a href="#ChordChartParser">ChordChartParser</a></p>
 </dd>
 <dt><a href="#ChordChartSerializer">ChordChartSerializer</a></dt>
@@ -416,7 +416,7 @@ The lyrics
 <a name="ChordLyricsPair+isRenderable"></a>
 
 ### chordLyricsPair.isRenderable() ⇒ <code>boolean</code>
-Indicates whether a ChordLyricsPair should be visible in a formatted chord sheet (except for ChordPro sheets)
+Indicates whether a ChordLyricsPair should be visible in a formatted chord chart (except for ChordPro sheets)
 
 **Kind**: instance method of [<code>ChordLyricsPair</code>](#ChordLyricsPair)  
 <a name="ChordLyricsPair+clone"></a>
@@ -439,7 +439,7 @@ Represents a comment. See https://www.chordpro.org/chordpro/chordpro-file-format
 <a name="Comment+isRenderable"></a>
 
 ### comment.isRenderable() ⇒ <code>boolean</code>
-Indicates whether a Comment should be visible in a formatted chord sheet (except for ChordPro sheets)
+Indicates whether a Comment should be visible in a formatted chord chart (except for ChordPro sheets)
 
 **Kind**: instance method of [<code>Comment</code>](#Comment)  
 <a name="Comment+clone"></a>
@@ -451,7 +451,7 @@ Returns a deep copy of the Comment, useful when programmatically transforming a 
 <a name="Line"></a>
 
 ## Line
-Represents a line in a chord sheet, consisting of items of type ChordLyricsPair or Tag
+Represents a line in a chord chart, consisting of items of type ChordLyricsPair or Tag
 
 **Kind**: global class  
 
@@ -583,7 +583,7 @@ Returns a deep clone of this Metadata object
 <a name="Paragraph"></a>
 
 ## Paragraph
-Represents a paragraph of lines in a chord sheet
+Represents a paragraph of lines in a chord chart
 
 **Kind**: global class  
 
@@ -615,7 +615,7 @@ Indicates whether the paragraph contains lines with renderable items.
 <a name="Song"></a>
 
 ## Song
-Represents a song in a chord sheet. Currently a chord sheet can only have one song.
+Represents a song in a chord chart. Currently a chord chart can only have one song.
 
 **Kind**: global class  
 
@@ -752,7 +752,7 @@ Returns a clone of the tag.
 <a name="ChordProFormatter"></a>
 
 ## ChordProFormatter
-Formats a song into a ChordPro chord sheet
+Formats a song into a ChordPro chord chart
 
 **Kind**: global class  
 
@@ -774,7 +774,7 @@ Instantiate
 <a name="ChordProFormatter+format"></a>
 
 ### chordProFormatter.format(song) ⇒ <code>string</code>
-Formats a song into a ChordPro chord sheet.
+Formats a song into a ChordPro chord chart.
 
 **Kind**: instance method of [<code>ChordProFormatter</code>](#ChordProFormatter)  
 **Returns**: <code>string</code> - The ChordPro string  
@@ -912,16 +912,16 @@ Example:
 <a name="TextFormatter"></a>
 
 ## TextFormatter
-Formats a song into a plain text chord sheet
+Formats a song into a plain text chord chart
 
 **Kind**: global class  
 <a name="TextFormatter+format"></a>
 
 ### textFormatter.format(song) ⇒ <code>string</code>
-Formats a song into a plain text chord sheet
+Formats a song into a plain text chord chart
 
 **Kind**: instance method of [<code>TextFormatter</code>](#TextFormatter)  
-**Returns**: <code>string</code> - the chord sheet  
+**Returns**: <code>string</code> - the chord chart  
 
 | Param | Type | Description |
 | --- | --- | --- |
@@ -930,7 +930,7 @@ Formats a song into a plain text chord sheet
 <a name="ChordProParser"></a>
 
 ## ChordProParser
-Parses a ChordPro chord sheet
+Parses a ChordPro chord chart
 
 **Kind**: global class  
 
@@ -941,25 +941,25 @@ Parses a ChordPro chord sheet
 <a name="ChordProParser+warnings"></a>
 
 ### chordProParser.warnings : [<code>Array.&lt;ParserWarning&gt;</code>](#ParserWarning)
-All warnings raised during parsing the ChordPro chord sheet
+All warnings raised during parsing the ChordPro chord chart
 
 **Kind**: instance property of [<code>ChordProParser</code>](#ChordProParser)  
 <a name="ChordProParser+parse"></a>
 
 ### chordProParser.parse(chordProChordChart) ⇒ [<code>Song</code>](#Song)
-Parses a ChordPro chord sheet into a song
+Parses a ChordPro chord chart into a song
 
 **Kind**: instance method of [<code>ChordProParser</code>](#ChordProParser)  
 **Returns**: [<code>Song</code>](#Song) - The parsed song  
 
 | Param | Type | Description |
 | --- | --- | --- |
-| chordProChordChart | <code>string</code> | the ChordPro chord sheet |
+| chordProChordChart | <code>string</code> | the ChordPro chord chart |
 
 <a name="ChordChartParser"></a>
 
 ## ChordChartParser
-Parses a normal chord sheet
+Parses a normal chord chart
 
 **Kind**: global class  
 
@@ -970,7 +970,7 @@ Parses a normal chord sheet
 <a name="new_ChordChartParser_new"></a>
 
 ### new ChordChartParser(options)
-Instantiate a chord sheet parser
+Instantiate a chord chart parser
 
 
 | Param | Type | Description |
@@ -981,14 +981,14 @@ Instantiate a chord sheet parser
 <a name="ChordChartParser+parse"></a>
 
 ### chordChartParser.parse(chordChart, options) ⇒ [<code>Song</code>](#Song)
-Parses a chord sheet into a song
+Parses a chord chart into a song
 
 **Kind**: instance method of [<code>ChordChartParser</code>](#ChordChartParser)  
 **Returns**: [<code>Song</code>](#Song) - The parsed song  
 
 | Param | Type | Description |
 | --- | --- | --- |
-| chordChart | <code>string</code> | The ChordPro chord sheet |
+| chordChart | <code>string</code> | The ChordPro chord chart |
 | options | <code>Object</code> | Optional parser options |
 | options.song | [<code>Song</code>](#Song) | The [Song](#Song) to store the song data in |
 
@@ -1014,13 +1014,13 @@ The warning message
 <a name="ParserWarning+lineNumber"></a>
 
 ### parserWarning.lineNumber : <code>number</code>
-The chord sheet line number on which the warning occurred
+The chord chart line number on which the warning occurred
 
 **Kind**: instance property of [<code>ParserWarning</code>](#ParserWarning)  
 <a name="ParserWarning+column"></a>
 
 ### parserWarning.column : <code>number</code>
-The chord sheet column on which the warning occurred
+The chord chart column on which the warning occurred
 
 **Kind**: instance property of [<code>ParserWarning</code>](#ParserWarning)  
 <a name="ParserWarning+toString"></a>
@@ -1033,7 +1033,7 @@ Returns a stringified version of the warning
 <a name="UltimateGuitarParser"></a>
 
 ## UltimateGuitarParser
-Parses an Ultimate Guitar chord sheet with metadata
+Parses an Ultimate Guitar chord chart with metadata
 Inherits from [ChordChartParser](#ChordChartParser)
 
 **Kind**: global class  
@@ -1051,11 +1051,11 @@ Serializes a song into een plain object, and deserializes the serialized object 
 <a name="ChordChartSerializer+serialize"></a>
 
 ### chordChartSerializer.serialize() ⇒
-Serializes the chord sheet to a plain object, which can be converted to any format like JSON, XML etc
+Serializes the chord chart to a plain object, which can be converted to any format like JSON, XML etc
 Can be deserialized using [deserialize](deserialize)
 
 **Kind**: instance method of [<code>ChordChartSerializer</code>](#ChordChartSerializer)  
-**Returns**: object A plain JS object containing all chord sheet data  
+**Returns**: object A plain JS object containing all chord chart data  
 <a name="ChordChartSerializer+deserialize"></a>
 
 ### chordChartSerializer.deserialize(serializedSong) ⇒ [<code>Song</code>](#Song)

@@ -18,9 +18,9 @@ const LINE = 'line';
  */
 class ChordChartSerializer {
   /**
-   * Serializes the chord sheet to a plain object, which can be converted to any format like JSON, XML etc
+   * Serializes the chord chart to a plain object, which can be converted to any format like JSON, XML etc
    * Can be deserialized using {@link deserialize}
-   * @returns object A plain JS object containing all chord sheet data
+   * @returns object A plain JS object containing all chord chart data
    */
   serialize(song) {
     return {

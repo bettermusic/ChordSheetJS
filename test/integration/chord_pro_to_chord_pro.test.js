@@ -48,7 +48,7 @@ title is set and c is unset`.substring(1);
     expect(formatted).toEqual(chordChart);
   });
 
-  it('does not fail on empty chord sheet', () => {
+  it('does not fail on empty chord chart', () => {
     const song = new ChordProParser().parse('');
     const formatted = new ChordProFormatter().format(song);
 

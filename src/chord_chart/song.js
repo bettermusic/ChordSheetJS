@@ -9,7 +9,7 @@ import { CHORUS, NONE, VERSE } from '../constants';
 import ParserWarning from '../parser/parser_warning';
 
 /**
- * Represents a song in a chord sheet. Currently a chord sheet can only have one song.
+ * Represents a song in a chord chart. Currently a chord chart can only have one song.
  */
 class Song {
   /**

@@ -3,13 +3,13 @@ import Tag from '../chord_chart/tag';
 import { hasChordContents, hasTextContents, padLeft } from '../utilities';
 
 /**
- * Formats a song into a plain text chord sheet
+ * Formats a song into a plain text chord chart
  */
 class TextFormatter {
   /**
-   * Formats a song into a plain text chord sheet
+   * Formats a song into a plain text chord chart
    * @param {Song} song The song to be formatted
-   * @returns {string} the chord sheet
+   * @returns {string} the chord chart
    */
   format(song) {
     return [

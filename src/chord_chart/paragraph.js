@@ -1,7 +1,7 @@
 import { INDETERMINATE } from '../constants';
 
 /**
- * Represents a paragraph of lines in a chord sheet
+ * Represents a paragraph of lines in a chord chart
  */
 class Paragraph {
   constructor() {

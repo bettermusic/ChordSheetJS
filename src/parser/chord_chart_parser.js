@@ -4,11 +4,11 @@ const WHITE_SPACE = /\s/;
 const CHORD_LINE_REGEX = /^\s*((([A-G])(#|b)?([^/\s]*)(\/([A-G])(#|b)?)?)(\s|$)+)+(\s|$)+/;
 
 /**
- * Parses a normal chord sheet
+ * Parses a normal chord chart
  */
 class ChordChartParser {
   /**
-   * Instantiate a chord sheet parser
+   * Instantiate a chord chart parser
    * @param {Object} options options
    * @param {boolean} options.preserveWhitespace whether to preserve trailing whitespace for chords
    */
@@ -17,8 +17,8 @@ class ChordChartParser {
   }
 
   /**
-   * Parses a chord sheet into a song
-   * @param {string} chordChart The ChordPro chord sheet
+   * Parses a chord chart into a song
+   * @param {string} chordChart The ChordPro chord chart
    * @param {Object} options Optional parser options
    * @param {Song} options.song The {@link Song} to store the song data in
    * @returns {Song} The parsed song

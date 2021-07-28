@@ -2,17 +2,17 @@ import ChordProPegParser from './chord_pro_peg_parser';
 import ChordChartSerializer from '../chord_chart_serializer';
 
 /**
- * Parses a ChordPro chord sheet
+ * Parses a ChordPro chord chart
  */
 class ChordProParser {
   /**
-   * Parses a ChordPro chord sheet into a song
-   * @param {string} chordProChordChart the ChordPro chord sheet
+   * Parses a ChordPro chord chart into a song
+   * @param {string} chordProChordChart the ChordPro chord chart
    * @returns {Song} The parsed song
    */
   parse(chordProChordChart) {
     /**
-     * All warnings raised during parsing the ChordPro chord sheet
+     * All warnings raised during parsing the ChordPro chord chart
      * @member
      * @type {Array<ParserWarning>}
      */
@@ -22,7 +22,7 @@ class ChordProParser {
   }
 
   /**
-   * All warnings raised during parsing the ChordPro chord sheet
+   * All warnings raised during parsing the ChordPro chord chart
    * @member
    * @type {ParserWarning[]}
    */

@@ -5,7 +5,7 @@ import song from '../fixtures/song';
 import { createChordLyricsPair, createSong } from '../utilities';
 
 describe('HtmlDivFormatter', () => {
-  it('formats a song to a html chord sheet correctly', () => {
+  it('formats a song to a html chord chart correctly', () => {
     const formatter = new HtmlDivFormatter();
 
     const expectedChordChart = '<h1>Let it be</h1>'

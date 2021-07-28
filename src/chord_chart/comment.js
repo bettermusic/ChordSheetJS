@@ -7,7 +7,7 @@ class Comment {
   }
 
   /**
-   * Indicates whether a Comment should be visible in a formatted chord sheet (except for ChordPro sheets)
+   * Indicates whether a Comment should be visible in a formatted chord chart (except for ChordPro sheets)
    * @returns {boolean}
    */
   isRenderable() {

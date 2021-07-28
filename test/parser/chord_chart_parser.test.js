@@ -9,7 +9,7 @@ C                F  G           F  C/E Dm C
 Whisper words of wisdom, let it be`.substring(1);
 
 describe('ChordChartParser', () => {
-  it('parses a regular chord sheet correctly', () => {
+  it('parses a regular chord chart correctly', () => {
     const parser = new ChordChartParser();
     const song = parser.parse(chordChart);
     const { lines } = song;
@@ -73,7 +73,7 @@ Whisper words of wisdom, let it be`.substring(1);
   });
 
   describe('with option preserveWhitespace:true', () => {
-    it('parses a regular chord sheet correctly', () => {
+    it('parses a regular chord chart correctly', () => {
       const parser = new ChordChartParser({ preserveWhitespace: true });
       const song = parser.parse(chordChart);
       const { lines } = song;
@@ -99,7 +99,7 @@ Whisper words of wisdom, let it be`.substring(1);
   });
 
   describe('with option preserveWhitespace:false', () => {
-    it('parses a regular chord sheet correctly', () => {
+    it('parses a regular chord chart correctly', () => {
       const parser = new ChordChartParser({ preserveWhitespace: false });
       const song = parser.parse(chordChart);
       const { lines } = song;

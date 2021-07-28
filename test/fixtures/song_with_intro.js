@@ -1,6 +1,6 @@
 import { createSong, createChordLyricsPair } from '../utilities';
 
-// Mimic the following chord sheet:
+// Mimic the following chord chart:
 // [Intro: ][C]
 // Let it [Am]be, let it [C/G]be, let it [F]be, let it [C]be
 // [C]Whisper words of [G]wisdom, let it [F]be [C/E] [Dm] [C]

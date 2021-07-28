@@ -3,7 +3,7 @@ import {
   TextFormatter,
 } from '../../src';
 
-describe('chordpro to chord sheet', () => {
+describe('chordpro to chord chart', () => {
   it('correctly parses and formats meta expressions', () => {
     const chordChart = `
 {title: A}
@@ -55,7 +55,7 @@ Whisper words of wisdom, let it be`.substring(1);
     expect(formatted).toEqual(expectedChordChart);
   });
 
-  it('does not fail on empty chord sheet', () => {
+  it('does not fail on empty chord chart', () => {
     const song = new ChordProParser().parse('');
     const formatted = new TextFormatter().format(song);
 

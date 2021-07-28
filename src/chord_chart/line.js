@@ -4,7 +4,7 @@ import Comment from './comment';
 import { CHORUS, NONE, VERSE } from '../constants';
 
 /**
- * Represents a line in a chord sheet, consisting of items of type ChordLyricsPair or Tag
+ * Represents a line in a chord chart, consisting of items of type ChordLyricsPair or Tag
  */
 class Line {
   constructor() {

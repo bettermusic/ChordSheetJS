@@ -5,7 +5,7 @@ import song from '../fixtures/song';
 import songWithIntro from '../fixtures/song_with_intro';
 
 describe('TextFormatter', () => {
-  it('formats a song to a text chord sheet correctly', () => {
+  it('formats a song to a text chord chart correctly', () => {
     const formatter = new TextFormatter();
 
     const expectedChordChart = `

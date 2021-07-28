@@ -24,7 +24,7 @@ const endSectionTags = {
 };
 
 /**
- * Parses an Ultimate Guitar chord sheet with metadata
+ * Parses an Ultimate Guitar chord chart with metadata
  * Inherits from {@link ChordChartParser}
  */
 class UltimateGuitarParser extends ChordChartParser {
