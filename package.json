@@ -2,7 +2,7 @@
   "name": "@praisecharts/chordchartjs",
   "author": "PraiseCharts",
   "version": "4.7.1",
-  "description": "A JavaScript library for parsing and formatting chord charts",
+  "description": "A JavaScript library for parsing and formatting chord charts. Testing GH Actions",
   "main": "lib/index.js",
   "repository": {
     "type": "git",
