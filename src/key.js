@@ -45,6 +45,10 @@ class Key {
     return this.parse(keyStringOrObject);
   }
 
+  static toString(keyStringOrObject) {
+    return `${Key.wrap(keyStringOrObject)}`;
+  }
+
   static distance(oneKey, otherKey) {
     return this.wrap(oneKey).distanceTo(otherKey);
   }
@@ -69,7 +73,7 @@ class Key {
   }
 
   isMinor() {
-    return this.note.isMinor();
+    return this.minor || this.note.isMinor();
   }
 
   clone() {
@@ -166,7 +170,7 @@ class Key {
 
   toString() {
     if (this.isChordSymbol()) {
-      return `${this.note}${this.modifier || ''}`;
+      return `${this.note}${this.modifier || ''}${this.isMinor() ? 'm' : ''}`;
     }
 
     return `${this.modifier || ''}${this.note}`;
