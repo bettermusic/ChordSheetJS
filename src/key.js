@@ -170,7 +170,7 @@ class Key {
 
   toString() {
     if (this.isChordSymbol()) {
-      return `${this.note}${this.modifier || ''}${this.isMinor() ? 'm' : ''}`;
+      return `${this.note}${this.modifier || ''}`;
     }
 
     return `${this.modifier || ''}${this.note}`;

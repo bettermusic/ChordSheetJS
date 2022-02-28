@@ -58,7 +58,5 @@ export function getCapos(key) {
  */
 export function getKeys(key) {
   const keyObj = Key.wrap(key);
-  const keyString = keyObj.toString();
-  const availableKeys = keyObj.isMinor() ? minorKeys : majorKeys;
-  return availableKeys.filter((availableKey) => availableKey !== keyString);
+  return keyObj.isMinor() ? minorKeys : majorKeys;
 }
