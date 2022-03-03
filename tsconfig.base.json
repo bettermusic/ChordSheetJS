@@ -14,7 +14,15 @@
     "skipLibCheck": true,
     "skipDefaultLibCheck": true,
     "baseUrl": ".",
-    "paths": {}
+    "paths": {
+      ".": ["dist/packages/editor"],
+      "./loader": ["dist/packages/editor/loader"],
+      "@chordpro-editor/editor": ["packages/editor/src/index.ts"],
+      "@praisecharts/chordchartjs-editor": ["dist/packages/editor"],
+      "@praisecharts/chordchartjs-editor/loader": [
+        "dist/packages/editor/loader"
+      ]
+    }
   },
   "exclude": ["node_modules", "tmp"]
 }

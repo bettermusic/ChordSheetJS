@@ -1,7 +1,8 @@
 {
   "version": 2,
   "projects": {
-    "ChordChartJS": "packages/ChordChartJS",
-    "simple": "packages/simple"
+    "core": "packages/core",
+    "demo": "packages/demo",
+    "editor": "packages/editor"
   }
 }

@@ -1,0 +1,72 @@
+{
+  "root": "packages/editor",
+  "sourceRoot": "packages/editor/src",
+  "projectType": "library",
+  "generators": {
+    "@nxext/stencil:component": {
+      "style": "pcss"
+    }
+  },
+  "tags": [],
+  "targets": {
+    "test": {
+      "executor": "@nxext/stencil:test",
+      "outputs": ["{options.outputPath}"],
+      "options": {
+        "projectType": "library",
+        "tsConfig": "packages/editor/tsconfig.lib.json",
+        "configPath": "packages/editor/stencil.config.ts",
+        "outputPath": "dist/packages/editor"
+      }
+    },
+    "build": {
+      "executor": "@nxext/stencil:build",
+      "outputs": ["{options.outputPath}"],
+      "options": {
+        "projectType": "library",
+        "tsConfig": "packages/editor/tsconfig.lib.json",
+        "configPath": "packages/editor/stencil.config.ts",
+        "outputPath": "dist/packages/editor"
+      },
+      "configurations": {
+        "production": {
+          "dev": false,
+          "prod": true
+        }
+      }
+    },
+    "serve": {
+      "executor": "@nxext/stencil:serve",
+      "outputs": ["{options.outputPath}"],
+      "dependsOn": [
+          {
+            "target": "build",
+            "projects": "dependencies"
+          }
+      ],
+      "options": {
+        "projectType": "library",
+        "tsConfig": "packages/editor/tsconfig.lib.json",
+        "configPath": "packages/editor/stencil.config.ts",
+        "outputPath": "dist/packages/editor"
+      }
+    },
+    "e2e": {
+      "executor": "@nxext/stencil:e2e",
+      "outputs": ["{options.outputPath}"],
+      "options": {
+        "projectType": "library",
+        "tsConfig": "packages/editor/tsconfig.lib.json",
+        "configPath": "packages/editor/stencil.config.ts",
+        "outputPath": "dist/packages/editor"
+      }
+    },
+    "lint": {
+      "executor": "@nrwl/linter:eslint",
+      "outputs": ["{options.outputFile}"],
+      "options": {
+        "lintFilePatterns": "packages/editor/**/*.{ts,tsx}"
+      }
+    }
+  }
+}
