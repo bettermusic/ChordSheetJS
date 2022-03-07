@@ -1,5 +1,5 @@
 #!/bin/sh
 . "$(dirname "$0")/_/husky.sh"
 
-nx readme ChordChartJS
-git add packages/ChordChartJS/README.md
+nx readme core
+git add packages/core/README.md
