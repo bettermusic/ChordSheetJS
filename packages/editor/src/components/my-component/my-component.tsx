@@ -1,9 +1,10 @@
 import { Component, Prop, h } from '@stencil/core';
-import { format } from '../../utils/utils';
+// import { format } from '../../utils/utils';
+import ChordChartJs from '@praisecharts/chordchartjs';
 
 @Component({
   tag: 'my-component',
-  styleUrl: 'my-component.pcss',
+  styleUrl: 'my-component.css',
   shadow: true,
 })
 export class MyComponent {
@@ -23,7 +24,17 @@ export class MyComponent {
   @Prop() last: string;
 
   private getText(): string {
-    return format(this.first, this.middle, this.last);
+    const chordSheet = `
+       Am         C/G        F          C
+Let it be, let it be, let it be, let it be
+C                G              F  C/E Dm C
+Whisper words of wisdom, let it be`.substring(1);
+
+const parser = new ChordChartJs.ChordSheetParser();
+const song = parser.parse(chordSheet);
+const formatter = new ChordChartJs.ChordProFormatter();
+const disp = formatter.format(song);
+    return disp
   }
 
   render() {
