@@ -7,22 +7,21 @@
     "postinstall": "husky install"
   },
   "private": true,
-  "dependencies": {
-    "@angular-devkit/schematics": "^13.2.5",
-    "@nrwl/eslint-plugin-nx": "^13.8.4",
-    "@nxext/stencil": "^13.1.2",
-    "tslib": "^2.0.0"
-  },
   "devDependencies": {
+    "@angular-devkit/schematics": "^13.2.5",
+    "@nrwl/angular": "13.4.4",
     "@nrwl/cli": "13.8.4",
     "@nrwl/eslint-plugin-nx": "13.8.4",
     "@nrwl/jest": "13.8.4",
     "@nrwl/linter": "13.8.4",
     "@nrwl/nx-cloud": "latest",
+    "@nrwl/react": "13.4.4",
+    "@nrwl/storybook": "13.4.4",
     "@nrwl/tao": "13.8.4",
     "@nrwl/workspace": "13.8.4",
+    "@nxext/stencil": "^13.1.2",
     "@stencil/core": "^2.12.0",
-    "@stencil/eslint-plugin": "0.3.1",
+    "@stencil/eslint-plugin": "^0.3.1",
     "@stencil/postcss": "2.1.0",
     "@stencil/router": "^1.0.1",
     "@types/autoprefixer": "^9.7.2",
@@ -35,12 +34,14 @@
     "eslint": "~8.7.0",
     "eslint-config-prettier": "8.1.0",
     "eslint-plugin-import": "2.22.1",
+    "eslint-plugin-react": "7.19.0",
     "husky": "^7.0.0",
     "jest": "26.6.3",
     "jest-config": "26.6.3",
     "prettier": "^2.5.1",
     "puppeteer": "~5.3.1",
     "ts-jest": "26.5.6",
+    "tslib": "^2.0.0",
     "typescript": "~4.5.2"
   },
   "workspaces": [
