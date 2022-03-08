@@ -1,6 +1,9 @@
 import { Component, Prop, h } from '@stencil/core';
 // import { format } from '../../utils/utils';
-import ChordChartJs from '@praisecharts/chordchartjs';
+// import { parseChord } from '@praisecharts/chordchartjs';
+import ChordChartJs from 'chordsheetjs';
+// var ChordChartJs = require('chordsheetjs').default;
+
 
 @Component({
   tag: 'my-component',
@@ -25,15 +28,15 @@ export class MyComponent {
 
   private getText(): string {
     const chordSheet = `
-       Am         C/G        F          C
-Let it be, let it be, let it be, let it be
-C                G              F  C/E Dm C
-Whisper words of wisdom, let it be`.substring(1);
+          Am         C/G        F          C
+    Let it be, let it be, let it be, let it be
+    C                G              F  C/E Dm C
+    Whisper words of wisdom, let it be`.substring(1);
 
-const parser = new ChordChartJs.ChordSheetParser();
-const song = parser.parse(chordSheet);
-const formatter = new ChordChartJs.ChordProFormatter();
-const disp = formatter.format(song);
+    const parser = new ChordChartJs.ChordSheetParser();
+    const song = parser.parse(chordSheet);
+    const formatter = new ChordChartJs.ChordProFormatter();
+    const disp = formatter.format(song);
     return disp
   }
 
