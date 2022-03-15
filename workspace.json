@@ -1,8 +1,9 @@
 {
   "version": 2,
   "projects": {
+    "angular-demo": "demos/angular-demo",
     "core": "packages/core",
-    "demo": "packages/demo",
-    "editor": "packages/editor"
+    "editor": "packages/editor",
+    "stencil-demo": "demos/stencil-demo"
   }
 }

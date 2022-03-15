@@ -14,7 +14,7 @@
   },
   "homepage": "https://github.com/praisecharts/ChordChartJS",
   "devDependencies": {
-  },
+  },  
   "scripts": {
     "build:template": "handlebars \"src/formatter/templates/$TEMPLATE.handlebars\" -f \"src/formatter/templates/$TEMPLATE.js\" --known each --known if --known with --known paragraphClasses --known isChordLyricsPair --known isTag --known isComment --known shouldRenderLine --known hasChordContents --known lineHasContents --known lineClasses --known toUpperCase --known paragraphClasses --commonjs handlebars",
     "build:templates": "TEMPLATE=html_div_formatter yarn build:template && TEMPLATE=html_table_formatter yarn build:template",

@@ -39,10 +39,10 @@
       "executor": "@nxext/stencil:serve",
       "outputs": ["{options.outputPath}"],
       "dependsOn": [
-          {
-            "target": "build",
-            "projects": "dependencies"
-          }
+        {
+          "target": "build",
+          "projects": "dependencies"
+        }
       ],
       "options": {
         "projectType": "library",

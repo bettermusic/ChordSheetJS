@@ -18,12 +18,10 @@
       ".": ["dist/packages/editor"],
       "./loader": ["dist/packages/editor/loader"],
       "@chordpro-editor/editor": ["packages/editor/src/index.ts"],
+      "@praisecharts/chordchartjs": ["dist/packages/core/lib/index.js"],
       "@praisecharts/chordchartjs-editor": ["dist/packages/editor"],
       "@praisecharts/chordchartjs-editor/loader": [
         "dist/packages/editor/loader"
-      ],
-      "@praisecharts/chordchartjs": [
-        "dist/packages/core/lib/index.js"
       ]
     }
   },

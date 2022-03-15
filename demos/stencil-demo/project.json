@@ -1,10 +1,10 @@
 {
-  "root": "packages/demo",
-  "sourceRoot": "packages/demo/src",
+  "root": "demos/stencil-demo",
+  "sourceRoot": "demos/stencil-demo/src",
   "projectType": "application",
   "generators": {
     "@nxext/stencil:component": {
-      "style": "pcss"
+      "style": "scss"
     }
   },
   "tags": [],
@@ -14,9 +14,9 @@
       "outputs": ["{options.outputPath}"],
       "options": {
         "projectType": "application",
-        "tsConfig": "packages/demo/tsconfig.app.json",
-        "configPath": "packages/demo/stencil.config.ts",
-        "outputPath": "dist/packages/demo"
+        "tsConfig": "demos/stencil-demo/tsconfig.app.json",
+        "configPath": "demos/stencil-demo/stencil.config.ts",
+        "outputPath": "dist/demos/stencil-demo"
       },
       "configurations": {
         "production": {
@@ -30,9 +30,9 @@
       "outputs": ["{options.outputPath}"],
       "options": {
         "projectType": "application",
-        "tsConfig": "packages/demo/tsconfig.app.json",
-        "configPath": "packages/demo/stencil.config.ts",
-        "outputPath": "dist/packages/demo"
+        "tsConfig": "demos/stencil-demo/tsconfig.app.json",
+        "configPath": "demos/stencil-demo/stencil.config.ts",
+        "outputPath": "dist/demos/stencil-demo"
       }
     },
     "test": {
@@ -40,9 +40,9 @@
       "outputs": ["{options.outputPath}"],
       "options": {
         "projectType": "application",
-        "tsConfig": "packages/demo/tsconfig.app.json",
-        "configPath": "packages/demo/stencil.config.ts",
-        "outputPath": "dist/packages/demo"
+        "tsConfig": "demos/stencil-demo/tsconfig.app.json",
+        "configPath": "demos/stencil-demo/stencil.config.ts",
+        "outputPath": "dist/demos/stencil-demo"
       }
     },
     "e2e": {
@@ -50,16 +50,16 @@
       "outputs": ["{options.outputPath}"],
       "options": {
         "projectType": "application",
-        "tsConfig": "packages/demo/tsconfig.app.json",
-        "configPath": "packages/demo/stencil.config.ts",
-        "outputPath": "dist/packages/demo"
+        "tsConfig": "demos/stencil-demo/tsconfig.app.json",
+        "configPath": "demos/stencil-demo/stencil.config.ts",
+        "outputPath": "dist/demos/stencil-demo"
       }
     },
     "lint": {
       "executor": "@nrwl/linter:eslint",
       "outputs": ["{options.outputFile}"],
       "options": {
-        "lintFilePatterns": ["packages/demo/**/*.{ts,tsx}"]
+        "lintFilePatterns": ["demos/stencil-demo/**/*.{ts,tsx}"]
       }
     }
   }

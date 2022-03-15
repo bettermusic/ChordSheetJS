@@ -4,11 +4,18 @@
   "license": "MIT",
   "scripts": {
     "prepare": "husky install",
-    "postinstall": "husky install"
+    "postinstall": "husky install && ngcc --properties es2015 browser module main"
   },
   "private": true,
   "devDependencies": {
+    "@angular-devkit/build-angular": "~13.1.0",
     "@angular-devkit/schematics": "^13.2.5",
+    "@angular-eslint/eslint-plugin": "~13.0.1",
+    "@angular-eslint/eslint-plugin-template": "~13.0.1",
+    "@angular-eslint/template-parser": "~13.0.1",
+    "@angular/cli": "~13.1.0",
+    "@angular/compiler-cli": "~13.1.0",
+    "@angular/language-service": "~13.1.0",
     "@babel/cli": "^7.10.1",
     "@babel/core": "^7.10.2",
     "@babel/eslint-parser": "^7.16.3",
@@ -16,6 +23,7 @@
     "@babel/preset-env": "^7.10.2",
     "@nrwl/angular": "13.4.4",
     "@nrwl/cli": "13.8.4",
+    "@nrwl/cypress": "13.4.4",
     "@nrwl/eslint-plugin-nx": "13.8.4",
     "@nrwl/jest": "13.8.4",
     "@nrwl/linter": "13.8.4",
@@ -29,6 +37,7 @@
     "@stencil/eslint-plugin": "^0.3.1",
     "@stencil/postcss": "2.1.0",
     "@stencil/router": "^1.0.1",
+    "@stencil/sass": "1.5.2",
     "@types/autoprefixer": "^9.7.2",
     "@types/jest": "27.0.2",
     "@types/node": "16.11.7",
@@ -37,22 +46,27 @@
     "@typescript-eslint/parser": "~5.10.0",
     "autoprefixer": "^9.7.6",
     "babel-plugin-handlebars-inline-precompile": "^2.1.1",
+    "cypress": "^9.1.0",
     "eslint": "^8.3.0",
     "eslint-config-airbnb-base": "^15.0.0",
     "eslint-config-prettier": "8.1.0",
+    "eslint-plugin-cypress": "^2.10.3",
     "eslint-plugin-import": "^2.25.4",
     "eslint-plugin-react": "7.19.0",
     "husky": "^7.0.0",
-    "jest": "^27.0.1",
+    "jest": "26.6.3",
     "jest-config": "26.6.3",
+    "jest-preset-angular": "11.0.0",
     "jsdoc-to-markdown": "^7.1.0",
     "pegjs": "^0.10.0",
     "pinst": "^3.0.0",
+    "postcss": "^8.4.5",
     "prettier": "^2.5.1",
     "print": "^1.2.0",
     "puppeteer": "~5.3.1",
     "rollup-plugin-commonjs": "^10.1.0",
     "rollup-plugin-node-polyfills": "^0.2.1",
+    "tailwindcss": "^3.0.2",
     "ts-jest": "26.5.6",
     "tslib": "^2.0.0",
     "typescript": "~4.5.2"
@@ -62,6 +76,17 @@
     "apps/**"
   ],
   "dependencies": {
-    "chordsheetjs": "^6.1.0"
+    "@angular/animations": "~13.1.0",
+    "@angular/common": "~13.1.0",
+    "@angular/compiler": "~13.1.0",
+    "@angular/core": "~13.1.0",
+    "@angular/forms": "~13.1.0",
+    "@angular/platform-browser": "~13.1.0",
+    "@angular/platform-browser-dynamic": "~13.1.0",
+    "@angular/router": "~13.1.0",
+    "chordsheetjs": "^6.1.0",
+    "rxjs": "~7.4.0",
+    "tslib": "^2.0.0",
+    "zone.js": "~0.11.4"
   }
 }
