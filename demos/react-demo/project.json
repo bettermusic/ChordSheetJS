@@ -1,0 +1,73 @@
+{
+  "root": "demos/react-demo",
+  "sourceRoot": "demos/react-demo/src",
+  "projectType": "application",
+  "targets": {
+    "build": {
+      "executor": "@nrwl/web:webpack",
+      "outputs": ["{options.outputPath}"],
+      "defaultConfiguration": "production",
+      "options": {
+        "compiler": "babel",
+        "outputPath": "dist/demos/react-demo",
+        "index": "demos/react-demo/src/index.html",
+        "baseHref": "/",
+        "main": "demos/react-demo/src/main.tsx",
+        "polyfills": "demos/react-demo/src/polyfills.ts",
+        "tsConfig": "demos/react-demo/tsconfig.app.json",
+        "assets": [
+          "demos/react-demo/src/favicon.ico",
+          "demos/react-demo/src/assets"
+        ],
+        "styles": ["demos/react-demo/src/styles.css"],
+        "scripts": [],
+        "webpackConfig": "@nrwl/react/plugins/webpack"
+      },
+      "configurations": {
+        "production": {
+          "fileReplacements": [
+            {
+              "replace": "demos/react-demo/src/environments/environment.ts",
+              "with": "demos/react-demo/src/environments/environment.prod.ts"
+            }
+          ],
+          "optimization": true,
+          "outputHashing": "all",
+          "sourceMap": false,
+          "namedChunks": false,
+          "extractLicenses": true,
+          "vendorChunk": false
+        }
+      }
+    },
+    "serve": {
+      "executor": "@nrwl/web:dev-server",
+      "options": {
+        "buildTarget": "react-demo:build",
+        "hmr": true
+      },
+      "configurations": {
+        "production": {
+          "buildTarget": "react-demo:build:production",
+          "hmr": false
+        }
+      }
+    },
+    "lint": {
+      "executor": "@nrwl/linter:eslint",
+      "outputs": ["{options.outputFile}"],
+      "options": {
+        "lintFilePatterns": ["demos/react-demo/**/*.{ts,tsx,js,jsx}"]
+      }
+    },
+    "test": {
+      "executor": "@nrwl/jest:jest",
+      "outputs": ["coverage/demos/react-demo"],
+      "options": {
+        "jestConfig": "demos/react-demo/jest.config.js",
+        "passWithNoTests": true
+      }
+    }
+  },
+  "tags": []
+}

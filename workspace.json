@@ -4,6 +4,7 @@
     "angular-demo": "demos/angular-demo",
     "core": "packages/core",
     "editor": "packages/editor",
+    "react-demo": "demos/react-demo",
     "stencil-demo": "demos/stencil-demo"
   }
 }
