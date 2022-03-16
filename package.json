@@ -26,9 +26,12 @@
     "husky": "^7.0.0",
     "jest": "^27.0.1",
     "jsdoc-to-markdown": "^7.1.0",
+    "peggy": "^1.2.0",
     "pegjs": "^0.10.0",
     "pinst": "^3.0.0",
-    "print": "^1.2.0"
+    "print": "^1.2.0",
+    "webpack": "^5.70.0",
+    "webpack-cli": "^4.9.2"
   },
   "scripts": {
     "build:template": "handlebars \"src/formatter/templates/$TEMPLATE.handlebars\" -f \"src/formatter/templates/$TEMPLATE.js\" --known each --known if --known with --known paragraphClasses --known isChordLyricsPair --known isTag --known isComment --known shouldRenderLine --known hasChordContents --known lineHasContents --known lineClasses --known toUpperCase --known paragraphClasses --commonjs handlebars",
