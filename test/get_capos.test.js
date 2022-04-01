@@ -1,5 +1,5 @@
-import { getCapos } from './helpers';
-import { Key } from './index';
+import { getCapos } from '../src/helpers';
+import { Key } from '../src';
 
 describe('getCapos', () => {
   it('returns the applicable capos for the provided key object', () => {

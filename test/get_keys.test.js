@@ -1,4 +1,4 @@
-import { getKeys } from './helpers';
+import { getKeys } from '../src/helpers';
 
 describe('getKeys', () => {
   it('returns the applicable keys for a major key symbol', () => {
