@@ -1,4 +1,8 @@
+import heredoc from 'heredoc-tag';
+
 import { ChordSheetParser } from '../../src';
+import { majorKeys, minorKeys } from '../../src/key_config.json';
+import suffixNormalizeMapping from '../../src/normalize_mappings/suffix-normalize-mapping';
 
 import '../matchers';
 
@@ -121,6 +125,30 @@ Whisper words of wisdom, let it be`.substring(1);
       expect(line1Items[4]).toBeChordLyricsPair('C/E', '');
       expect(line1Items[5]).toBeChordLyricsPair('Dm', '');
       expect(line1Items[6]).toBeChordLyricsPair('C', '');
+    });
+  });
+
+  const keys = [...majorKeys, ...minorKeys];
+
+  keys.forEach((key) => {
+    Object.keys(suffixNormalizeMapping).forEach((suffix) => {
+      const chord = `${key}${suffix}`;
+
+      it(`recognises ${chord} as a valid, single chord`, () => {
+        const sheet = heredoc.unindent.trim`
+          ${chord}
+          The lyrics are here
+        `;
+
+        const song = new ChordSheetParser().parse(sheet);
+        const { lines } = song;
+        const { items } = lines[0];
+
+        expect(lines.length).toEqual(1);
+        expect(items.length).toEqual(1);
+
+        expect(items[0]).toBeChordLyricsPair(chord, 'The lyrics are here');
+      });
     });
   });
 });
