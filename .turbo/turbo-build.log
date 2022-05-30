@@ -1,0 +1,19 @@
+@praisecharts/chordchartjs:build: cache hit, replaying output [2m2b4e687074b43042[0m
+[32m@praisecharts/chordchartjs:build: [0m$ yarn build:code-generate && yarn build:sources && yarn build:browserify
+[32m@praisecharts/chordchartjs:build: [0m$ yarn build:suffix-normalize && yarn build:templates && yarn build:pegjs
+[32m@praisecharts/chordchartjs:build: [0m$ rm -rf src/normalize_mappings/suffix-normalize-mapping.ts && ts-node src/normalize_mappings/generate-suffix-normalize-mapping.ts
+[32m@praisecharts/chordchartjs:build: [0m[34m 👷 Building suffix normalize mapping from suffix-mapping.txt
+[32m@praisecharts/chordchartjs:build: [0m[32m ✨ Sucessfully built suffix-normalize-mapping.ts
+[32m@praisecharts/chordchartjs:build: [0m$ TEMPLATE=html_div_formatter yarn build:template && TEMPLATE=html_table_formatter yarn build:template
+[32m@praisecharts/chordchartjs:build: [0m$ handlebars "src/formatter/templates/$TEMPLATE.hbs" -f "src/formatter/templates/$TEMPLATE.js" --extension hbs --commonjs handlebars --known each --known if --known with --known paragraphClasses --known isChordLyricsPair --known isTag --known isComment --known shouldRenderLine --known hasChordContents --known lineHasContents --known lineClasses --known toUpperCase --known paragraphClasses
+[32m@praisecharts/chordchartjs:build: [0m$ handlebars "src/formatter/templates/$TEMPLATE.hbs" -f "src/formatter/templates/$TEMPLATE.js" --extension hbs --commonjs handlebars --known each --known if --known with --known paragraphClasses --known isChordLyricsPair --known isTag --known isComment --known shouldRenderLine --known hasChordContents --known lineHasContents --known lineClasses --known toUpperCase --known paragraphClasses
+[32m@praisecharts/chordchartjs:build: [0m$ peggy --plugin ../../node_modules/ts-pegjs -o src/parser/chord_pro_peg_parser.ts src/parser/chord_pro_grammar.pegjs
+[32m@praisecharts/chordchartjs:build: [0m$ parcel build
+[32m@praisecharts/chordchartjs:build: [0mBuilding...
+[32m@praisecharts/chordchartjs:build: [0mBundling...
+[32m@praisecharts/chordchartjs:build: [0mPackaging & Optimizing...
+[32m@praisecharts/chordchartjs:build: [0m✨ Built in 1.21s
+[32m@praisecharts/chordchartjs:build: [0m
+[32m@praisecharts/chordchartjs:build: [0mlib/index.js     219.87 KB    77ms
+[32m@praisecharts/chordchartjs:build: [0mlib/main.d.ts     33.92 KB    16ms
+[32m@praisecharts/chordchartjs:build: [0m$ browserify lib/index.js --outfile lib/bundle.js --standalone ChordSheetJS
