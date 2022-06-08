@@ -12,7 +12,7 @@ class Paragraph {
    */
   lines: Line[] = [];
 
-  addLine(line) {
+  addLine(line: Line) {
     this.lines.push(line);
   }
 
@@ -21,7 +21,7 @@ class Paragraph {
    * If not, it returns {@link INDETERMINATE}
    * @returns {string}
    */
-  get type() {
+  get type(): string {
     const types = this.lines.map((line) => line.type);
     const uniqueTypes = [...new Set(types)];
 
@@ -37,7 +37,7 @@ class Paragraph {
    * @see {@link Line.hasRenderableItems}
    * @returns {boolean}
    */
-  hasRenderableItems() {
+  hasRenderableItems(): boolean {
     return this.lines.some((line) => line.hasRenderableItems());
   }
 }

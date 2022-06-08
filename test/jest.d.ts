@@ -20,14 +20,14 @@ declare global {
 
       toBeLiteral(contents: string): CustomMatcherResult;
 
-      toBeTernary(
-        {
-          variable = null,
-          valueTest = null,
-          trueExpression = null,
-          falseExpression = null,
-        }
-      ): CustomMatcherResult;
+      toBeTernary({
+        variable, valueTest, trueExpression, falseExpression,
+      }: {
+          variable?: any;
+          valueTest?: any;
+          trueExpression?: any;
+          falseExpression?: any;
+      }): CustomMatcherResult;
 
       toBeComment(_contents: string): CustomMatcherResult;
 

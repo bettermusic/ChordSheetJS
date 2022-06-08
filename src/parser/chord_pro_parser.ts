@@ -1,6 +1,7 @@
-import { Song } from '../index';
+import Song from '../chord_sheet/song';
 import { parse } from './chord_pro_peg_parser';
 import ChordSheetSerializer from '../chord_sheet_serializer';
+import ParserWarning from './parser_warning';
 
 /**
  * Parses a ChordPro chord sheet
@@ -13,13 +14,13 @@ class ChordProParser {
    * @param {string} chordProChordSheet the ChordPro chord sheet
    * @returns {Song} The parsed song
    */
-  parse(chordProChordSheet) {
+  parse(chordProChordSheet: string): Song {
     /**
      * All warnings raised during parsing the ChordPro chord sheet
      * @member
      * @type {ParserWarning[]}
      */
-    const ast = parse(chordProChordSheet);
+    const ast: ParserWarning[] = parse(chordProChordSheet);
     this.song = new ChordSheetSerializer().deserialize(ast);
     return this.song;
   }

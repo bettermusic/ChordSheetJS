@@ -36,7 +36,7 @@ class ParserWarning {
    * Returns a stringified version of the warning
    * @returns {string} The string warning
    */
-  toString() {
+  toString(): string {
     return `Warning: ${this.message} on line ${this.lineNumber} column ${this.column}`;
   }
 }

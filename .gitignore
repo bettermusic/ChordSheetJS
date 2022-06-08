@@ -1,6 +1,6 @@
 node_modules
 .idea
-lib
+lib/
 src/formatter/templates/*.js
 src/parser/chord_pro_peg_parser.ts
 .tool-versions

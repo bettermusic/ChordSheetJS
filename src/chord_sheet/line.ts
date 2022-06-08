@@ -52,7 +52,7 @@ class Line {
    * Indicates whether the line contains any items
    * @returns {boolean}
    */
-  isEmpty() {
+  isEmpty(): boolean {
     return this.items.length === 0;
   }
 
@@ -76,7 +76,7 @@ class Line {
    * Indicates whether the line contains items that are renderable
    * @returns {boolean}
    */
-  hasRenderableItems() {
+  hasRenderableItems(): boolean {
     return this.items.some((item) => item.isRenderable());
   }
 
@@ -84,7 +84,7 @@ class Line {
    * Returns a deep copy of the line and all of its items
    * @returns {Line}
    */
-  clone() {
+  clone(): Line {
     return this.mapItems(null);
   }
 
@@ -106,7 +106,7 @@ class Line {
    * Indicates whether the line type is {@link VERSE}
    * @returns {boolean}
    */
-  isVerse() {
+  isVerse(): boolean {
     return this.type === VERSE;
   }
 
@@ -114,7 +114,7 @@ class Line {
    * Indicates whether the line type is {@link CHORUS}
    * @returns {boolean}
    */
-  isChorus() {
+  isChorus(): boolean {
     return this.type === CHORUS;
   }
 
@@ -123,7 +123,7 @@ class Line {
    * @deprecated
    * @returns {boolean}
    */
-  hasContent() {
+  hasContent(): boolean {
     return this.hasRenderableItems();
   }
 
