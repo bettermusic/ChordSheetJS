@@ -123,4 +123,22 @@ Whisper words of wisdom, let it be`.substring(1);
       expect(line1Items[6]).toBeChordLyricsPair('C', '');
     });
   });
+
+  it('parses a regular chord sheet with a comment tags', () => {
+    const chordsOverWords = `
+Chorus 1
+    D                  Dsus  
+There’s honey in the rock, water in the stone
+
+Verse 1
+D        Dsus               D        Dsus 
+  Praying     for a miracle,  thirsty
+`.substring(1);
+    const parser = new ChordSheetParser({ preserveWhitespace: false });
+    const song = parser.parse(chordsOverWords);
+    const { lines } = song;
+
+    expect(lines[0].items[0]).toBeTag('comment', 'Chorus 1');
+    expect(lines[3].items[0]).toBeTag('comment', 'Verse 1');
+  });
 });
