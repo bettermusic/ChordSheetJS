@@ -241,7 +241,7 @@ class Chord {
    * For example, `sus2` becomes `2`, `sus4` becomes `sus`.
    * All suffix normalizations can be found in `src/normalize_mappings/suffix-mapping.txt`.
    *
-   * When the chord is minor, bass notes are normalzied off of the relative major
+   * When the chord is minor, bass notes are normalized off of the relative major
    * of the root note. For example, `Em/A#` becomes `Em/Bb`.
    * @param {Key|string} [key=null] the key to normalize to
    * @param {Object} [options={}] options
