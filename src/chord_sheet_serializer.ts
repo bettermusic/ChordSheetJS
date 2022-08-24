@@ -148,7 +148,13 @@ class ChordSheetSerializer {
   }
 
   parseChordLyricsPair(astComponent) {
-    const { chords, lyrics } = astComponent;
+    let { chords } = astComponent;
+    const { lyrics } = astComponent;
+
+    if (chords.length && lyrics === ' ') {
+      chords += ' ';
+    }
+
     return new ChordLyricsPair(chords, lyrics);
   }
 

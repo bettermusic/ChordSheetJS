@@ -52,9 +52,38 @@ Let it [Am]be, let it [C/A][C/G#]be, let it [F]be, let it [C]be
     expect(lines5Pairs[3]).toBeChordLyricsPair('G', 'dom, ');
     expect(lines5Pairs[4]).toBeChordLyricsPair('', 'let it ');
     expect(lines5Pairs[5]).toBeChordLyricsPair('F', 'be ');
-    expect(lines5Pairs[6]).toBeChordLyricsPair('C/E', ' ');
-    expect(lines5Pairs[7]).toBeChordLyricsPair('Dm', ' ');
+    expect(lines5Pairs[6]).toBeChordLyricsPair('C/E ', ' ');
+    expect(lines5Pairs[7]).toBeChordLyricsPair('Dm ', ' ');
     expect(lines5Pairs[8]).toBeChordLyricsPair('C', '');
+  });
+
+  it('handles trailing chords correctly', () => {
+    const chordSheet = `
+{title: Honey In The Rock}
+{c:Verse 1}
+[D] Praying[Dsus] for a miracle,[D] thirsty[Dsus]
+
+`.substring(1);
+
+    const song = new ChordProParser().parse(chordSheet);
+    const { lines } = song;
+
+    expect(lines.length).toEqual(5);
+
+    expect(lines[0].items.length).toEqual(1);
+    expect(lines[0].items[0]).toBeTag('title', 'Honey In The Rock');
+
+    expect(lines[1].items.length).toEqual(1);
+    expect(lines[1].items[0]).toBeTag('comment', 'Verse 1');
+
+    const line2Pairs = lines[2].items;
+    expect(line2Pairs[0]).toBeChordLyricsPair('D ', ' ');
+    expect(line2Pairs[1]).toBeChordLyricsPair('', 'Praying');
+    expect(line2Pairs[2]).toBeChordLyricsPair('Dsus ', ' ');
+    expect(line2Pairs[3]).toBeChordLyricsPair('', 'for a miracle,');
+    expect(line2Pairs[4]).toBeChordLyricsPair('D ', ' ');
+    expect(line2Pairs[5]).toBeChordLyricsPair('', 'thirsty');
+    expect(line2Pairs[6]).toBeChordLyricsPair('Dsus', '');
   });
 
   it('correctly parses a directive with special characters', () => {
@@ -167,8 +196,8 @@ Let it [Am]be, let it [C/G]be, let it [F]be, let it [C]be
     expect(paragraph0Line1Items[3]).toBeChordLyricsPair('G', 'dom, ');
     expect(paragraph0Line1Items[4]).toBeChordLyricsPair('', 'let it ');
     expect(paragraph0Line1Items[5]).toBeChordLyricsPair('F', 'be ');
-    expect(paragraph0Line1Items[6]).toBeChordLyricsPair('C/E', ' ');
-    expect(paragraph0Line1Items[7]).toBeChordLyricsPair('Dm', ' ');
+    expect(paragraph0Line1Items[6]).toBeChordLyricsPair('C/E ', ' ');
+    expect(paragraph0Line1Items[7]).toBeChordLyricsPair('Dm ', ' ');
     expect(paragraph0Line1Items[8]).toBeChordLyricsPair('C', '');
 
     const paragraph1Line0Items = paragraphs[1].lines[0].items;
