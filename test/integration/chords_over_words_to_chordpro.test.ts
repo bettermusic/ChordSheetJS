@@ -7,7 +7,6 @@ title: Let it be
 key: C
 ---
 Chorus 1:
-
        Am         C/G        F          C
 Let it be, let it be, let it be, let it be
 C                G              F  C/E Dm C
@@ -23,7 +22,6 @@ Whisper words of wisdom, let it be
 {title: Let it be}
 {key: C}
 {comment: Chorus 1:}
-
 Let it [Am]be, let it [C/G]be, let it [F]be, let it [C]be
 [C]Whisper words of [G]wisdom, let it [F]be[C/E][Dm][C]
 
