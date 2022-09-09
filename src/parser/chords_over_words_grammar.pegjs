@@ -1,21 +1,21 @@
 ChordSheet
-  = frontMatterLines:FrontMatter? lines:ChordSheetContents? {
+  = metaDataLines:MetaData? lines:ChordSheetContents? {
       return {
         type: "chordSheet",
         lines: [
-          ...frontMatterLines,
+          ...metaDataLines,
           ...lines,
         ]
       };
     }
 
 ChordSheetContents
-  = NewLine items:ChordSheetItem* {
+  = NewLine? items:ChordSheetItem* {
     return items;
   }
 
 ChordSheetItem
-  = item:(ChordLyricsLines / LyricsLine) NewLine {
+  = item:(InlineMetaData / ChordLyricsLines / LyricsLine) NewLine {
     return item;
   }
 
@@ -78,8 +78,8 @@ ChordWithSpacing
       return chord;
     }
 
-FrontMatter
-  = pairs:FrontMatterPair* FrontMatterSeparator {
+MetaData
+  = pairs:MetaDataPair* MetaDataSeparator? {
       return pairs.map(([key, value]) => ({
         type: "line",
         items: [
@@ -88,18 +88,28 @@ FrontMatter
       }));
     }
 
-FrontMatterPair
-  = key:$(FrontMatterKey) _ ":" _ value:$(FrontMatterValue) NewLine {
+InlineMetaData
+  = key:$(MetaDataKey) _ ":" _ value:$(MetaDataValue) {
+      return {
+        type: "line",
+        items: [
+          { type: "tag", name: key, value },
+        ],
+      }
+    }
+
+MetaDataPair
+  = key:$(MetaDataKey) _ ":" _ value:$(MetaDataValue) NewLine {
       return [key, value];
     }
 
-FrontMatterKey
+MetaDataKey
   = [^\n\r\t: -]+
 
-FrontMatterValue
+MetaDataValue
   = [^\n\r]+
 
-FrontMatterSeparator
+MetaDataSeparator
   = "---"
 
 _ "whitespace"
