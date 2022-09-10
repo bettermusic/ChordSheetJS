@@ -162,6 +162,90 @@ Mother Mary comes to me
     expect(lines4Pairs[1]).toBeChordLyricsPair('', 'Mother Mary comes to me');
   });
 
+  it('supports a chords only section with rhythm symbols ', () => {
+    const chordOverWords = `
+title: Rattle
+Intro (5x)
+Eb(no3) / / / | / / / / |
+`.substring(1);
+
+    const parser = new ChordsOverWordsParser();
+    const song = parser.parse(chordOverWords);
+    const { lines } = song;
+
+    expect(lines[0].items.length).toEqual(1);
+    expect(lines[0].items[0]).toBeTag('title', 'Rattle');
+
+    expect(lines[1].items.length).toEqual(1);
+    expect(lines[1].items[0]).toBeTag('Comment', 'Intro (5x)');
+
+    const line2Pairs = lines[2].items;
+    expect(line2Pairs[0]).toBeChordLyricsPair('Eb(no3)', '');
+    expect(line2Pairs[1]).toBeChordLyricsPair('/', '');
+    expect(line2Pairs[2]).toBeChordLyricsPair('/', '');
+    expect(line2Pairs[3]).toBeChordLyricsPair('/', '');
+    expect(line2Pairs[4]).toBeChordLyricsPair('|', '');
+    expect(line2Pairs[5]).toBeChordLyricsPair('/', '');
+    expect(line2Pairs[6]).toBeChordLyricsPair('/', '');
+    expect(line2Pairs[7]).toBeChordLyricsPair('/', '');
+    expect(line2Pairs[8]).toBeChordLyricsPair('/', '');
+    expect(line2Pairs[9]).toBeChordLyricsPair('|', '');
+  });
+
+  it('supports mixed chords only line & chords over words ', () => {
+    const chordOverWords = `
+title: Rattle
+Intro (5x)
+Eb(no3) / / / | / / / / |
+
+Verse 1
+Eb                   Ebsus         Eb      
+Saturday was silent, surely it was through
+Ab2 - Eb/G Eb /
+`.substring(1);
+
+    const parser = new ChordsOverWordsParser();
+    const song = parser.parse(chordOverWords);
+    const { lines } = song;
+
+    expect(lines[0].items.length).toEqual(1);
+    expect(lines[0].items[0]).toBeTag('title', 'Rattle');
+
+    expect(lines[1].items.length).toEqual(1);
+    expect(lines[1].items[0]).toBeTag('Comment', 'Intro (5x)');
+
+    const line2Pairs = lines[2].items;
+    expect(line2Pairs[0]).toBeChordLyricsPair('Eb(no3)', '');
+    expect(line2Pairs[1]).toBeChordLyricsPair('/', '');
+    expect(line2Pairs[2]).toBeChordLyricsPair('/', '');
+    expect(line2Pairs[3]).toBeChordLyricsPair('/', '');
+    expect(line2Pairs[4]).toBeChordLyricsPair('|', '');
+    expect(line2Pairs[5]).toBeChordLyricsPair('/', '');
+    expect(line2Pairs[6]).toBeChordLyricsPair('/', '');
+    expect(line2Pairs[7]).toBeChordLyricsPair('/', '');
+    expect(line2Pairs[8]).toBeChordLyricsPair('/', '');
+    expect(line2Pairs[9]).toBeChordLyricsPair('|', '');
+
+    expect(lines[3].items.length).toEqual(0);
+
+    expect(lines[4].items.length).toEqual(1);
+    expect(lines[4].items[0]).toBeTag('Comment', 'Verse 1');
+
+    const line5Pairs = lines[5].items;
+    expect(line5Pairs[0]).toBeChordLyricsPair('Eb', 'Saturday ');
+    expect(line5Pairs[1]).toBeChordLyricsPair('', 'was silent, ');
+    expect(line5Pairs[2]).toBeChordLyricsPair('Ebsus', 'surely ');
+    expect(line5Pairs[3]).toBeChordLyricsPair('', 'it was ');
+    expect(line5Pairs[4]).toBeChordLyricsPair('Eb', 'through');
+
+    const line6Pairs = lines[6].items;
+    expect(line6Pairs[0]).toBeChordLyricsPair('Ab2', '');
+    expect(line6Pairs[1]).toBeChordLyricsPair('-', '');
+    expect(line6Pairs[2]).toBeChordLyricsPair('Eb/G', '');
+    expect(line6Pairs[3]).toBeChordLyricsPair('Eb', '');
+    expect(line6Pairs[4]).toBeChordLyricsPair('/', '');
+  });
+
   it('parses comment without a ":"', () => {
     const chordOverWords = `
 title: Let it be
