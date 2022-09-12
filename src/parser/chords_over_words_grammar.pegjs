@@ -20,8 +20,8 @@ ChordLyricsLines
   = chords:ChordsLine NewLine lyrics:Lyrics {
       const chordLyricsPairs = chords.map((chord, i) => {
          const nextChord = chords[i + 1];
-         const start = chord.column - 1;
-         const end = nextChord ? nextChord.column - 1 : lyrics.length;
+         const start = chord.column;
+         const end = nextChord ? nextChord.column : lyrics.length;
 
          return {
            type: "chordLyricsPair",
@@ -39,7 +39,7 @@ ChordLyricsLines
           chordLyricsPairs.unshift({
             type: "chordLyricsPair",
             chord: null,
-            lyrics: lyrics.substring(0, firstChordPosition - 1),
+            lyrics: lyrics.substring(0, firstChordPosition),
           });
         }
       }
