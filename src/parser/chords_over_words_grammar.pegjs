@@ -1,21 +1,18 @@
 ChordSheet
-  = metaDataLines:MetaData? lines:ChordSheetContents? {
+  = lines:LineWithNewLine* line: Line? {
       return {
         type: "chordSheet",
-        lines: [
-          ...metaDataLines,
-          ...lines,
-        ]
+        lines: [...lines, line]
       };
     }
 
-ChordSheetContents
-  = NewLine? items:ChordSheetItem* {
+LineWithNewLine
+  = items:Line NewLine {
     return items;
   }
 
-ChordSheetItem
-  = item:(InlineMetaData / ChordLyricsLines / LyricsLine) NewLine {
+Line
+  = item:(InlineMetaData / ChordLyricsLines / LyricsLine) {
     return item;
   }
 
