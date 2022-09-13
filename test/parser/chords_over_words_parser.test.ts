@@ -9,55 +9,6 @@ describe('ChordsOverWordsParser', () => {
     const chordOverWords = `
 title: Let it be
 key: C
----
-Chorus 1:
-       Am         C/G        F          C
-Let it be, let it be, let it be, let it be
-C                G              F  C/E Dm C
-Whisper words of wisdom, let it be
-`.substring(1);
-
-    const parser = new ChordsOverWordsParser();
-    const song = parser.parse(chordOverWords);
-    const { lines } = song;
-
-    expect(lines.length).toEqual(5);
-
-    expect(lines[0].items.length).toEqual(1);
-    expect(lines[0].items[0]).toBeTag('title', 'Let it be');
-
-    expect(lines[1].items.length).toEqual(1);
-    expect(lines[1].items[0]).toBeTag('key', 'C');
-
-    expect(lines[2].items.length).toEqual(1);
-    expect(lines[2].items[0]).toBeTag('comment', 'Chorus 1:');
-
-    const line3Pairs = lines[3].items;
-    expect(line3Pairs[0]).toBeChordLyricsPair('', 'Let it ');
-    expect(line3Pairs[1]).toBeChordLyricsPair('Am', 'be, ');
-    expect(line3Pairs[2]).toBeChordLyricsPair('', 'let it ');
-    expect(line3Pairs[3]).toBeChordLyricsPair('C/G', 'be, ');
-    expect(line3Pairs[4]).toBeChordLyricsPair('', 'let it ');
-    expect(line3Pairs[5]).toBeChordLyricsPair('F', 'be, ');
-    expect(line3Pairs[6]).toBeChordLyricsPair('', 'let it ');
-    expect(line3Pairs[7]).toBeChordLyricsPair('C', 'be');
-
-    const lines4Pairs = lines[4].items;
-    expect(lines4Pairs[0]).toBeChordLyricsPair('C', 'Whisper ');
-    expect(lines4Pairs[1]).toBeChordLyricsPair('', 'words of ');
-    expect(lines4Pairs[2]).toBeChordLyricsPair('F', 'wis');
-    expect(lines4Pairs[3]).toBeChordLyricsPair('G', 'dom, ');
-    expect(lines4Pairs[4]).toBeChordLyricsPair('', 'let it ');
-    expect(lines4Pairs[5]).toBeChordLyricsPair('F', 'be ');
-    expect(lines4Pairs[6]).toBeChordLyricsPair('C/E', ' ');
-    expect(lines4Pairs[7]).toBeChordLyricsPair('Dm', ' ');
-    expect(lines4Pairs[8]).toBeChordLyricsPair('C', '');
-  });
-
-  it('allows for frontmatter seperator to be optional', () => {
-    const chordOverWords = `
-title: Let it be
-key: C
 
 Chorus 1:
        Am         C/G        F          C
@@ -70,19 +21,17 @@ Whisper words of wisdom, let it be
     const song = parser.parse(chordOverWords);
     const { lines } = song;
 
-    expect(lines.length).toEqual(5);
-
     expect(lines[0].items.length).toEqual(1);
     expect(lines[0].items[0]).toBeTag('title', 'Let it be');
 
     expect(lines[1].items.length).toEqual(1);
     expect(lines[1].items[0]).toBeTag('key', 'C');
-
-    expect(lines[2].items.length).toEqual(1);
-    expect(lines[2].items[0]).toBeTag('comment', 'Chorus 1:');
 
     // this test almost works, it just doesn't maintain the space after the metadata
-    expect(lines[3].items.length).toEqual(0);
+    expect(lines[2].items.length).toEqual(0);
+
+    expect(lines[3].items.length).toEqual(1);
+    expect(lines[3].items[0]).toBeTag('comment', 'Chorus 1:');
 
     const line4Pairs = lines[4].items;
     expect(line4Pairs[0]).toBeChordLyricsPair('', 'Let it ');
@@ -97,13 +46,12 @@ Whisper words of wisdom, let it be
     const lines5Pairs = lines[5].items;
     expect(lines5Pairs[0]).toBeChordLyricsPair('C', 'Whisper ');
     expect(lines5Pairs[1]).toBeChordLyricsPair('', 'words of ');
-    expect(lines5Pairs[2]).toBeChordLyricsPair('F', 'wis');
-    expect(lines5Pairs[3]).toBeChordLyricsPair('G', 'dom, ');
-    expect(lines5Pairs[4]).toBeChordLyricsPair('', 'let it ');
-    expect(lines5Pairs[5]).toBeChordLyricsPair('F', 'be ');
-    expect(lines5Pairs[6]).toBeChordLyricsPair('C/E', ' ');
-    expect(lines5Pairs[7]).toBeChordLyricsPair('Dm', ' ');
-    expect(lines5Pairs[8]).toBeChordLyricsPair('C', '');
+    expect(lines5Pairs[2]).toBeChordLyricsPair('G', 'wisdom, ');
+    expect(lines5Pairs[3]).toBeChordLyricsPair('', 'let it ');
+    expect(lines5Pairs[4]).toBeChordLyricsPair('F', 'be');
+    expect(lines5Pairs[5]).toBeChordLyricsPair('C/E', '');
+    expect(lines5Pairs[6]).toBeChordLyricsPair('Dm', '');
+    expect(lines5Pairs[7]).toBeChordLyricsPair('C', '');
   });
 
   it('parses simple chords over words with only 1 metadata', () => {
@@ -383,11 +331,11 @@ Let it be, let it be
       expect(lines[0].items.length).toEqual(1);
       expect(lines[0].items[0]).toBeTag('comment', 'Chorus 1:');
 
-      const line2Pairs = lines[2].items;
-      expect(line2Pairs[0]).toBeChordLyricsPair('', 'Let it ');
-      expect(line2Pairs[1]).toBeChordLyricsPair('Am', 'be,');
-      expect(line2Pairs[2]).toBeChordLyricsPair('', 'let it ');
-      expect(line2Pairs[3]).toBeChordLyricsPair('C/G', 'be');
+      const line1Pairs = lines[1].items;
+      expect(line1Pairs[0]).toBeChordLyricsPair('', 'Let it ');
+      expect(line1Pairs[1]).toBeChordLyricsPair('Am', 'be, ');
+      expect(line1Pairs[2]).toBeChordLyricsPair('', 'let it ');
+      expect(line1Pairs[3]).toBeChordLyricsPair('C/G', 'be');
     });
 
     it('correctly places a trailing chord', () => {
@@ -405,8 +353,8 @@ Let it   be, let it be
 
       const line1Pairs = lines[1].items;
       expect(line1Pairs[0]).toBeChordLyricsPair('', 'Let it');
-      expect(line1Pairs[1]).toBeChordLyricsPair('Am', '');
-      expect(line1Pairs[2]).toBeChordLyricsPair('', ' be, let it');
+      expect(line1Pairs[1]).toBeChordLyricsPair('Am', ' ');
+      expect(line1Pairs[2]).toBeChordLyricsPair('', 'be, let it ');
       expect(line1Pairs[3]).toBeChordLyricsPair('C/G', 'be');
     });
   });

@@ -1,5 +1,5 @@
 ChordSheet
-  = lines:LineWithNewLine* line: Line? {
+  = lines:LineWithNewLine+ line: Line {
       return {
         type: "chordSheet",
         lines: [...lines, line]
@@ -18,34 +18,116 @@ Line
 
 ChordLyricsLines
   = chords:ChordsLine NewLine lyrics:Lyrics {
-      const chordLyricsPairs = chords.map((chord, i) => {
-         const nextChord = chords[i + 1];
-         const start = chord.column;
-         const end = nextChord ? nextChord.column : lyrics.length;
-
-         return {
-           type: "chordLyricsPair",
-           chord,
-           lyrics: lyrics.substring(start, end)
-         };
-      });
-
-      const firstChord = chords[0];
-
-      if (firstChord && chords[0].column > 0) {
-      	const firstChordPosition = firstChord.column;
-
-        if (firstChordPosition > 0) {
-          chordLyricsPairs.unshift({
-            type: "chordLyricsPair",
-            chord: null,
-            lyrics: lyrics.substring(0, firstChordPosition),
-          });
+    // get column index of each space
+    let spacePositions = []
+    lyrics.split('').map((c, i) => {
+      if (c == ' ') {
+          spacePositions.push(i);
         }
+    })
+
+    const chordColumns = chords.map(x => x.column);
+    let start;
+    let end;
+    let lyric;
+    const pairs = [];
+          
+    chordColumns.map((position, i) => {
+      let nextSpace = spacePositions[0]; 
+      let nextChord = position;
+      const lastChordInLine = nextChord == chordColumns[chordColumns.length - 1];
+
+      // chords only line
+      if (spacePositions.length == 0) {
+          pairs.push({
+            chord: chords[i],
+            lyrics: ''
+          });
+          return;
       }
 
-      return { type: "line", items: chordLyricsPairs };
-    }
+      if(nextChord > 0 && i == 0) {
+        start = 0;
+        end = nextChord;
+        lyric = lyrics.substring(start,end);
+        pairs.push({
+          chord: '',
+          lyrics: lyric
+        });
+        spacePositions = spacePositions.filter(x => x >= nextChord);
+        start = end;
+        end = spacePositions[0] + 1;
+        if (!end) {
+          end = lyrics.length;
+          lyric = lyrics.substring(start,end);
+        } else {
+          lyric = lyrics.substring(start,end);
+        } 
+        pairs.push({
+          chord: chords[i],
+          lyrics: lyric
+        });
+        start = end;
+        }
+        
+        if(nextChord == 0 && i == 0) {
+          start = 0;
+          end = nextSpace + 1;
+          lyric = lyrics.substring(start,end);
+          pairs.push({
+            chord: chords[i],
+            lyrics: lyric
+          });
+          start = end;
+        }
+        
+        if(nextChord > 0 && i > 0) {
+          if (nextChord > nextSpace) {
+            end = position;
+            lyric = lyrics.substring(start,end);
+            pairs.push({
+              chord: '',
+              lyrics: lyric.trim() + ' '
+            });
+            spacePositions = spacePositions.filter(x => x >= nextChord);
+            start = end;
+            end = spacePositions[0] + 1;
+            if (!end) {
+              end = lyrics.length;
+              lyric = lyrics.substring(start,end);
+            } else {
+              lyric = lyrics.substring(start,end);
+            }
+            pairs.push({
+              chord: chords[i],
+              lyrics: lyric
+            });
+            start = end; 
+          }
+        }
+        
+        if (lastChordInLine && lyrics.length > end) {
+          start = end;
+          end = lyrics.length;
+          lyric = lyrics.substring(start,end);
+          pairs.push({
+            chord: '',
+            lyrics: lyric
+          });
+        }
+    });
+
+
+    const chordLyricsPairs = pairs.map((pair) => {
+      return {
+        type: "chordLyricsPair",
+        chord: pair.chord,
+        lyrics: pair.lyrics
+      };
+    });
+
+    return { type: "line", items: chordLyricsPairs };
+  }
 
 ChordsLine
   = ChordWithSpacing+
@@ -123,3 +205,4 @@ LineFeed
 
 CarriageReturn
   = "\r"
+  

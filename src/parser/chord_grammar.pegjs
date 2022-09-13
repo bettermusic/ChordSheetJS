@@ -1,6 +1,6 @@
 Chord
   = chordSymbol:ChordSymbol {
-    return { type: "chord", ...chordSymbol, column: location().start.column };
+    return { type: "chord", ...chordSymbol, column: location().start.column - 1};
   }
 
 ChordSymbol
@@ -9,7 +9,7 @@ ChordSymbol
     }
 
 ChordSymbolRoot
-  = [A-Ga-g/|x-]
+  = [A-Ga-g/|x]
 
 ChordModifier
   = "#" / "b"
