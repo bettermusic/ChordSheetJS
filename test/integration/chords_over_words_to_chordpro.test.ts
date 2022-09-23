@@ -15,8 +15,7 @@ Whisper words of wisdom, let it be
        Bbm7       DbM7/Ab    Gbsus2     Db
 Let it be, let it be, let it be, let it be
 GbM7             Absus          Gb  Db/F Ebm Db
-Whisper words of wisdom, let it be
-`.substring(1);
+Whisper words of wisdom, let it be`.substring(1);
 
     const expectedChordPro = `
 {title: Let it be}

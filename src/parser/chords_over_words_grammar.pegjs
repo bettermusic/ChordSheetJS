@@ -1,41 +1,53 @@
 ChordSheet
-  = metaDataLines:MetaData? lines:ChordSheetContents? {
+  = metadataLines:Metadata? lines:ChordSheetContents? {
       return {
         type: "chordSheet",
         lines: [
-          ...metaDataLines,
+          ...metadataLines,
           ...lines,
         ]
       };
     }
 
 ChordSheetContents
-  = NewLine? items:ChordSheetItem* {
-    return items;
+  = newLine:NewLine? items:ChordSheetItemWithNewLine* trailingItem:ChordSheetItem? {
+    const hasEmptyLine = newLine?.length > 0;
+    const emptyLines = hasEmptyLine ? [{ type: "line", items: [] }] : [];
+    return [...emptyLines, ...items, trailingItem];
+  }
+
+ChordSheetItemWithNewLine
+  = item:ChordSheetItem NewLine {
+    return item;
   }
 
 ChordSheetItem
-  = item:(InlineMetaData / ChordLyricsLines / LyricsLine) NewLine {
+  = item:(ChordLyricsLines / LyricsLine) {
     return item;
   }
 
 ChordLyricsLines
   = chords:ChordsLine NewLine lyrics:Lyrics {
       const chordLyricsPairs = chords.map((chord, i) => {
-         const nextChord = chords[i + 1];
-         const start = chord.column - 1;
-         const end = nextChord ? nextChord.column - 1 : lyrics.length;
+        const nextChord = chords[i + 1];
+        const start = chord.column - 1;
+        const end = nextChord ? nextChord.column - 1 : lyrics.length;
+        const pairLyrics = lyrics.substring(start, end);
+        const secondWordPosition = pairLyrics.search(/(?<=\s+)\S/);
 
-         return {
-           type: "chordLyricsPair",
-           chord,
-           lyrics: lyrics.substring(start, end)
-         };
-      });
+        if (secondWordPosition !== -1 && secondWordPosition < end) {
+          return [
+            { type: "chordLyricsPair", chord, lyrics: pairLyrics.substring(0, secondWordPosition) },
+            { type: "chordLyricsPair", chord: '', lyrics: pairLyrics.substring(secondWordPosition) },
+          ];
+        }
+
+        return { type: "chordLyricsPair", chord, lyrics: pairLyrics };
+      }).flat();
 
       const firstChord = chords[0];
 
-      if (firstChord && chords[0].column > 0) {
+      if (firstChord && firstChord.column > 1) {
       	const firstChordPosition = firstChord.column;
 
         if (firstChordPosition > 0) {
@@ -78,18 +90,20 @@ ChordWithSpacing
       return chord;
     }
 
-MetaData
-  = pairs:MetaDataPair* MetaDataSeparator? {
-      return pairs.map(([key, value]) => ({
-        type: "line",
-        items: [
-          { type: "tag", name: key, value },
-        ],
-      }));
+Metadata
+  = pairs:MetadataPairWithNewLine* trailingPair:MetadataPair? MetadataSeparator? {
+      return [...pairs, trailingPair]
+        .filter(x => x)
+        .map(([key, value]) => ({
+          type: "line",
+          items: [
+            { type: "tag", name: key, value },
+          ],
+        }));
     }
 
-InlineMetaData
-  = key:$(MetaDataKey) _ ":" _ value:$(MetaDataValue) {
+InlineMetadata
+  = key:$(MetadataKey) _ ":" _ value:$(MetadataValue) {
       return {
         type: "line",
         items: [
@@ -98,19 +112,32 @@ InlineMetaData
       }
     }
 
-MetaDataPair
-  = key:$(MetaDataKey) _ ":" _ value:$(MetaDataValue) NewLine {
-      return [key, value];
+MetadataPairWithNewLine
+  = pair:MetadataPair NewLine {
+      return pair;
     }
 
-MetaDataKey
-  = [^\n\r\t: -]+
+MetadataPair
+  = MetadataPairWithBrackets / MetadataPairWithoutBrackets
 
-MetaDataValue
-  = [^\n\r]+
+MetadataPairWithBrackets
+  = "{" _ pair:MetadataPairWithoutBrackets _ "}" {
+    return pair;
+  }
 
-MetaDataSeparator
-  = "---"
+MetadataPairWithoutBrackets
+  = key:$(MetadataKey) _ ":" _ value:$(MetadataValue) {
+    return [key, value];
+  }
+
+MetadataKey
+  = [a-zA-Z0-9-_]+
+
+MetadataValue
+  = [^\n\r}]+
+
+MetadataSeparator
+  = "---" NewLine
 
 _ "whitespace"
   = [ \t]*
