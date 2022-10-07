@@ -22,12 +22,37 @@ ChordSheetItemWithNewLine
   }
 
 ChordSheetItem
-  = item:(ChordLyricsLines / LyricsLine) {
+  = item:(ChordLyricsLines / DirectionLine / ChordsLine / LyricsLine) {
+    if (item.type === "chordsLine") {
+      return {
+        type: "line",
+        items: item.items.map((item) => {
+          const chordLyricsPair = {
+            type: "chordLyricsPair"
+          };
+
+          if (item.type === "chord") {
+            return {
+              ...chordLyricsPair,
+              chord: item
+            };
+          }
+
+          return {
+            ...chordLyricsPair,
+            chords: item.value
+          };
+        })
+      };
+    }
+
     return item;
   }
 
 ChordLyricsLines
-  = chords:ChordsLine NewLine lyrics:Lyrics {
+  = chordsLine:ChordsLine NewLine lyrics:NonEmptyLyrics {
+      const chords = chordsLine.items;
+
       const chordLyricsPairs = chords.map((chord, i) => {
         const nextChord = chords[i + 1];
         const start = chord.column - 1;
@@ -35,14 +60,16 @@ ChordLyricsLines
         const pairLyrics = lyrics.substring(start, end);
         const secondWordPosition = pairLyrics.search(/(?<=\s+)\S/);
 
+        const chordData = (chord.type === "chord") ? { chord } : { chords: chord.value };
+
         if (secondWordPosition !== -1 && secondWordPosition < end) {
           return [
-            { type: "chordLyricsPair", chord, lyrics: pairLyrics.substring(0, secondWordPosition) },
-            { type: "chordLyricsPair", chord: '', lyrics: pairLyrics.substring(secondWordPosition) },
+            { type: "chordLyricsPair", ...chordData, lyrics: pairLyrics.substring(0, secondWordPosition) },
+            { type: "chordLyricsPair", chords: "", lyrics: pairLyrics.substring(secondWordPosition) },
           ];
         }
 
-        return { type: "chordLyricsPair", chord, lyrics: pairLyrics };
+        return { type: "chordLyricsPair", ...chordData, lyrics: pairLyrics };
       }).flat();
 
       const firstChord = chords[0];
@@ -53,7 +80,7 @@ ChordLyricsLines
         if (firstChordPosition > 0) {
           chordLyricsPairs.unshift({
             type: "chordLyricsPair",
-            chord: null,
+            chords: "",
             lyrics: lyrics.substring(0, firstChordPosition - 1),
           });
         }
@@ -63,7 +90,26 @@ ChordLyricsLines
     }
 
 ChordsLine
-  = ChordWithSpacing+
+  = items:(RhythmSymbolWithSpacing / ChordWithSpacing)+ {
+      return {
+        type: "chordsLine",
+        items
+      };
+    }
+
+RhythmSymbolWithSpacing
+  = _ symbol:RhythmSymbol _ {
+      return symbol;
+    }
+
+RhythmSymbol
+  = symbol:("/" / "|" / "-") {
+      return {
+        type: "symbol",
+        value: symbol,
+        column: location().start.column
+      };
+    }
 
 LyricsLine
   = lyrics:Lyrics {
@@ -74,7 +120,7 @@ LyricsLine
     return {
       type: "line",
       items: [
-        { type: "tag", name: "comment", value: lyrics }
+        { type: "chordLyricsPair", chords: "", lyrics }
       ]
     };
   }
@@ -82,13 +128,35 @@ LyricsLine
 Lyrics
   = $(WordChar*)
 
-WordChar
-  = [^\n\r]
+NonEmptyLyrics
+  = $(WordChar+)
 
 ChordWithSpacing
   = _ chord:Chord _ {
       return chord;
     }
+
+DirectionLine
+  = line:$(_ keyword:Keyword _ WordChar* _) {
+      return {
+        type: "line",
+        items: [
+          { type: "tag", name: "comment", value: line }
+        ]
+      };
+    }
+
+Keyword
+  = "verse"i
+  / "chorus"i
+  / "bridge"i
+  / "tag"i
+  / "interlude"i
+  / "instrumental"i
+  / "intro"i
+
+WordChar
+  = [^\n\r]
 
 Metadata
   = pairs:MetadataPairWithNewLine* trailingPair:MetadataPair? MetadataSeparator? {
@@ -103,7 +171,7 @@ Metadata
     }
 
 InlineMetadata
-  = key:$(MetadataKey) _ ":" _ value:$(MetadataValue) {
+  = key:$(MetadataKey) _ Colon _ value:$(MetadataValue) {
       return {
         type: "line",
         items: [
@@ -126,9 +194,12 @@ MetadataPairWithBrackets
   }
 
 MetadataPairWithoutBrackets
-  = key:$(MetadataKey) _ ":" _ value:$(MetadataValue) {
+  = key:$(MetadataKey) _ Colon _ value:$(MetadataValue) {
     return [key, value];
   }
+
+Colon
+  = ":"
 
 MetadataKey
   = [a-zA-Z0-9-_]+

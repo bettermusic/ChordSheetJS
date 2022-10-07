@@ -1,4 +1,4 @@
-import { ChordsOverWordsParser } from '../../src';
+import {ChordsOverWordsParser} from '../../src';
 
 import '../matchers';
 
@@ -144,16 +144,16 @@ Mother Mary comes to me
     const line1Pairs = lines[1].items;
     expect(line1Pairs[0]).toBeChordLyricsPair('', 'Let it ');
     expect(line1Pairs[1]).toBeChordLyricsPair('Am', 'be');
-    expect(line1Pairs[2]).toBeChordLyricsPair('', 'Whisper words of wisdom, let it be');
 
-    expect(lines[2].items.length).toEqual(0);
+    expect(lines[2].items[0]).toBeChordLyricsPair('', 'Whisper words of wisdom, let it be');
 
-    expect(lines[3].items.length).toEqual(1);
-    expect(lines[3].items[0]).toBeTag('comment', 'Verse');
+    expect(lines[3].items.length).toEqual(0);
 
-    const lines4Pairs = lines[4].items;
-    expect(lines4Pairs[0]).toBeChordLyricsPair('', 'When I find myself in times of trouble');
-    expect(lines4Pairs[1]).toBeChordLyricsPair('', 'Mother Mary comes to me');
+    expect(lines[4].items.length).toEqual(1);
+    expect(lines[4].items[0]).toBeTag('comment', 'Verse');
+
+    expect((lines[5].items)[0]).toBeChordLyricsPair('', 'When I find myself in times of trouble');
+    expect((lines[6].items)[0]).toBeChordLyricsPair('', 'Mother Mary comes to me');
   });
 
   it('supports a chords only section with rhythm symbols ', () => {
@@ -223,7 +223,7 @@ Ab2 - Eb/G Eb /
     expect(lines[3].items.length).toEqual(0);
 
     expect(lines[4].items.length).toEqual(1);
-    expect(lines[4].items[0]).toBeTag('Comment', 'Verse 1');
+    expect(lines[4].items[0]).toBeTag('comment', 'Verse 1');
 
     const line5Pairs = lines[5].items;
     expect(line5Pairs[0]).toBeChordLyricsPair('Eb', 'Saturday ');
