@@ -22,7 +22,7 @@ ChordSheetItemWithNewLine
   }
 
 ChordSheetItem
-  = item:(ChordLyricsLines / DirectionLine / ChordsLine / LyricsLine) {
+  = item:(DirectionLine / InlineMetadata / ChordLyricsLines / ChordsLine / LyricsLine) {
     if (item.type === "chordsLine") {
       return {
         type: "line",

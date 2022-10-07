@@ -3,6 +3,14 @@ import { Song } from '../index';
 import ChordSheetSerializer from '../chord_sheet_serializer';
 import ParserWarning from './parser_warning';
 
+interface IParseOptions {
+  filename?: string;
+  startRule?: string;
+  tracer?: any;
+  [key: string]: any;
+}
+export type ParseFunction = (_input: string, _options?: IParseOptions) => any;
+
 /**
  * Parses a chords over words sheet
  */
@@ -18,7 +26,7 @@ class PegBasedParser {
     return this.song.warnings;
   }
 
-  protected parseWithParser(chordSheet, parser) {
+  protected parseWithParser(chordSheet, parser: ParseFunction) {
     const ast = parser(chordSheet);
     this.song = new ChordSheetSerializer().deserialize(ast);
     return this.song;

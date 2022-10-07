@@ -1,4 +1,4 @@
-import {ChordsOverWordsParser} from '../../src';
+import { ChordsOverWordsParser } from '../../src';
 
 import '../matchers';
 
@@ -309,7 +309,7 @@ Let it be
     expect(line3Pairs[1]).toBeChordLyricsPair('Am', 'be');
 
     expect(lines[4].items.length).toEqual(1);
-    expect(lines[4].items[0]).toBeTag('nk', 'G');
+    expect(lines[4].items[0]).toBeTag('new_key', 'G');
 
     const line5Pairs = lines[5].items;
     expect(line5Pairs[0]).toBeChordLyricsPair('', 'Let it ');
