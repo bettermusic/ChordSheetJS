@@ -22,9 +22,6 @@ ChordSymbolBass
       return { bassBase: root, bassModifier: modifier };
     }
 
-ChordSuffix
-  = [a-zA-Z0-9()#]*
-
 Numeral
   = modifier:ChordModifier? root:NumeralRoot suffix:$(ChordSuffix) bass:NumeralBass? {
       return { base: root, modifier, suffix, ...bass, chordType: "numeral" };
