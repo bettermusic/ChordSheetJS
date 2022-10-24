@@ -9,7 +9,10 @@ describe('ChordsOverWordsFormatter', () => {
 
     const expectedChordSheet = `
 title: Let it be
-ChordSheetJS example version
+subtitle: ChordSheetJS example version
+key: C
+x_some_setting: undefined
+composer: John Lennon,Paul McCartney
 
 Written by: John Lennon,Paul McCartney
 

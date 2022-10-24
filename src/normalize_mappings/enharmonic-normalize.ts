@@ -35,7 +35,6 @@ export default {
   'F': {
     'A#': 'Bb',
     'F#': 'Gb',
-    'C#': 'Db',
     'D#': 'Eb',
     'G#': 'Ab',
   },

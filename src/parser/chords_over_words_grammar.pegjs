@@ -68,8 +68,8 @@ ChordLyricsLines
             { type: "chordLyricsPair", chords: "", lyrics: pairLyrics.substring(secondWordPosition) },
           ];
         }
-
-        return { type: "chordLyricsPair", ...chordData, lyrics: pairLyrics };
+		    const trimmedLyrics = /.+\s+$/.test(pairLyrics) ? pairLyrics.trim() + " " : pairLyrics;
+        return { type: "chordLyricsPair", ...chordData, lyrics: trimmedLyrics };
       }).flat();
 
       const firstChord = chords[0];
@@ -103,7 +103,7 @@ RhythmSymbolWithSpacing
     }
 
 RhythmSymbol
-  = symbol:("/" / "|" / "-") {
+  = symbol:("/" / "|" / "-" / "x") {
       return {
         type: "symbol",
         value: symbol,
