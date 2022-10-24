@@ -46,6 +46,13 @@ describe('Chord', () => {
             base: 'F', modifier: '#', suffix: 'maj9b11', bassBase: null, bassModifier: null,
           });
         });
+
+        it('parses a chord with confusing suffix', () => {
+          const chord = Chord.parse('A7(#9)');
+          expect(chord).toBeChord({
+            base: 'A', modifier: null, suffix: '7(#9)', bassBase: null, bassModifier: null,
+          });
+        });
       });
 
       describe('chord with bass', () => {

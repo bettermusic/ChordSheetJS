@@ -44,7 +44,7 @@ export default (
                 ${ when(isChordLyricsPair(item), () => `
                   <div class="column">
                     ${ keep([renderChord(item.chords, line, song, key)], ([renderedChord]) => `
-                      <div class="chord"${ renderedChord ? fontStyleTag(line.chordFont) : '' }>${ renderedChord }</div>
+                      <div class="chord"${ renderedChord ? fontStyleTag(line.chordFont) : '' }>${ renderedChord } </div>
                     `) }
                     <div class="lyrics"${ item.lyrics ? fontStyleTag(line.textFont) : '' }>${ item.lyrics }</div>
                   </div>
