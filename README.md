@@ -404,6 +404,9 @@ Inherits from [ChordSheetParser](#ChordSheetParser)</p></dd>
 <dd><p>Represents a Chord, consisting of a root, suffix (quality) and bass</p></dd>
 <dt><a href="#ChordSheetSerializer">ChordSheetSerializer</a></dt>
 <dd><p>Serializes a song into een plain object, and deserializes the serialized object back into a [Song](#Song)</p></dd>
+<dt><a href="#Key">Key</a></dt>
+<dd><p>Represents a key, such as Eb (symbol), #3 (numeric) or VII (numeral).</p>
+<p>The only function considered public API is <code>Key.distance</code></p></dd>
 </dl>
 
 ## Members
@@ -576,7 +579,7 @@ metadata.get('author')   // =&gt; 'John'</p>
 <a name="Metadata+get"></a>
 
 ### metadata.get(prop) ⇒ <code>Array.&lt;String&gt;</code> \| <code>String</code>
-<p>Reads a metadata value by key. This method supports simple value lookup, as fetching single array values.</p>
+<p>Reads a metadata value by key. This method supports simple value lookup, as well as fetching single array values.</p>
 <p>This method deprecates direct property access, eg: metadata['author']</p>
 <p>Examples:</p>
 <p>const metadata = new Metadata({ lyricist: 'Pete', author: ['John', 'Mary'] });
@@ -1271,7 +1274,7 @@ When the chord is already a chord symbol, it will return a clone of the object.<
 
 | Param | Type | Default | Description |
 | --- | --- | --- | --- |
-| [key] | <code>Key</code> \| <code>string</code> | <code></code> | <p>the reference key</p> |
+| [key] | [<code>Key</code>](#Key) \| <code>string</code> | <code></code> | <p>the reference key</p> |
 
 <a name="Chord+toChordSymbolString"></a>
 
@@ -1286,7 +1289,7 @@ When the chord is already a chord symbol, it will return a string version of the
 
 | Param | Type | Default | Description |
 | --- | --- | --- | --- |
-| [key] | <code>Key</code> \| <code>string</code> | <code></code> | <p>the reference key</p> |
+| [key] | [<code>Key</code>](#Key) \| <code>string</code> | <code></code> | <p>the reference key</p> |
 
 <a name="Chord+isChordSymbol"></a>
 
@@ -1305,7 +1308,7 @@ For example, a chord symbol A# with reference key E will return the numeric chor
 
 | Param | Type | Default | Description |
 | --- | --- | --- | --- |
-| [key] | <code>Key</code> \| <code>string</code> | <code></code> | <p>the reference key</p> |
+| [key] | [<code>Key</code>](#Key) \| <code>string</code> | <code></code> | <p>the reference key</p> |
 
 <a name="Chord+toNumeral"></a>
 
@@ -1318,7 +1321,7 @@ For example, a chord symbol A# with reference key E will return the numeral chor
 
 | Param | Type | Default | Description |
 | --- | --- | --- | --- |
-| key | <code>Key</code> \| <code>string</code> \| <code>null</code> | <code></code> | <p>the reference key. The key is required when converting a chord symbol</p> |
+| key | [<code>Key</code>](#Key) \| <code>string</code> \| <code>null</code> | <code></code> | <p>the reference key. The key is required when converting a chord symbol</p> |
 
 <a name="Chord+toNumeralString"></a>
 
@@ -1332,7 +1335,7 @@ For example, a chord symbol A# with reference key E will return the numeral chor
 
 | Param | Type | Default | Description |
 | --- | --- | --- | --- |
-| [key] | <code>Key</code> \| <code>string</code> | <code></code> | <p>the reference key</p> |
+| [key] | [<code>Key</code>](#Key) \| <code>string</code> | <code></code> | <p>the reference key</p> |
 
 <a name="Chord+isNumeric"></a>
 
@@ -1352,7 +1355,7 @@ For example, a chord symbol A# with reference key E will return the numeric chor
 
 | Param | Type | Default | Description |
 | --- | --- | --- | --- |
-| [key] | <code>Key</code> \| <code>string</code> | <code></code> | <p>the reference key</p> |
+| [key] | [<code>Key</code>](#Key) \| <code>string</code> | <code></code> | <p>the reference key</p> |
 
 <a name="Chord+isNumeral"></a>
 
@@ -1392,7 +1395,7 @@ of the root note. For example, <code>Em/A#</code> becomes <code>Em/Bb</code>.</p
 
 | Param | Type | Default | Description |
 | --- | --- | --- | --- |
-| [key] | <code>Key</code> \| <code>string</code> | <code></code> | <p>the key to normalize to</p> |
+| [key] | [<code>Key</code>](#Key) \| <code>string</code> | <code></code> | <p>the key to normalize to</p> |
 | [options] | <code>Object</code> | <code>{}</code> | <p>options</p> |
 | [options.normalizeSuffix] | <code>boolean</code> | <code>true</code> | <p>whether to normalize the chord suffix after transposing</p> |
 
@@ -1475,6 +1478,26 @@ Can be deserialized using [deserialize](deserialize)</p>
 | Param | Type | Description |
 | --- | --- | --- |
 | serializedSong | <code>object</code> | <p>The serialized song</p> |
+
+<a name="Key"></a>
+
+## Key
+<p>Represents a key, such as Eb (symbol), #3 (numeric) or VII (numeral).</p>
+<p>The only function considered public API is <code>Key.distance</code></p>
+
+**Kind**: global class  
+<a name="Key.distance"></a>
+
+### Key.distance(oneKey, otherKey) ⇒ <code>number</code>
+<p>Calculates the distance in semitones between one key and another.</p>
+
+**Kind**: static method of [<code>Key</code>](#Key)  
+**Returns**: <code>number</code> - <p>the distance in semitones</p>  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| oneKey | [<code>Key</code>](#Key) \| <code>string</code> | <p>the key</p> |
+| otherKey | [<code>Key</code>](#Key) \| <code>string</code> | <p>the other key</p> |
 
 <a name="ALBUM"></a>
 
@@ -1682,7 +1705,7 @@ values are the effective key for that capo.</p>
 
 | Param | Type | Description |
 | --- | --- | --- |
-| key | <code>Key</code> \| <code>string</code> | <p>The key to get capos for</p> |
+| key | [<code>Key</code>](#Key) \| <code>string</code> | <p>The key to get capos for</p> |
 
 <a name="getKeys"></a>
 
@@ -1694,5 +1717,5 @@ values are the effective key for that capo.</p>
 
 | Param | Type | Description |
 | --- | --- | --- |
-| key | <code>Key</code> \| <code>string</code> | <p>The key to get keys for</p> |
+| key | [<code>Key</code>](#Key) \| <code>string</code> | <p>The key to get keys for</p> |
 
