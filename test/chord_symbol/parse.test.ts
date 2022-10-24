@@ -105,6 +105,15 @@ describe('Chord', () => {
           base: 'F', modifier: '#', suffix: null, bassBase: 'C', bassModifier: '#',
         });
       });
+
+      describe('chord with only a bass', () => {
+        it('parses a simple chord with no base', () => {
+          const chord = Chord.parse('/B');
+          expect(chord).toBeChord({
+            base: null, modifier: null, suffix: null, bassBase: 'B', bassModifier: null,
+          });
+        });
+      });
     });
   });
 });
