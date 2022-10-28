@@ -26,7 +26,7 @@ class PegBasedParser {
     return this.song.warnings;
   }
 
-  protected parseWithParser(chordSheet, parser: ParseFunction) {
+  protected parseWithParser(chordSheet, parser: ParseFunction): Song {
     const ast = parser(chordSheet);
     this.song = new ChordSheetSerializer().deserialize(ast);
     return this.song;
