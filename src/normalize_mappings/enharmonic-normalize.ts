@@ -1,4 +1,4 @@
-export default {
+const enharmonics: Record<string, Record<string, string>> = {
   'Ab': {
     'B': 'Cb',
   },
@@ -125,4 +125,6 @@ export default {
     'A#': 'Bb',
     'D#': 'Eb',
   }
-}
+};
+
+export default enharmonics;
