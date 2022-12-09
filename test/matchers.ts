@@ -124,8 +124,8 @@ function toBeChord(
 ) {
   return toBeClassInstanceWithProperties(
     {
-      base: received.root.note.note,
-      modifier: received.root.modifier,
+      base: received.root?.note.note || null,
+      modifier: received.root?.modifier || null,
       suffix: received.suffix,
       bassBase: received.bass?.note?.note || null,
       bassModifier: received.bass?.modifier || null,
