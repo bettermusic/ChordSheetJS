@@ -240,20 +240,20 @@ class Chord implements ChordProperties {
    */
   normalize(key: Key | string | null = null, { normalizeSuffix = true } = {}): Chord {
     const suffix = normalizeSuffix ? normalizeChordSuffix(this.suffix) : this.suffix;
-
-    let bassRootKey: Key | null = null;
+    let normalizedRoot = this.root;
 
     if (this.root) {
-      this.root.normalize().normalizeEnharmonics(key);
-      if (this.root.isMinor() && this.bass) {
-        bassRootKey = this.root.transpose(3).removeMinor().normalize();
+      normalizedRoot = this.root.normalize();
+
+      if (key) {
+        normalizedRoot = normalizedRoot.normalizeEnharmonics(key);
       }
     }
 
     return this.set({
       suffix,
-      root: this.root?.normalize().normalizeEnharmonics(key) || null,
-      bass: this.bass ? this.bass.normalize().normalizeEnharmonics(bassRootKey) : null,
+      root: normalizedRoot,
+      bass: this.bass ? this.bass.normalize().normalizeEnharmonics(normalizedRoot) : null,
     });
   }
 
