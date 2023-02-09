@@ -120,10 +120,10 @@ export function ternary(
 type TestCaseProps = {
   [key: string]: any;
   outcome: any;
-  index: number;
+  index: string;
 }
 
-export function eachTestCase(table: string, callback: (_testCase: TestCaseProps) => void) {
+export function eachTestCase(table: string, callback: (_testCase: TestCaseProps) => void): void {
   const lines = table.trim().split('\n');
   const names = lines[0].split('|').map((s) => s.trim()).slice(1, -1);
   const caseLines = lines.slice(2);
@@ -131,7 +131,7 @@ export function eachTestCase(table: string, callback: (_testCase: TestCaseProps)
   const testCases = caseLines.map((line) => {
     const columns = line.split('|').map((s) => s.trim());
     const values = columns.slice(1, -1);
-    const testCase = { index: parseInt(columns[0], 10) };
+    const testCase = { index: columns[0] };
 
     return names.reduce((acc, name, index) => ({
       ...acc,
@@ -139,14 +139,29 @@ export function eachTestCase(table: string, callback: (_testCase: TestCaseProps)
     }), testCase);
   });
 
-  testCases.forEach((testCaseProps) => {
-    const testCase = testCaseProps as TestCaseProps;
-    const description = names.filter((n) => n !== 'outcome').map((name) => `${name}=${testCase[name]}`).join(', ');
+  const focusTests = testCases.some((testCase) => testCase.index === 'f');
+  const skipTests = testCases.some((testCase) => testCase.index === 's');
 
-    it(`returns ${testCase.outcome} for ${description} (${testCaseProps.index})`, () => {
-      callback(testCase);
+  testCases
+    .filter(({ index }) => {
+      if (focusTests) {
+        return index === 'f';
+      }
+
+      if (skipTests) {
+        return index !== 's';
+      }
+
+      return true;
+    })
+    .forEach((testCaseProps) => {
+      const testCase = testCaseProps as TestCaseProps;
+      const description = names.filter((n) => n !== 'outcome').map((name) => `${name}=${testCase[name]}`).join(', ');
+
+      it(`returns ${testCase.outcome} for ${description} (${testCaseProps.index})`, () => {
+        callback(testCase);
+      });
     });
-  });
 }
 
 export function buildKey(
