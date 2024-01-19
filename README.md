@@ -394,6 +394,8 @@ metadata.get('author')   // =&gt; 'John'</p>
 <dt><a href="#HtmlTableFormatter">HtmlTableFormatter</a></dt>
 <dd><p>Formats a song into HTML. It uses TABLEs to align lyrics with chords, which makes the HTML for things like
 PDF conversion.</p></dd>
+<dt><a href="#PdfFormatter">PdfFormatter</a></dt>
+<dd><p>Formats a song into a ChordPro chord sheet</p></dd>
 <dt><a href="#TextFormatter">TextFormatter</a></dt>
 <dd><p>Formats a song into a plain text chord sheet</p></dd>
 <dt><a href="#ChordProParser">ChordProParser</a></dt>
@@ -1268,6 +1270,12 @@ For a CSS string see [cssString](cssString)</p>
 ## HtmlTableFormatter
 <p>Formats a song into HTML. It uses TABLEs to align lyrics with chords, which makes the HTML for things like
 PDF conversion.</p>
+
+**Kind**: global class  
+<a name="PdfFormatter"></a>
+
+## PdfFormatter
+<p>Formats a song into a ChordPro chord sheet</p>
 
 **Kind**: global class  
 <a name="TextFormatter"></a>
