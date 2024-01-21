@@ -132,6 +132,73 @@ const editor = CodeMirror(document.getElementById('editor'), {
 
 editor.setSize("100%", "90%");
 
+const pdfConfig = {
+    // Font settings for various elements
+    fonts: {
+        title: { name: 'helvetica', style: 'bold', size: 24, color: 'black' },
+        subtitle: { name: 'helvetica', style: 'normal', size: 10, color: 100 },
+        metadata: { name: 'helvetica', style: 'normal', size: 10, color: 100 },
+        text: { name: 'helvetica', style: 'normal', size: 10, color: 'black' },
+        chord: { name: 'helvetica', style: 'bold', size: 10, color: 'black' },
+        comment: { name: 'helvetica', style: 'bold', size: 10, color: 'black' },
+        annotation: { name: 'helvetica', style: 'normal', size: 10, color: 'black' }
+    },
+    // Layout settings
+    margintop: 25,
+    marginbottom: 15,
+    marginleft: 25,
+    marginright: 25,
+    lineHeight: 5,
+    chordLyricSpacing: 0,
+    linePadding: 8,
+    numberOfSpacesToAdd: 2,
+    columnCount: 2,
+    columnWidth: 0,
+    columnSpacing: 25,
+    layout: {
+        header: {
+            height: 60,
+            content: [
+                {
+                    type: 'text',
+                    template: '${title}',
+                    style: { name: 'helvetica', style: 'bold', size: 24, color: 'black' },
+                    position: { x: 'left', y: 15 },
+                },
+                {
+                    type: 'text',
+                    template: 'Key of ${key} - BPM ${bpm} - Time ${timeSignature}',
+                    style: { name: 'helvetica', style: 'normal', size: 12, color: 100 },
+                    position: { x: 'left', y: 28 },
+                },
+                {
+                    type: 'text',
+                    template: 'By ${artist} ${subtitle}',
+                    style: { name: 'helvetica', style: 'normal', size: 10, color: 100 },
+                    position: { x: 'left', y: 38 },
+                },
+                // {
+                //   type: 'image',
+                //   src: 'logo.png',
+                //   position: { x: 'right', y: 5 },
+                //   size: { width: 40, height: 40 },
+                // },
+            ],
+        },
+        footer: {
+            height: 10,
+            content: [
+                {
+                    type: 'text',
+                    value: '©2024 My Music Publishing',
+                    style: { name: 'helvetica', style: 'normal', size: 10, color: 'black' },
+                    position: { x: 'left', y: 10 },
+                },
+            ],
+        },
+    }
+};
+
 // Function to render PDF in an <iframe> or <object>
 const renderPDFInBrowser = async (pdfBlob) => {
     const pdfContainer = document.getElementById('pdfViewer');
@@ -148,7 +215,7 @@ const renderPDFInBrowser = async (pdfBlob) => {
 const updatePDF = async (chordProText) => {
     const song = new ChordProParser().parse(chordProText);
     const formatter = new PdfFormatter();
-    formatter.format(song);
+    formatter.format(song, pdfConfig);
     const pdfBlob = await formatter.generatePDF();
     renderPDFInBrowser(pdfBlob);
 };
