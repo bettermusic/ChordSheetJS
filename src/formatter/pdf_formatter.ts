@@ -60,12 +60,6 @@ class PdfFormatter extends Formatter {
               style: { name: 'helvetica', style: 'normal', size: 10, color: 100 },
               position: { x: 'left', y: 38 },
             },
-            // {
-            //   type: 'image',
-            //   src: 'logo.png',
-            //   position: { x: 'right', y: 5 },
-            //   size: { width: 40, height: 40 },
-            // },
           ],
         },
         footer: {
@@ -147,7 +141,20 @@ class PdfFormatter extends Formatter {
 
   // Renders individual image items
   renderImage(imageItem, sectionY) {
-    // .TODO: image rendering
+    const { src, position, size, alias, compression, rotation } = imageItem;
+
+    // Determine the x position based on the alignment
+    const x = this.calculateX(position.x, size.width);
+
+    // Adjust y position based on sectionY and the provided y offset
+    const y = sectionY + position.y;
+
+    // Determine the format of the image based on the file extension or provided format
+    const format = src.split('.').pop().toUpperCase(); // Assumes src is a filename with extension
+
+    // Add the image to the PDF
+    // imageData can be a base64 string, an HTMLImageElement, HTMLCanvasElement, Uint8Array, or RGBAData
+    this.doc.addImage(src, format, x, y, size.width, size.height, alias, compression, rotation);
   }
 
   // Helper method to interpolate metadata
@@ -158,16 +165,21 @@ class PdfFormatter extends Formatter {
   }
 
   // Helper method to calculate x position based on alignment
-  calculateX(alignment) {
+  calculateX(alignment, width = 0) {
+    let x;
     switch (alignment) {
       case 'center':
-        return this.doc.internal.pageSize.getWidth() / 2;
+        x = (this.doc.internal.pageSize.getWidth() / 2) - (width / 2);
+        break;
       case 'right':
-        return this.doc.internal.pageSize.getWidth() - this.pdfConfiguration.marginright;
+        x = this.doc.internal.pageSize.getWidth() - this.pdfConfiguration.marginright - width;
+        break;
       case 'left':
       default:
-        return this.pdfConfiguration.marginleft;
+        x = this.pdfConfiguration.marginleft;
+        break;
     }
+    return x;
   }
 
   formatParagraphs() {
