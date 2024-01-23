@@ -207,55 +207,66 @@ class PdfFormatter extends Formatter {
 
   formatLine(line) {
     let x = this.x;
+    let lineY = this.y;
     let maxChordHeight = this.getMaxChordHeight(line);
     const spaceWidth = this.getSpaceWidth();
+    const columnWidth = this.columnWidth;
   
-    line.items.forEach((item) => {
+    line.items.forEach((item, index, items) => {
       if (isChordLyricsPair(item)) {
         let chordWidth = 0;
         let lyricWidth = 0;
-        let extraSpace = 0;
-  
-        // Render and position chords
+    
+        // Calculate widths for chords and lyrics
         if (item.chords) {
           const style = this.pdfConfiguration.fonts['chord'];
           this.setFontStyle(style);
-          let chordDimensions = this.getTextDimensions(item.chords);
-          chordWidth = chordDimensions.w;
-          let chordBaseline = this.y + maxChordHeight - chordDimensions.h;
-          this.doc.text(item.chords, x, chordBaseline);
+          chordWidth = this.getTextDimensions(item.chords).w;
         }
-  
-        // Render and position lyrics
+    
         if (item.lyrics && item.lyrics.trim() !== '') {
           const style = this.pdfConfiguration.fonts['text'];
           this.setFontStyle(style);
-          let lyricDimensions = this.getTextDimensions(item.lyrics);
-          lyricWidth = lyricDimensions.w;
-          let lyricsY = this.y + maxChordHeight + this.pdfConfiguration.chordLyricSpacing;
+          lyricWidth = this.getTextDimensions(item.lyrics).w;
+        }
+    
+        // Check if the chord-lyric pair will fit in the current column
+        if (x + Math.max(chordWidth, lyricWidth) > this.x + columnWidth) {
+          // Move to the next line if it doesn't fit
+          lineY += maxChordHeight + this.pdfConfiguration.chordLyricSpacing + this.pdfConfiguration.linePadding + this.pdfConfiguration.lineHeight;
+          this.y = lineY; // Update this.y to the new line position
+          x = this.x; // Reset x to the start of the column
+          maxChordHeight = this.getMaxChordHeight({ items: items.slice(index) }); // Recalculate max chord height for new line
+        }
+    
+        // Render and position chords
+        if (item.chords) {
+          let chordBaseline = lineY + maxChordHeight - this.getTextDimensions(item.chords).h;
+          const style = this.pdfConfiguration.fonts['chord'];
+          this.setFontStyle(style);
+          this.doc.text(item.chords, x, chordBaseline);
+        }
+    
+        // Render and position lyrics
+        if (item.lyrics && item.lyrics.trim() !== '') {
+          let lyricsY = lineY + maxChordHeight + this.pdfConfiguration.chordLyricSpacing;
+          const style = this.pdfConfiguration.fonts['text'];
+          this.setFontStyle(style);
           this.doc.text(item.lyrics, x, lyricsY);
         }
-  
-        // Calculate additional space for chord-lyric alignment
-        if (chordWidth > lyricWidth) {
-          let numberOfSpacesToAdd = this.pdfConfiguration.numberOfSpacesToAdd || 0;
-          extraSpace = numberOfSpacesToAdd * spaceWidth;
-        }
-  
+    
         // Update x for the next chord-lyric pair
-        x += Math.max(chordWidth, lyricWidth) + extraSpace;
+        x += chordWidth > lyricWidth ?  chordWidth + (this.pdfConfiguration.numberOfSpacesToAdd || 0) * spaceWidth : lyricWidth;
       }
-  
+    
       if (isComment(item)) {
         this.formatComment(item.value);
       }
-  
-      // Handle other item types...
     });
-  
-    // Update y for the next line
-    this.y += maxChordHeight + this.pdfConfiguration.chordLyricSpacing + this.pdfConfiguration.linePadding;
-  }  
+    
+    // Update y for the next line, considering the possibility of line breaks within the current line
+    this.y = lineY + maxChordHeight + this.pdfConfiguration.chordLyricSpacing + this.pdfConfiguration.linePadding;
+  } 
 
   formatComment(commentText) {
     const style = this.pdfConfiguration.fonts['comment'];
