@@ -123,15 +123,6 @@ Lookin' like, lookin' like  me and      you
 Just [F13]let it, just [Bbma9]let it fill the room
 `.substring(1);
 
-// Initialize CodeMirror instance
-const editor = CodeMirror(document.getElementById('editor'), {
-  mode: "javascript",
-  lineNumbers: true,
-  value: chordpro
-});
-
-editor.setSize("100%", "90%");
-
 const pdfConfig = {
     // Font settings for various elements
     fonts: {
@@ -199,6 +190,25 @@ const pdfConfig = {
         },
     }
 };
+// // Initialize CodeMirror instance
+const editor = CodeMirror(document.getElementById('editor'), {
+  mode: "javascript",
+  lineNumbers: true,
+  value: chordpro
+});
+
+editor.setSize("100%", "49vh");
+
+const pdfConfigString = JSON.stringify(pdfConfig, null, 4);
+
+const configEditor = CodeMirror(document.getElementById('configEditor'), {
+    mode: "javascript",
+    lineNumbers: true,
+    value: pdfConfigString
+});
+
+configEditor.setSize("100%", "49vh");
+
 
 // Function to render PDF in an <iframe> or <object>
 const renderPDFInBrowser = async (pdfBlob) => {
@@ -216,13 +226,17 @@ const renderPDFInBrowser = async (pdfBlob) => {
 const updatePDF = async (chordProText) => {
     const song = new ChordProParser().parse(chordProText);
     const formatter = new PdfFormatter();
-    formatter.format(song, pdfConfig);
+    formatter.format(song, JSON.parse((configEditor.getValue())));
     const pdfBlob = await formatter.generatePDF();
     renderPDFInBrowser(pdfBlob);
 };
 // Listen for changes in the editor
 editor.on('change', (cm) => {
     updatePDF(cm.getValue());
+});
+
+configEditor.on('change', (cm) => {
+    updatePDF(editor.getValue());
 });
 
 // Initial rendering
