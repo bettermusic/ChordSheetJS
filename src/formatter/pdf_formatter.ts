@@ -196,7 +196,6 @@ class PdfFormatter extends Formatter {
   // Helper method to interpolate metadata
   interpolateMetadata(template, song) {
     return template(song);
-    return template.replace(/\$\{(\w+)\}/g, (_, key) => song[key] || '');
   }
 
   // Helper method to calculate x position based on alignment

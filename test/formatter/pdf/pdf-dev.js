@@ -6,7 +6,8 @@ const chordpro = `
 {artist: Maverick City}
 {author: Kirk Franklin}
 {key: F}
-
+{tempo: 115}
+{time: 4/4}
 
 {c:Intro (2x)}
 [Gm][F][/][/][|][Dbdim7][Dm][/][/][|]
@@ -89,11 +90,9 @@ He's coming, He's [Dm7]coming, [C/E] He's coming, He's [F]coming[Bb2]
 
 {c:Tag 7 (4x) *16-17}
 [Dm7]If you wanna know [C/E]what Heaven looks [Eb/F]like
-        F9/A    Bbma9    A7(#9#5)
-Lookin' like me and   you
+Lookin' [F9/A]like me [Bbma9]and   you[A7(#9#5)]
 [Dm7]If you wanna know [C/E]what Heav - [Dm7]en [Eb/Db]sounds [Cm7]like
-         F13      Bbma9     A7(#9#5)
-Just let it  fill the   room
+Just let [F13]it  fill [Bbma9]the   room[A7(#9#5)]
 
 {c:Interlude 4 *18}
 [Dm9][/][C/E][/][|][F9/A][Bbma9][/][A7(#9#5)][|]
@@ -101,19 +100,15 @@ Just let it  fill the   room
 
 {c:Tag 8 (2x) *19}
 If you [Dm9]wanna know [C/E]what Heaven looks like
-        F9/A          Bbma9        A7(#9#5)
-Lookin' like, lookin' like  me and you
+Lookin' [F9/A]like, lookin' [Bbma9]like  me and [A7(#9#5)]you
 If you [Dm9]wanna know [C/E]what Heav - [/D]en [/Db]looks [/C]like
-     F13          Bbma9             A7(#9#5)
-Just let it, just let   it fill the room
+Just [F13]let it, just [Bbma9]let   it fill the [A7(#9#5)]room
 
 {c:Tag 9 *20a}
 [Dm9]If you wanna know [C/E]what Heaven looks [Ebma7/F]like
-        F9/A          Bbma9    A7(#9#5)
-Lookin' like, lookin' like  me and      you
+Lookin' [F9/A]like, lookin' [Bbma9]like  me [A7(#9#5)]and      you
 [Dm9]If you wanna know [C7/E]what Heav - [/D]en [/Db]sounds [Cm7]like
-     F13          Bbma9             A7(#9#5)
-Just let it, just let   it fill the room
+Just [F13]let it, just [Bbma9]let   it fill the [A7(#9#5)]room
 
 {c:Tag 10 *20b}
 [Dm9]If you wanna know [C/E]what Heaven looks [Ebma7/F]like
