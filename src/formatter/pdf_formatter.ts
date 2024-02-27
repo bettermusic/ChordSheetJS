@@ -2,6 +2,8 @@ import JsPDF from 'jspdf';
 import Formatter from './formatter';
 import { isChordLyricsPair, isComment, lineHasContents } from '../template_helpers';
 import Song from '../chord_sheet/song';
+import ChordProParser from '../parser/chord_pro_parser';
+import TextFormatter from './text_formatter';
 
 class PdfFormatter extends Formatter {
   song: Song = new Song();
@@ -65,7 +67,7 @@ class PdfFormatter extends Formatter {
           content: [
             {
               type: 'text',
-              template: (song) => `${song.title}`,
+              template: '%{title}',
               style: {
                 name: 'helvetica', style: 'bold', size: 24, color: 'black',
               },
@@ -73,7 +75,7 @@ class PdfFormatter extends Formatter {
             },
             {
               type: 'text',
-              template: (song) => `Key of ${song.key} - BPM ${song.tempo} - Time ${song.time}`,
+              template: 'Key of %{key} - BPM %{tempo} - Time %{time}',
               style: {
                 name: 'helvetica', style: 'normal', size: 12, color: 100,
               },
@@ -81,7 +83,7 @@ class PdfFormatter extends Formatter {
             },
             {
               type: 'text',
-              template: (song) => `By ${song.artist} ${song.subtitle}`,
+              template: 'By %{artist} %{subtitle}',
               style: {
                 name: 'helvetica', style: 'normal', size: 10, color: 100,
               },
@@ -168,9 +170,14 @@ class PdfFormatter extends Formatter {
     this.setFontStyle(style);
     const x = this.calculateX(position.x);
     const y = position.y instanceof Array ? position.y.map((yOffset) => sectionY + yOffset) : sectionY + position.y;
-    y instanceof Array ? y.forEach((yPosition, index) => {
-      this.doc.text(textValue.split('\n')[index] || '', x, yPosition);
-    }) : this.doc.text(textValue, x, y);
+
+    if (y instanceof Array) {
+      y.forEach((yPosition, index) => {
+        this.doc.text(textValue.split('\n')[index] || '', x, yPosition);
+      });
+    } else {
+      this.doc.text(textValue, x, y);
+    }
   }
 
   // Renders individual image items
@@ -195,7 +202,8 @@ class PdfFormatter extends Formatter {
 
   // Helper method to interpolate metadata
   interpolateMetadata(template, song) {
-    return template(song);
+    const parsedTemplate = new ChordProParser().parse(template);
+    return new TextFormatter().format(parsedTemplate, song.metadata);
   }
 
   // Helper method to calculate x position based on alignment

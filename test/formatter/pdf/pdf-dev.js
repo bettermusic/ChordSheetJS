@@ -161,7 +161,7 @@ const pdfConfig = {
       content: [
         {
           type: 'text',
-          template: (song) => `${song.title}`,
+          template: '%{title}',
           style: {
             name: 'helvetica', style: 'bold', size: 24, color: 'black',
           },
@@ -169,7 +169,7 @@ const pdfConfig = {
         },
         {
           type: 'text',
-          template: (song) => `Key of ${song.key} - BPM ${song.tempo} - Time ${song.time}`,
+          template: 'Key of %{key} - BPM %{tempo} - Time %{time}',
           style: {
             name: 'helvetica', style: 'normal', size: 12, color: 100,
           },
@@ -177,7 +177,7 @@ const pdfConfig = {
         },
         {
           type: 'text',
-          template: (song) => `By ${song.artist} ${song.subtitle}`,
+          template: 'By %{artist} %{subtitle}',
           style: {
             name: 'helvetica', style: 'normal', size: 10, color: 100,
           },
@@ -209,23 +209,22 @@ const pdfConfig = {
 };
 // // Initialize CodeMirror instance
 const editor = CodeMirror(document.getElementById('editor'), {
-  mode: "javascript",
+  mode: 'javascript',
   lineNumbers: true,
-  value: chordpro
+  value: chordpro,
 });
 
-editor.setSize("100%", "49vh");
+editor.setSize('100%', '49vh');
 
 const pdfConfigString = JSON.stringify(pdfConfig, null, 4);
 
 const configEditor = CodeMirror(document.getElementById('configEditor'), {
-    mode: "javascript",
-    lineNumbers: true,
-    value: pdfConfigString
+  mode: 'javascript',
+  lineNumbers: true,
+  value: pdfConfigString,
 });
 
-configEditor.setSize("100%", "49vh");
-
+configEditor.setSize('100%', '49vh');
 
 // Function to render PDF in an <iframe> or <object>
 const renderPDFInBrowser = async (pdfBlob) => {
@@ -253,7 +252,7 @@ editor.on('change', (cm) => {
 });
 
 configEditor.on('change', (cm) => {
-    updatePDF(editor.getValue());
+  updatePDF(editor.getValue());
 });
 
 // Initial rendering
