@@ -1,9 +1,82 @@
-import JsPDF from 'jspdf';
+import JsPDF, { ImageCompression } from 'jspdf';
 import Formatter from './formatter';
 import { isChordLyricsPair, isComment, lineHasContents } from '../template_helpers';
 import Song from '../chord_sheet/song';
 import ChordProParser from '../parser/chord_pro_parser';
 import TextFormatter from './text_formatter';
+
+type FontSection = 'title' | 'subtitle' | 'metadata' | 'text' | 'chord' | 'comment' | 'annotation';
+type LayoutSection = 'header' | 'footer';
+
+interface FontConfiguration {
+  name: string;
+  style: string;
+  size: number;
+  color: string | number;
+}
+
+interface Position {
+  x: 'left',
+  y: number,
+}
+
+interface Dimension {
+  width: number,
+  height: number,
+}
+
+interface ILayoutContentItem {
+  type: string,
+  position: Position,
+}
+
+interface LayoutContentItemWithText extends ILayoutContentItem {
+  type: 'text',
+  style: FontConfiguration,
+  value?: string,
+  template?: string,
+}
+
+interface LayoutContentItemWithValue extends LayoutContentItemWithText {
+  value: string,
+}
+
+interface LayoutContentItemWithTemplate extends LayoutContentItemWithText {
+  template: string,
+}
+
+interface LayoutContentItemWithImage extends ILayoutContentItem {
+  type: 'image',
+  src: string,
+  position: Position,
+  compression: ImageCompression,
+  size: Dimension,
+  alias?: string,
+  rotation?: number,
+}
+
+type LayoutContentItem = LayoutContentItemWithValue | LayoutContentItemWithTemplate | LayoutContentItemWithImage;
+
+type LayoutItem = {
+  height: number,
+  content: LayoutContentItem[],
+};
+
+type PDFConfiguration = {
+  fonts: Record<FontSection, FontConfiguration>,
+  margintop: number,
+  marginbottom: number,
+  marginleft: number,
+  marginright: number,
+  lineHeight: number,
+  chordLyricSpacing: number,
+  linePadding: number,
+  numberOfSpacesToAdd: number,
+  columnCount: number,
+  columnWidth: number,
+  columnSpacing: number,
+  layout: Record<LayoutSection, LayoutItem>,
+};
 
 class PdfFormatter extends Formatter {
   song: Song = new Song();
@@ -20,10 +93,10 @@ class PdfFormatter extends Formatter {
 
   columnWidth: number = 0;
 
-  pdfConfiguration: any = this.defaultPdfConfiguration;
+  pdfConfiguration: PDFConfiguration = this.defaultPdfConfiguration;
 
   // Configuration settings for the PDF document
-  get defaultPdfConfiguration() {
+  get defaultPdfConfiguration(): PDFConfiguration {
     return {
       // Font settings for various elements
       fonts: {
@@ -109,7 +182,7 @@ class PdfFormatter extends Formatter {
   }
 
   // Main function to format and save the song as a PDF
-  format(song: Song, configuration = this.defaultPdfConfiguration) {
+  format(song: Song, configuration: PDFConfiguration = this.defaultPdfConfiguration): void {
     this.startTime = performance.now();
     this.song = song;
     this.pdfConfiguration = configuration;
@@ -123,13 +196,13 @@ class PdfFormatter extends Formatter {
   }
 
   // Save the formatted document as a PDF file
-  save() {
+  save(): void {
     this.doc.save(`${this.song.title || 'untitled'}.pdf`);
   }
 
   // Generate the PDF as a Blob object
-  async generatePDF() {
-    return new Promise((resolve) => {
+  async generatePDF(): Promise<Blob> {
+    return new Promise((resolve): void => {
       const blob = this.doc.output('blob');
       resolve(blob);
     });
@@ -140,14 +213,25 @@ class PdfFormatter extends Formatter {
     const doc = new JsPDF('portrait', 'px');
     doc.setLineWidth(0);
     doc.setDrawColor(0, 0, 0, 0);
-    this.columnWidth = (doc.internal.pageSize.getWidth() - this.pdfConfiguration.marginleft - this.pdfConfiguration.marginright - ((this.pdfConfiguration.columnCount - 1) * this.pdfConfiguration.columnSpacing)) / this.pdfConfiguration.columnCount;
+    const pageWidth = doc.internal.pageSize.getWidth();
+
+    const {
+      marginleft,
+      marginright,
+      columnCount,
+      columnSpacing,
+    } = this.pdfConfiguration;
+
+    this.columnWidth = (pageWidth - marginleft - marginright - ((columnCount - 1) * columnSpacing)) / columnCount;
     return doc;
   }
 
   // Renders the layout for header and footer
-  renderLayout(layoutConfig, section) {
+  renderLayout(layoutConfig: LayoutItem, section: LayoutSection) {
     const { height } = layoutConfig;
-    const sectionY = section === 'header' ? this.pdfConfiguration.margintop : this.doc.internal.pageSize.getHeight() - height - this.pdfConfiguration.marginbottom;
+    const { margintop, marginbottom } = this.pdfConfiguration;
+    const pageHeight = this.doc.internal.pageSize.getHeight();
+    const sectionY = section === 'header' ? margintop : pageHeight - height - marginbottom;
 
     layoutConfig.content.forEach((contentItem) => {
       if (contentItem.type === 'text') {
@@ -159,31 +243,33 @@ class PdfFormatter extends Formatter {
   }
 
   // Renders individual text items
-  renderText(textItem, sectionY) {
+  renderText(textItem: LayoutContentItemWithText, sectionY: number) {
     const {
-      value, template, style, position,
+      value,
+      template,
+      style,
+      position,
     } = textItem;
 
-    console.log('renderText', { template, value });
+    const textValue = template
+      ? this.interpolateMetadata(template, this.song)
+      : value as string;
 
-    const textValue = template ? this.interpolateMetadata(template, this.song) : value;
     this.setFontStyle(style);
     const x = this.calculateX(position.x);
-    const y = position.y instanceof Array ? position.y.map((yOffset) => sectionY + yOffset) : sectionY + position.y;
-
-    if (y instanceof Array) {
-      y.forEach((yPosition, index) => {
-        this.doc.text(textValue.split('\n')[index] || '', x, yPosition);
-      });
-    } else {
-      this.doc.text(textValue, x, y);
-    }
+    const y = sectionY + position.y;
+    this.doc.text(textValue, x, y);
   }
 
   // Renders individual image items
-  renderImage(imageItem, sectionY) {
+  renderImage(imageItem: LayoutContentItemWithImage, sectionY: number) {
     const {
-      src, position, size, alias, compression, rotation,
+      src,
+      position,
+      size,
+      alias,
+      compression,
+      rotation,
     } = imageItem;
 
     // Determine the x position based on the alignment
@@ -193,7 +279,7 @@ class PdfFormatter extends Formatter {
     const y = sectionY + position.y;
 
     // Determine the format of the image based on the file extension or provided format
-    const format = src.split('.').pop().toUpperCase(); // Assumes src is a filename with extension
+    const format = src.split('.').pop()?.toUpperCase() as string; // Assumes src is a filename with extension
 
     // Add the image to the PDF
     // imageData can be a base64 string, an HTMLImageElement, HTMLCanvasElement, Uint8Array, or RGBAData
@@ -201,7 +287,7 @@ class PdfFormatter extends Formatter {
   }
 
   // Helper method to interpolate metadata
-  interpolateMetadata(template, song) {
+  interpolateMetadata(template: string, song: Song): string {
     const parsedTemplate = new ChordProParser().parse(template);
     return new TextFormatter().format(parsedTemplate, song.metadata);
   }
@@ -225,9 +311,10 @@ class PdfFormatter extends Formatter {
   }
 
   formatParagraphs() {
-    console.log(this.doc.internal.pageSize.getHeight());
-    const columnHeight = this.doc.internal.pageSize.getHeight() - this.pdfConfiguration.margintop - this.pdfConfiguration.marginbottom - this.pdfConfiguration.layout.footer.height;
-    console.log(columnHeight);
+    const pageHeight = this.doc.internal.pageSize.getHeight();
+    const { margintop, marginbottom } = this.pdfConfiguration;
+    const footerHeight = this.pdfConfiguration.layout.footer.height;
+    const columnHeight = pageHeight - margintop - marginbottom - footerHeight;
     const { bodyParagraphs } = this.song;
 
     bodyParagraphs.forEach((paragraph) => {
@@ -249,11 +336,10 @@ class PdfFormatter extends Formatter {
 
   formatLine(line) {
     let { x } = this;
-    const maxChordHeight = this.getMaxChordHeight(line);
     let lineY = this.y;
     let maxChordHeight = this.getMaxChordHeight(line);
     const spaceWidth = this.getSpaceWidth();
-    const columnWidth = this.columnWidth;
+    const { columnWidth } = this;
 
     line.items.forEach((item, index, items) => {
       if (isChordLyricsPair(item)) {
@@ -262,42 +348,51 @@ class PdfFormatter extends Formatter {
 
         // Calculate widths for chords and lyrics
         if (item.chords) {
-          const style = this.pdfConfiguration.fonts['chord'];
+          const style = this.pdfConfiguration.fonts.chord;
           this.setFontStyle(style);
           chordWidth = this.getTextDimensions(item.chords).w;
         }
 
         if (item.lyrics && item.lyrics.trim() !== '') {
-          const style = this.pdfConfiguration.fonts['text'];
+          const style = this.pdfConfiguration.fonts.text;
           this.setFontStyle(style);
           lyricWidth = this.getTextDimensions(item.lyrics).w;
         }
 
         // Check if the chord-lyric pair will fit in the current column
         if (x + Math.max(chordWidth, lyricWidth) > this.x + columnWidth) {
+          const {
+            chordLyricSpacing,
+            linePadding,
+            lineHeight,
+          } = this.pdfConfiguration;
+
           // Move to the next line if it doesn't fit
-          lineY += maxChordHeight + this.pdfConfiguration.chordLyricSpacing + this.pdfConfiguration.linePadding + this.pdfConfiguration.lineHeight;
+          lineY += maxChordHeight + chordLyricSpacing + linePadding + lineHeight;
           this.y = lineY; // Update this.y to the new line position
           x = this.x; // Reset x to the start of the column
-          maxChordHeight = this.getMaxChordHeight({ items: items.slice(index) }); // Recalculate max chord height for new line
+
+          // Recalculate max chord height for new line
+          maxChordHeight = this.getMaxChordHeight({ items: items.slice(index) });
         }
         // Render and position chords
         if (item.chords) {
-          let chordBaseline = lineY + maxChordHeight - this.getTextDimensions(item.chords).h;
+          const chordBaseline = lineY + maxChordHeight - this.getTextDimensions(item.chords).h;
           const style = this.pdfConfiguration.fonts.chord;
           this.setFontStyle(style);
           this.doc.text(item.chords, x, chordBaseline);
         }
         // Render and position lyrics
         if (item.lyrics && item.lyrics.trim() !== '') {
-          let lyricsY = lineY + maxChordHeight + this.pdfConfiguration.chordLyricSpacing;
+          const lyricsY = lineY + maxChordHeight + this.pdfConfiguration.chordLyricSpacing;
           const style = this.pdfConfiguration.fonts.text;
           this.setFontStyle(style);
           this.doc.text(item.lyrics, x, lyricsY);
         }
 
         // Update x for the next chord-lyric pair
-        x += chordWidth > lyricWidth ?  chordWidth + (this.pdfConfiguration.numberOfSpacesToAdd || 0) * spaceWidth : lyricWidth;
+        const { numberOfSpacesToAdd } = this.pdfConfiguration;
+        x += chordWidth > lyricWidth ? chordWidth + (numberOfSpacesToAdd || 0) * spaceWidth : lyricWidth;
       }
       if (isComment(item)) {
         this.formatComment(item.value);
@@ -305,7 +400,7 @@ class PdfFormatter extends Formatter {
     });
 
     // Update y for the next line, considering the possibility of line breaks within the current line
-    this.y = lineY +maxChordHeight + this.pdfConfiguration.chordLyricSpacing + this.pdfConfiguration.linePadding;
+    this.y = lineY + maxChordHeight + this.pdfConfiguration.chordLyricSpacing + this.pdfConfiguration.linePadding;
   }
 
   formatComment(commentText) {
@@ -375,17 +470,29 @@ class PdfFormatter extends Formatter {
     this.doc.text(`${timeTaken}s`, timeTextX, timeTextY);
   }
 
-  moveToNextColumn(columnHeight) {
-    this.currentColumn++;
-    if (this.currentColumn > this.pdfConfiguration.columnCount) {
+  moveToNextColumn(_columnHeight: number) {
+    this.currentColumn += 1;
+
+    const {
+      columnSpacing,
+      columnCount,
+      marginleft,
+      layout: {
+        header,
+        footer,
+      },
+    } = this.pdfConfiguration;
+
+    if (this.currentColumn > columnCount) {
       this.doc.addPage();
       this.currentColumn = 1;
       this.x = this.pdfConfiguration.marginleft;
-      this.renderLayout(this.pdfConfiguration.layout.header, 'header');
-      this.renderLayout(this.pdfConfiguration.layout.footer, 'footer');
+      this.renderLayout(header, 'header');
+      this.renderLayout(footer, 'footer');
     } else {
-      this.x = (this.currentColumn - 1) * this.columnWidth + this.pdfConfiguration.columnSpacing + this.pdfConfiguration.marginleft;
+      this.x = (this.currentColumn - 1) * this.columnWidth + columnSpacing + marginleft;
     }
+
     this.y = this.pdfConfiguration.margintop + this.pdfConfiguration.layout.header.height;
   }
 
