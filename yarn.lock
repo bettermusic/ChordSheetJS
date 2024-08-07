@@ -1649,7 +1649,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@babel/preset-typescript@npm:^7.16.7":
+"@babel/preset-typescript@npm:^7.24.7":
   version: 7.24.7
   resolution: "@babel/preset-typescript@npm:7.24.7"
   dependencies:
@@ -1783,7 +1783,7 @@ __metadata:
     "@babel/plugin-proposal-class-properties": "npm:^7.16.7"
     "@babel/plugin-proposal-object-rest-spread": "npm:^7.17.3"
     "@babel/preset-env": "npm:^7.25.2"
-    "@babel/preset-typescript": "npm:^7.16.7"
+    "@babel/preset-typescript": "npm:^7.24.7"
     "@eslint/js": "npm:^9.8.0"
     "@parcel/packager-ts": "npm:2.12.0"
     "@parcel/transformer-typescript-types": "npm:2.12.0"
