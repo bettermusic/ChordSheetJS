@@ -6,7 +6,7 @@ import StubbedPdfDoc, { RenderedItem, RenderedLine, RenderedText } from './forma
 declare global {
   namespace jest {
     interface Matchers<R> {
-      toBeKey({ note, modifier, minor = false }): CustomMatcherResult;
+      toBeKey({ note, modifier, minor }): CustomMatcherResult;
 
       toBeChordLyricsPair(chords: string, lyrics: string, annotation?: string): CustomMatcherResult;
 
