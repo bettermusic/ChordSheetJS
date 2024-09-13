@@ -1,7 +1,6 @@
 import Chord from './chord';
 import ChordLyricsPair from './chord_sheet/chord_lyrics_pair';
 import ChordProFormatter from './formatter/chord_pro_formatter';
-import PdfFormatter from './formatter/pdf_formatter';
 import ChordProParser from './parser/chord_pro_parser';
 import ChordSheetParser from './parser/chord_sheet_parser';
 import ChordSheetSerializer from './chord_sheet_serializer';
@@ -33,7 +32,6 @@ import {
 export { default as Chord } from './chord';
 export { default as ChordLyricsPair } from './chord_sheet/chord_lyrics_pair';
 export { default as ChordProFormatter } from './formatter/chord_pro_formatter';
-export { default as PdfFormatter } from './formatter/pdf_formatter';
 export { default as ChordProParser } from './parser/chord_pro_parser';
 export { default as ChordSheetParser } from './parser/chord_sheet_parser';
 export { default as ChordSheetSerializer } from './chord_sheet_serializer';
@@ -77,7 +75,6 @@ export default {
   Chord,
   ChordLyricsPair,
   ChordProFormatter,
-  PdfFormatter,
   ChordProParser,
   ChordSheetParser,
   ChordSheetSerializer,

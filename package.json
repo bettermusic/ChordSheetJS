@@ -103,7 +103,6 @@
     "test": "yarn pretest && yarn linter:run && yarn jest:run"
   },
   "dependencies": {
-    "jspdf": "^2.5.1",
     "lodash.get": "^4.4.2"
   },
   "packageManager": "yarn@4.2.2"
