@@ -9,6 +9,7 @@ export type Alignment = 'left' | 'center' | 'right';
 export interface FontConfiguration {
   name: string;
   style: string;
+  weight?: string | number;
   size: number;
   color: string | number;
 }
@@ -60,10 +61,19 @@ export type LayoutItem = {
   content: LayoutContentItem[],
 };
 
+export type LineLayout = {
+  items: MeasuredItem[];
+  lineHeight: number;
+  yPosition: number;
+  chordsY: number;
+  lyricsY: number;
+};
+
 export type MeasuredItem = {
   item: ChordLyricsPair | Comment | SoftLineBreak | Tag | Item,
   width: number,
   chordHeight?: number,
+  adjustedChord?: string,
 };
 
 export type PDFConfiguration = {
@@ -72,10 +82,10 @@ export type PDFConfiguration = {
   marginbottom: number,
   marginleft: number,
   marginright: number,
-  lineHeight: number,
+  paragraphSpacing: number,
   chordLyricSpacing: number,
   linePadding: number,
-  numberOfSpacesToAdd: number,
+  chordSpacing: number,
   columnCount: number,
   columnWidth: number,
   columnSpacing: number,
