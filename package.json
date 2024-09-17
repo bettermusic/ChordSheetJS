@@ -36,8 +36,8 @@
     "@types/jest": "^29.5.12",
     "@types/lodash.get": "^4.4.7",
     "@types/node": "^22.1.0",
-    "@typescript-eslint/eslint-plugin": "^8.6.0",
-    "@typescript-eslint/parser": "^8.6.0",
+    "@typescript-eslint/eslint-plugin": "8.1.0",
+    "@typescript-eslint/parser": "8.1.0",
     "codemirror": "^6.0.1",
     "detect-newline": "^4.0.1",
     "esbuild": "^0.23.1",
@@ -64,7 +64,7 @@
     "tsc": "^2.0.4",
     "tsx": "^4.17.0",
     "typescript": "^5.5.4",
-    "typescript-eslint": "^8.6.0"
+    "typescript-eslint": "8.1.0"
   },
   "scripts": {
     "build": "yarn build:code-generate && yarn build:sources && yarn build:bundle && yarn build:check-types",
