@@ -32,7 +32,7 @@ jobs:
     runs-on: windows-latest
     strategy:
       matrix:
-        node-version: [ 22.x ]
+        node-version: [ 22.6 ]
     name: Windows NodeJS ${{ matrix.node-version }} sample
     steps:
       - uses: actions/checkout@v4
@@ -50,7 +50,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        node-version: [ 22.x ]
+        node-version: [ 22.6 ]
     name: Verify README.md
     steps:
       - uses: actions/checkout@v4
@@ -68,7 +68,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        node-version: [ 22.x ]
+        node-version: [ 22.6 ]
     name: Verify NodeJS installation
     steps:
       - name: Use Node.js ${{ matrix.node-version }}
