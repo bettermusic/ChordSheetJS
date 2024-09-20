@@ -1872,7 +1872,7 @@ __metadata:
     "@babel/plugin-proposal-object-rest-spread": "npm:^7.17.3"
     "@babel/preset-env": "npm:^7.25.4"
     "@babel/preset-typescript": "npm:^7.24.7"
-    "@eslint/js": "npm:^9.8.0"
+    "@eslint/js": "npm:^9.11.0"
     "@parcel/packager-ts": "npm:2.12.0"
     "@parcel/transformer-typescript-types": "npm:2.12.0"
     "@types/jest": "npm:^29.5.12"
@@ -2400,10 +2400,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@eslint/js@npm:^9.8.0":
-  version: 9.8.0
-  resolution: "@eslint/js@npm:9.8.0"
-  checksum: 10c0/42edaae6b020436410454579509dcb6a8cd5b260e9f18e037fd803ae28d35eb13663d4019f0ab8ba686a19d3c4a43b0e11394c148e23345377ab694da0e83262
+"@eslint/js@npm:^9.11.0":
+  version: 9.11.0
+  resolution: "@eslint/js@npm:9.11.0"
+  checksum: 10c0/7403aeba28ba9cae3470d149b334a51375eb7fd850f167555c81cc72fe98e5cc5ac3059ccdbe68eb255a49d7498a7288d25429af0c7d20afeb4b3c0748349bb4
   languageName: node
   linkType: hard
 
