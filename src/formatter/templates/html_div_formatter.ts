@@ -1,5 +1,6 @@
 import { HtmlTemplateArgs } from '../html_formatter';
 import { renderChord } from '../../helpers';
+import { isPresent } from '../../utilities';
 
 import {
   each,
@@ -15,7 +16,6 @@ import {
   stripHTML,
   when,
 } from '../../template_helpers';
-import { isPresent } from '../../utilities';
 
 export default (
   {
