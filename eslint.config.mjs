@@ -61,6 +61,7 @@ export default tseslint.config(
           varsIgnorePattern: '^_',
         },
       ],
+      'object-curly-spacing': ['error', 'always'],
     },
   },
   {
