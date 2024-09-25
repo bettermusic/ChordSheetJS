@@ -673,7 +673,7 @@ class PdfFormatter extends Formatter {
     const lyricsWidth = lyrics ? this.getTextDimensions(lyrics, lyricsFont).w : 0;
 
     let adjustedChords = chords || '';
-    let adjustedLyrics = lyrics || '';
+    const adjustedLyrics = lyrics || '';
 
     if (chordWidth >= lyricsWidth && nextItemHasChords) {
       adjustedChords += this.chordSpacing;
@@ -725,7 +725,7 @@ class PdfFormatter extends Formatter {
       }
 
       if (index === 0) {
-        let text = hasFragments ? fragment + ',' : fragment;
+        const text = hasFragments ? fragment + ',' : fragment;
         items.push(new ChordLyricsPair(chords, text, annotation));
       }
     });
