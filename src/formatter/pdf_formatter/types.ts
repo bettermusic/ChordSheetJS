@@ -61,6 +61,7 @@ export type LayoutItem = {
   content: LayoutContentItem[],
 };
 
+<<<<<<< HEAD
 export type LineLayout = {
   items: MeasuredItem[];
   lineHeight: number;
@@ -69,11 +70,16 @@ export type LineLayout = {
   lyricsY: number;
 };
 
+=======
+>>>>>>> b7b282b5883b4a6ba10ee7890b2502619ce252df
 export type MeasuredItem = {
   item: ChordLyricsPair | Comment | SoftLineBreak | Tag | Item,
   width: number,
   chordHeight?: number,
+<<<<<<< HEAD
   adjustedChord?: string,
+=======
+>>>>>>> b7b282b5883b4a6ba10ee7890b2502619ce252df
 };
 
 export type PDFConfiguration = {
@@ -82,10 +88,17 @@ export type PDFConfiguration = {
   marginbottom: number,
   marginleft: number,
   marginright: number,
+<<<<<<< HEAD
   paragraphSpacing: number,
   chordLyricSpacing: number,
   linePadding: number,
   chordSpacing: number,
+=======
+  lineHeight: number,
+  chordLyricSpacing: number,
+  linePadding: number,
+  numberOfSpacesToAdd: number,
+>>>>>>> b7b282b5883b4a6ba10ee7890b2502619ce252df
   columnCount: number,
   columnWidth: number,
   columnSpacing: number,

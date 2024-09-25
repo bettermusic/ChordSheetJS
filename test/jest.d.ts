@@ -1,4 +1,4 @@
-/* eslint-disable no-unused-vars, @typescript-eslint/no-unused-vars */
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { TernaryProperties } from '../src/chord_sheet/chord_pro/ternary';
 import { ContentType } from '../src/serialized_types';
 import StubbedPdfDoc, { RenderedItem, RenderedLine, RenderedText } from './formatter/stubbed_pdf_doc';
@@ -6,7 +6,7 @@ import StubbedPdfDoc, { RenderedItem, RenderedLine, RenderedText } from './forma
 declare global {
   namespace jest {
     interface Matchers<R> {
-      toBeKey({ note, modifier, minor }): CustomMatcherResult;
+      toBeKey({ note, modifier, minor: boolean }): CustomMatcherResult;
 
       toBeChordLyricsPair(chords: string, lyrics: string, annotation?: string): CustomMatcherResult;
 
