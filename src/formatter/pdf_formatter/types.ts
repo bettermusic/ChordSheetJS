@@ -72,6 +72,7 @@ export type LineLayout = {
 export type MeasuredItem = {
   item: ChordLyricsPair | Comment | SoftLineBreak | Tag | Item,
   width: number,
+  chordLyricWidthDifference?: number,
   chordHeight?: number,
   adjustedChord?: string,
 };

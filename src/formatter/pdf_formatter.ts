@@ -508,7 +508,7 @@ class PdfFormatter extends Formatter {
 
       let x = this.x;
 
-      for (const measuredItem of items) {
+      for (const [index, measuredItem] of items.entries()) {
         const { item, width } = measuredItem;
 
         if (item instanceof ChordLyricsPair) {
@@ -528,11 +528,19 @@ class PdfFormatter extends Formatter {
         } else if (item instanceof Tag) {
           // Handle comments
           const commentText = item.value;
-          this.formatComment(commentText, x, lineLayout.yPosition); // Render comments at yPosition
+          this.formatComment(commentText, x, lineLayout.yPosition); 
           x += width;
         } else if (item instanceof SoftLineBreak) {
-          // Render SoftLineBreak's content
-          this.renderText(item.content, x, lyricsY, lyricsFont);
+          // Force soft line breaks with content to not be rendered in open space
+          let prevChordLyricDifference = 0;
+          if (index > 0 && items[index - 1].chordLyricWidthDifference) {
+            const previousItem = items[index - 1];
+            if (previousItem.item instanceof ChordLyricsPair) {
+              prevChordLyricDifference = previousItem.chordLyricWidthDifference || 0;
+            }
+          }
+          
+          this.renderText(item.content, x - prevChordLyricDifference, lyricsY, lyricsFont);
           x += width;
         }
       }
@@ -688,11 +696,13 @@ class PdfFormatter extends Formatter {
 
     const adjustedChordWidth = this.getTextDimensions(adjustedChords, chordFont).w;
     const totalWidth = Math.max(adjustedChordWidth, lyricsWidth);
+    const chordLyricWidthDifference = adjustedChordWidth > 0 && adjustedChordWidth > lyricsWidth ? Math.abs(adjustedChordWidth - lyricsWidth) : 0;
 
     return [
       {
         item: new ChordLyricsPair(adjustedChords, adjustedLyrics),
         width: totalWidth,
+        chordLyricWidthDifference,
         chordHeight: chords ? this.getTextDimensions(chords, chordFont).h : 0,
       },
     ];
@@ -722,18 +732,18 @@ class PdfFormatter extends Formatter {
 
     const lyricFragments = lyrics.split(/,\s*/);
 
-    const hasFragments = lyricFragments.length > 1;
-
     const items: Array<ChordLyricsPair | SoftLineBreak> = [];
 
     lyricFragments.forEach((fragment, index) => {
-      if (index > 0) {
-        items.push(new SoftLineBreak(' '));
+      if (index > 0 && index !== 0) {
+        items.push(new SoftLineBreak(', '));
+        if (fragment.trim() !== '') {
+          items.push(new ChordLyricsPair('', fragment, ''));
+        }
       }
 
       if (index === 0) {
-        const text = hasFragments ? fragment + ',' : fragment;
-        items.push(new ChordLyricsPair(chords, text, annotation));
+        items.push(new ChordLyricsPair(chords, fragment, annotation));
       }
     });
 
