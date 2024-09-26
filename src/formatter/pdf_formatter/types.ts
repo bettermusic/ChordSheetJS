@@ -144,6 +144,20 @@ export type PdfDoc = {
   setTextColor(ch1: number, ch2: number, ch3: number, ch4?: number): PdfDoc;
 
   text(text: string | string[], x: number, y: number, options?: TextOptionsLight, transform?: any): PdfDoc;
+
+  addFileToVFS(fileName: string, data: string): PdfDoc;
+  addFont(
+    postScriptName: string,
+    id: string,
+    fontStyle: string,
+    fontWeight?: string | number,
+    encoding?:
+      | "StandardEncoding"
+      | "MacRomanEncoding"
+      | "Identity-H"
+      | "WinAnsiEncoding",
+    isStandardFont?: boolean
+  ): string;
 };
 
 export type PdfConstructor = {

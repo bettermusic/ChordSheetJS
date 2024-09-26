@@ -30,6 +30,7 @@ import {
   PdfConstructor,
   PdfDoc,
 } from './pdf_formatter/types';
+import { NimbusSansLBolBold, NimbusSansLRegNormal } from './pdf_formatter/fonts/NimbusSansLFonts.base64';
 
 class PdfFormatter extends Formatter {
   song: Song = new Song();
@@ -95,6 +96,12 @@ class PdfFormatter extends Formatter {
     const doc = new docConstructor(constructorOptions);
     doc.setLineWidth(0);
     doc.setDrawColor(0, 0, 0, 0);
+
+    doc.addFileToVFS('NimbusSansL-Reg.ttf', NimbusSansLRegNormal);
+    doc.addFont('NimbusSansL-Reg.ttf', 'NimbusSansL-Reg', 'normal');
+
+    doc.addFileToVFS('NimbusSansL-Bol.ttf', NimbusSansLBolBold);
+    doc.addFont('NimbusSansL-Bol.ttf', 'NimbusSansL-Bol', 'bold');
 
     const pageWidth = doc.internal.pageSize.getWidth();
 
