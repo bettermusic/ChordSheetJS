@@ -30,7 +30,7 @@
   "devDependencies": {
     "@eslint/core": "^0.15.0",
     "@eslint/js": "^9.29.0",
-    "@martijnversluis/unibuild": "1.4.0",
+    "@martijnversluis/unibuild": "0.3.3",
     "@parcel/packager-ts": "^2.15.2",
     "@parcel/transformer-typescript-types": "^2.15.2",
     "@types/eslint__js": "^8.42.3",
@@ -76,7 +76,7 @@
     "dev:pdf": "parcel test/formatter/pdf/index.html --port=3000",
     "eslint": "node_modules/.bin/eslint",
     "lint": "yarn unibuild lint",
-    "prepare": "yarn install && yarn build",
+    "prepare": "yarn install && yarn build:code-generate",
     "release": "yarn unibuild release",
     "test": "yarn unibuild lint && yarn unibuild test",
     "unibuild": "tsx ./unibuild.ts"

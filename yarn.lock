@@ -527,7 +527,7 @@ __metadata:
   dependencies:
     "@eslint/core": "npm:^0.15.0"
     "@eslint/js": "npm:^9.29.0"
-    "@martijnversluis/unibuild": "npm:1.4.0"
+    "@martijnversluis/unibuild": "npm:0.3.3"
     "@parcel/packager-ts": "npm:^2.15.2"
     "@parcel/transformer-typescript-types": "npm:^2.15.2"
     "@types/eslint__js": "npm:^8.42.3"
@@ -1518,13 +1518,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@martijnversluis/unibuild@npm:1.4.0":
-  version: 1.4.0
-  resolution: "@martijnversluis/unibuild@npm:1.4.0"
+"@martijnversluis/unibuild@npm:0.3.3":
+  version: 0.3.3
+  resolution: "@martijnversluis/unibuild@npm:0.3.3"
   dependencies:
     chalk: "npm:^5.3.0"
     commander: "npm:^12.1.0"
-  checksum: 10c0/09c71d3d006fa311c83be1a70b784f843acaf735eeb5fa7d69af3541852c22aabc59c79192cfefb1f56abfc339233359652a4a6b0e41e0468ab781138f3cae1d
+  checksum: 10c0/e54814c59899515579db91c7c401c3d75bdd8238b0773a014309477a675ec392cd734fca054334747ae7e2b90743f0377ca90a97b469ed493d1e03b9c35112d7
   languageName: node
   linkType: hard
 
