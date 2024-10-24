@@ -1,5 +1,5 @@
 import {
-  DimensionOpts, PositionOpts, Renderer, SizeOpts,
+  DimensionOpts, FillOpts, PositionOpts, RadiusOpts, Renderer, SizeOpts, ThicknessOpts,
 } from './renderer';
 
 type ViewBox = [number, number, number, number];
@@ -25,7 +25,7 @@ class SVGRenderer implements Renderer {
       xmlns:xlink="http://www.w3.org/1999/xlink" 
       xmlns:svgjs="http://svgjs.com/svgjs" 
       preserveAspectRatio="xMidYMid meet" 
-      viewBox="0 0 400 596.3553184509277"
+      viewBox="${this.viewBox.join(' ')}"
     >
       ${innerHTML}
     </svg>
@@ -33,51 +33,51 @@ class SVGRenderer implements Renderer {
   }
 
   circle({
-    x, y, size, fill,
-  }: PositionOpts & SizeOpts & { fill?: boolean }) {
+    x, y, size, fill, thickness,
+  }: FillOpts & PositionOpts & SizeOpts & ThicknessOpts) {
     this.content += `
       <circle 
         r="${size / 2}" 
         cx="${x}"
         cy="${y}"
         fill="${fill ? '#000000' : 'none'}" 
-        stroke-width="2" 
+        stroke-width="${thickness}" 
         stroke="#000000" 
       ></circle>
     `;
   }
 
   line({
-    x1, y1, x2, y2, strokeWidth,
+    x1, y1, x2, y2, thickness,
   }: {
-    x1: number, y1: number, x2: number, y2: number, strokeWidth: number,
-  }): void {
+    x1: number, y1: number, x2: number, y2: number,
+  } & ThicknessOpts): void {
     this.content += `
       <line 
         x1="${x1}" 
         y1="${y1}" 
         x2="${x2}" 
         y2="${y2}" 
-        stroke-width="${strokeWidth}"
+        stroke-width="${thickness}"
         stroke="#000000"
       ></line>
     `;
   }
 
   rect({
-    x, y, width, height,
-  }: PositionOpts & DimensionOpts): void {
+    x, y, width, height, fill, thickness, radius,
+  }: DimensionOpts & FillOpts & PositionOpts & RadiusOpts & ThicknessOpts): void {
     this.content += `
       <rect 
         width="${width}"
         height="${height}"
         x="${x}"
         y="${y}"
-        fill="#000000" 
-        stroke-width="0" 
+        fill="${fill ? '#000000' : 'none'}" 
+        stroke-width="${thickness}" 
         stroke="#000000" 
-        rx="15.600000000000001" 
-        ry="15.600000000000001" 
+        rx="${radius}" 
+        ry="${radius}" 
       ></rect>
     `;
   }

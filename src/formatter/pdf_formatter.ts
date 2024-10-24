@@ -4,6 +4,8 @@ import { isChordLyricsPair, isComment, lineHasContents } from '../template_helpe
 import Song from '../chord_sheet/song';
 import ChordProParser from '../parser/chord_pro_parser';
 import TextFormatter from './text_formatter';
+import ChordDiagram from '../chord_diagram/chord_diagram';
+import JsPDFRenderer from '../chord_diagram/js_pdf_renderer';
 
 type FontSection = 'title' | 'subtitle' | 'metadata' | 'text' | 'chord' | 'comment' | 'annotation';
 type LayoutSection = 'header' | 'footer';
@@ -193,12 +195,40 @@ class PdfFormatter extends Formatter {
     this.song = song;
     this.pdfConfiguration = configuration;
     this.doc = this.setupDoc();
-    this.renderLayout(this.pdfConfiguration.layout.header, 'header');
-    this.renderLayout(this.pdfConfiguration.layout.footer, 'footer');
-    this.y = this.pdfConfiguration.margintop + this.pdfConfiguration.layout.header.height;
-    this.x = this.pdfConfiguration.marginleft;
-    this.formatParagraphs();
-    this.recordFormattingTime();
+    // this.renderLayout(this.pdfConfiguration.layout.header, 'header');
+    // this.renderLayout(this.pdfConfiguration.layout.footer, 'footer');
+    // this.y = this.pdfConfiguration.margintop + this.pdfConfiguration.layout.header.height;
+    // this.x = this.pdfConfiguration.marginleft;
+    // this.formatParagraphs();
+    // this.recordFormattingTime();
+
+    this.renderChordDiagram();
+  }
+
+  get chordDiagram() {
+    return new ChordDiagram({
+      barres: [
+        { from: 3, to: 6, fret: 1 },
+        { from: 1, to: 5, fret: 5 },
+      ],
+      chord: 'Bm7',
+      markers: [
+        { string: 2, fret: 1, finger: 3 },
+        { string: 3, fret: 2, finger: 4 },
+        { string: 4, fret: 3, finger: 2 },
+        { string: 5, fret: 4, finger: 1 },
+        { string: 6, fret: 5, finger: 5 },
+      ],
+      fretCount: 5,
+      stringCount: 6,
+      openStrings: [6],
+      unusedStrings: [1, 2, 3, 4, 5],
+    });
+  }
+
+  renderChordDiagram() {
+    const renderer = new JsPDFRenderer(this.doc, { x: 50, y: 50, scale: 0.5 });
+    this.chordDiagram.render(renderer);
   }
 
   // Save the formatted document as a PDF file
