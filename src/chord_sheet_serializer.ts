@@ -1,6 +1,9 @@
 import Literal from './chord_sheet/chord_pro/literal';
 import Song from './chord_sheet/song';
+import ChordDefinition from './chord_definition/chord_definition';
+import SongBuilder from './song_builder';
 import ChordLyricsPair from './chord_sheet/chord_lyrics_pair';
+import SoftLineBreak from './chord_sheet/soft_line_break';
 import Tag from './chord_sheet/tag';
 import Comment from './chord_sheet/comment';
 import Ternary from './chord_sheet/chord_pro/ternary';
@@ -9,6 +12,8 @@ import Line from './chord_sheet/line';
 import AstType from './chord_sheet/ast_type';
 import Item from './chord_sheet/item';
 import Evaluatable from './chord_sheet/chord_pro/evaluatable';
+
+import { warn } from './utilities';
 
 import {
   SerializedChordDefinition,
@@ -20,10 +25,6 @@ import {
   SerializedSong,
   SerializedTag, SerializedTernary,
 } from './serialized_types';
-import SoftLineBreak from './chord_sheet/soft_line_break';
-import { warn } from './utilities';
-import ChordDefinition from './chord_definition/chord_definition';
-import SongBuilder from './song_builder';
 
 const CHORD_LYRICS_PAIR = 'chordLyricsPair';
 const CHORD_SHEET = 'chordSheet';
@@ -224,6 +225,17 @@ class ChordSheetSerializer {
     const tag = new Tag(name, value, { line, column, offset }, attributes);
     tag.selector = selector || null;
     tag.isNegated = isNegated || false;
+
+    if (chordDefinition) {
+      tag.chordDefinition = new ChordDefinition(
+        chordDefinition.name,
+        chordDefinition.baseFret,
+        chordDefinition.frets,
+        chordDefinition.fingers,
+      );
+    }
+
+    return tag;
 
     if (chordDefinition) {
       tag.chordDefinition = new ChordDefinition(
