@@ -79,7 +79,6 @@
     "prepare": "yarn install && yarn build:code-generate",
     "release": "yarn unibuild release",
     "test": "yarn unibuild lint && yarn unibuild test",
-    "unibuild": "tsx ./unibuild.ts",
     "unibuild": "tsx ./unibuild.ts"
   },
   "dependencies": {
