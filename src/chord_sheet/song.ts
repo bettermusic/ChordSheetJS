@@ -20,6 +20,8 @@ import {
 
 type EachItemCallback = (_item: Item) => void;
 
+type EachItemCallback = (_item: Item) => void;
+
 type MapItemsCallback = (_item: Item) => Item | null;
 
 type MapLinesCallback = (_line: Line) => Line | null;
