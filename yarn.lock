@@ -16,12 +16,12 @@ __metadata:
   linkType: hard
 
 "@babel/cli@npm:^7.24.8":
-  version: 7.24.8
-  resolution: "@babel/cli@npm:7.24.8"
+  version: 7.25.9
+  resolution: "@babel/cli@npm:7.25.9"
   dependencies:
     "@jridgewell/trace-mapping": "npm:^0.3.25"
     "@nicolo-ribaudo/chokidar-2": "npm:2.1.8-no-fsevents.3"
-    chokidar: "npm:^3.4.0"
+    chokidar: "npm:^3.6.0"
     commander: "npm:^6.2.0"
     convert-source-map: "npm:^2.0.0"
     fs-readdir-recursive: "npm:^1.1.0"
@@ -38,7 +38,7 @@ __metadata:
   bin:
     babel: ./bin/babel.js
     babel-external-helpers: ./bin/babel-external-helpers.js
-  checksum: 10c0/b7f464ccb00db60aed63d71e980df823900d20c740bc2d9eb36c3abd4b3e2402cc438818382344085ef6603aeea2e6ee19af8f0ecb934966eccf077b87af7c7c
+  checksum: 10c0/2e8228c3715e220fa902888c643ce1a89c4ee90be3d9f7a31218d5bb2500456e0cef12cb90fd5877ab3e5a4498df8f27670425d346422a3eb52052fd3184d520
   languageName: node
   linkType: hard
 
@@ -5185,7 +5185,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"chokidar@npm:^3.4.0":
+"chokidar@npm:^3.6.0":
   version: 3.6.0
   resolution: "chokidar@npm:3.6.0"
   dependencies:
