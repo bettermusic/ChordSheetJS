@@ -1991,6 +1991,7 @@ __metadata:
     "@parcel/transformer-typescript-types": "npm:2.13.0"
     "@types/eslint__js": "npm:^8.42.3"
     "@types/jest": "npm:^27.4.1"
+    "@types/js-levenshtein": "npm:^1"
     "@types/lodash.get": "npm:^4.4.7"
     "@types/node": "npm:^22.0.0"
     detect-newline: "npm:^4.0.1"
@@ -2001,6 +2002,7 @@ __metadata:
     globals: "npm:^15.9.0"
     husky: "npm:^9.0.11"
     jest: "npm:^27.0.1"
+    js-levenshtein: "npm:^1.1.6"
     jsdoc-babel: "npm:^0.5.0"
     jsdoc-to-markdown: "npm:^9.0.5"
     jspdf: "npm:^2.5.2"
@@ -4227,6 +4229,13 @@ __metadata:
     jest-matcher-utils: "npm:^27.0.0"
     pretty-format: "npm:^27.0.0"
   checksum: 10c0/bb26b293210827c1d65efde9bf72feb0d2b7c2816911e086fd9a9fb7690cfa9416e10f4ddcfbc8e5017442a682da6273781b8b0f78951e0bb7e40993f6a52e7b
+  languageName: node
+  linkType: hard
+
+"@types/js-levenshtein@npm:^1":
+  version: 1.1.3
+  resolution: "@types/js-levenshtein@npm:1.1.3"
+  checksum: 10c0/025f2bd8d865cfa7a996799a1a2f2a77fa2fc74a28971aa035a103de35d7c1e3d949721a88f57fdb532815bbcb2bf7019196a608ed0a8bbd1023d64c52bb251b
   languageName: node
   linkType: hard
 
@@ -8060,6 +8069,13 @@ __metadata:
   bin:
     jest: bin/jest.js
   checksum: 10c0/c013d07e911e423612756bc42d376e578b8721d847db38d94344f9cdf8fdaa0241b0a5c2fe1aad7b7758d415e0b9517c1098312f0d03760f123958d5b6cf5597
+  languageName: node
+  linkType: hard
+
+"js-levenshtein@npm:^1.1.6":
+  version: 1.1.6
+  resolution: "js-levenshtein@npm:1.1.6"
+  checksum: 10c0/14045735325ea1fd87f434a74b11d8a14380f090f154747e613529c7cff68b5ee607f5230fa40665d5fb6125a3791f4c223f73b9feca754f989b059f5c05864f
   languageName: node
   linkType: hard
 
