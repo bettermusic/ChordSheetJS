@@ -60,7 +60,8 @@
     "ts-node": "^10.9.2",
     "ts-pegjs": "^3.0.0",
     "tsx": "^4.20.3",
-    "typedoc": "^0.28.5",
+    "typedoc": "^0.26.11",
+    "typedoc-plugin-markdown": "^4.2.10",
     "typescript": "^5.8.3",
     "typescript-eslint": "^8.34.0"
   },
@@ -78,6 +79,7 @@
     "lint": "yarn unibuild lint",
     "prepare": "yarn install && yarn build:code-generate",
     "release": "yarn unibuild release",
+    "readme": "yarn unibuild build readme -f",
     "test": "yarn unibuild lint && yarn unibuild test",
     "unibuild": "tsx ./unibuild.ts"
   },
