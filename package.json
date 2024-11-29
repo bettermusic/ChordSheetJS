@@ -56,7 +56,7 @@
     "js-levenshtein": "^1.1.6",
     "jsdoc-babel": "^0.5.0",
     "jsdoc-to-markdown": "^9.0.5",
-    "parcel": "2.13.0",
+    "parcel": "2.13.2",
     "peggy": "^4.2.0",
     "pegjs-backtrace": "^0.2.1",
     "pinst": "^3.0.0",
