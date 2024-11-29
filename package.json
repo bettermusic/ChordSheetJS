@@ -60,8 +60,8 @@
     "ts-node": "^10.9.2",
     "ts-pegjs": "^3.0.0",
     "tsx": "^4.20.3",
-    "typedoc": "^0.26.11",
-    "typedoc-plugin-markdown": "^4.2.10",
+    "typedoc": "^0.27.1",
+    "typedoc-plugin-markdown": "^4.3.0",
     "typescript": "^5.8.3",
     "typescript-eslint": "^8.34.0"
   },
