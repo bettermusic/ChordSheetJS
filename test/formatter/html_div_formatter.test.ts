@@ -98,6 +98,7 @@ describe('HtmlDivFormatter', () => {
           </div>
         </div>
 
+        
         <div class="paragraph chorus">
           <div class="row">
             <div class="comment">Breakdown</div>
