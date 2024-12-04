@@ -252,7 +252,7 @@ describe('ChordProParser', () => {
     const markedChordSheet = heredoc`
       {start_of_coda}
       Let it [Am]be
-
+      
       {start_of_interlude}
       [C]Speaking words of [G]wisdom
     `;
