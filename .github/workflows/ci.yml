@@ -13,7 +13,7 @@ jobs:
     continue-on-error: true
     strategy:
       matrix:
-        node-version: [ 18.x, 20.x, 22.6 ]
+        node-version: [ 18.x, 20.x, 22.x ]
     name: Ubuntu NodeJS ${{ matrix.node-version }} sample
     steps:
       - uses: actions/checkout@v4
@@ -45,7 +45,7 @@ jobs:
     runs-on: windows-latest
     strategy:
       matrix:
-        node-version: [ 22.6 ]
+        node-version: [ 22.x ]
     name: Windows NodeJS ${{ matrix.node-version }} sample
     steps:
       - uses: actions/checkout@v4
@@ -64,7 +64,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        node-version: [ 22.6 ]
+        node-version: [ 22.x ]
     name: Generate typedoc
     steps:
       - uses: actions/checkout@v4
@@ -90,7 +90,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        node-version: [ 22.6 ]
+        node-version: [ 22.x ]
     name: Verify NodeJS installation
     steps:
       - name: Use Node.js ${{ matrix.node-version }}
