@@ -146,7 +146,7 @@ describe('HtmlDivFormatter', () => {
             </div>
           </div>
         </div>
-
+        
         <div class="paragraph solo">
           <div class="row">
             <h3 class="label">Solo 1</h3>
@@ -164,7 +164,7 @@ describe('HtmlDivFormatter', () => {
             </div>
           </div>
         </div>
-
+        
         <div class="paragraph tab">
           <div class="row">
             <h3 class="label">Tab 1</h3>
@@ -356,7 +356,7 @@ describe('HtmlDivFormatter', () => {
             </div>
           </div>
         </div>
-
+        
         <div class="paragraph solo">
           <div class="row">
             <h3 class="label">Solo 1</h3>
@@ -374,7 +374,7 @@ describe('HtmlDivFormatter', () => {
             </div>
           </div>
         </div>
-
+        
         <div class="paragraph tab">
           <div class="row">
             <h3 class="label">Tab 1</h3>
@@ -1007,7 +1007,7 @@ describe('HtmlDivFormatter', () => {
             </div>
           </div>
         </div>
-
+        
         <div class="paragraph solo">
           <div class="row">
             <h3 class="label">Solo 1</h3>
@@ -1025,7 +1025,7 @@ describe('HtmlDivFormatter', () => {
             </div>
           </div>
         </div>
-
+        
         <div class="paragraph tab">
           <div class="row">
             <h3 class="label">Tab 1</h3>
