@@ -4635,6 +4635,24 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@puppeteer/browsers@npm:2.6.1":
+  version: 2.6.1
+  resolution: "@puppeteer/browsers@npm:2.6.1"
+  dependencies:
+    debug: "npm:^4.4.0"
+    extract-zip: "npm:^2.0.1"
+    progress: "npm:^2.0.3"
+    proxy-agent: "npm:^6.5.0"
+    semver: "npm:^7.6.3"
+    tar-fs: "npm:^3.0.6"
+    unbzip2-stream: "npm:^1.4.3"
+    yargs: "npm:^17.7.2"
+  bin:
+    browsers: lib/cjs/main-cli.js
+  checksum: 10c0/31d4951eec40515769467be3878d3581fe0e50227f2a9fa865e9f872e4a003262996c412a1d48d9c800665b3aa91bb1c2d971eaa314ef10e536d08e63f2f40d3
+  languageName: node
+  linkType: hard
+
 "@shikijs/engine-oniguruma@npm:^1.24.0":
   version: 1.24.0
   resolution: "@shikijs/engine-oniguruma@npm:1.24.0"
@@ -14142,6 +14160,20 @@ __metadata:
     typed-query-selector: "npm:^2.12.0"
     ws: "npm:^8.18.0"
   checksum: 10c0/62b512b57bd9849af58ef96234f6c84042ef07f666d7f2cdfedac417dc9961ffaa0099cd1591c16fa4e7e1ec815019b9fd5f4e5784681e998dc81bf67d843b89
+  languageName: node
+  linkType: hard
+
+"puppeteer-core@npm:23.10.3":
+  version: 23.10.3
+  resolution: "puppeteer-core@npm:23.10.3"
+  dependencies:
+    "@puppeteer/browsers": "npm:2.6.1"
+    chromium-bidi: "npm:0.8.0"
+    debug: "npm:^4.4.0"
+    devtools-protocol: "npm:0.0.1367902"
+    typed-query-selector: "npm:^2.12.0"
+    ws: "npm:^8.18.0"
+  checksum: 10c0/8ef0da85f0c057d45057a29c124f324867cdb55d3837ed3b825466d0e68269386423c46eafc26dfa3dc30ce09895de00893fedd7f4663e7e48d9de264c629113
   languageName: node
   linkType: hard
 
