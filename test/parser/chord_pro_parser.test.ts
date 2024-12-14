@@ -361,6 +361,17 @@ This part is [G]key
     expect(tag.isNegated).toBe(true);
   });
 
+  it('allows negated conditional directives', () => {
+    const chordSheet = '{title-guitar!: Guitar song}';
+    const song = new ChordProParser().parse(chordSheet);
+
+    const tag = song.lines[0].items[0] as Tag;
+
+    expect(tag).toBeTag('title', 'Guitar song', 'guitar');
+
+    expect(tag.isNegated).toBe(true);
+  });
+
   it('parses annotation', () => {
     const chordSheet = '[*Full band!]Let it be';
     const song = new ChordProParser().parse(chordSheet);

@@ -236,17 +236,6 @@ class ChordSheetSerializer {
     }
 
     return tag;
-
-    if (chordDefinition) {
-      tag.chordDefinition = new ChordDefinition(
-        chordDefinition.name,
-        chordDefinition.baseFret,
-        chordDefinition.frets,
-        chordDefinition.fingers,
-      );
-    }
-
-    return tag;
   }
 
   parseComment(astComponent: SerializedComment): Comment {
