@@ -197,6 +197,8 @@ class Tag extends AstComponent {
     this.attributes = { ...attributes };
     this.selector = selector;
     this.isNegated = isNegated;
+    this.selector = selector;
+    this.isNegated = isNegated;
   }
 
   private parseNameValue(name: string, value: string | null): void {
