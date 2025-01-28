@@ -963,4 +963,41 @@ Let it [Am]be
       expect(parser.warnings).toHaveLength(0);
     });
   });
+
+  it('adds uses label of part type section for line type', () => {
+    const markedChordSheet = heredoc`
+      {start_of_verse}
+      Let it [Am]be
+      {end_of_verse}
+      {start_of_part: Intro}
+      Let it [Am]be
+      {end_of_part}`;
+
+    const parser = new ChordProParser();
+    const song = parser.parse(markedChordSheet);
+    const lineTypes = song.lines.map((line) => line.type);
+
+    expect(lineTypes).toEqual([VERSE, VERSE, VERSE, 'intro', 'intro', 'intro']);
+    expect(parser.warnings).toHaveLength(0);
+  });
+
+  it('part short form can make verse and chord paragraph types', () => {
+    const markedChordSheet = heredoc`
+      {p: Intro (2x)}
+      [Gm][F]
+      {ep}
+      {p: Verse 1}
+      [Gm] This is the [F]first verse
+      {ep}
+      {p: Chorus 1 *2}
+      [Gm] This is the [F]first chorus
+      {ep}`;
+
+    const parser = new ChordProParser();
+    const song = parser.parse(markedChordSheet);
+    const lineTypes = song.lines.map((line) => line.type);
+
+    expect(lineTypes).toEqual(['intro', 'intro', 'intro', VERSE, VERSE, VERSE, CHORUS, CHORUS, CHORUS]);
+    expect(parser.warnings).toHaveLength(0);
+  });
 });
