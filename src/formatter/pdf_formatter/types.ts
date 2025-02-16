@@ -146,13 +146,15 @@ export interface LayoutContentItemWithImage extends ILayoutContentItem {
   rotation?: number,
 }
 
+export interface LineStyle {
+  color: string; // Color of the line (e.g., "black", "#000000")
+  width: number; // Line width in points
+  dash?: number[]; // Array for dash pattern, e.g., [2, 2] for dashed lines
+}
+
 export interface LayoutContentItemWithLine {
   type: 'line';
-  style: {
-      color: string; // Color of the line (e.g., "black", "#000000")
-      width: number; // Line width in points
-      dash?: number[]; // Array for dash pattern, e.g., [2, 2] for dashed lines
-  };
+  style: LineStyle;
   position: {
       x?: number;
       y: number;
@@ -237,9 +239,21 @@ export interface PdfDoc {
 
   addImage(options: ImageOptions): PdfDoc;
 
+  circle(x: number, y: number, r: number, style?: string | null): PdfDoc;
+
   getTextDimensions(text: string, options?: TextOptionsLight): { w: number; h: number };
 
   line(x1: number, y1: number, x2: number, y2: number, style?: string | null): PdfDoc;
+
+  roundedRect(
+    x: number,
+    y: number,
+    w: number,
+    h: number,
+    rx: number,
+    ry: number,
+    style?: string | null
+  ): PdfDoc;
 
   save(filename: string, options: { returnPromise: true }): Promise<void>;
   save(filename?: string): PdfDoc;
