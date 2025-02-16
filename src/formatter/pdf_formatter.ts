@@ -16,6 +16,7 @@ import defaultPDFConfiguration from './pdf_formatter/default_configuration';
 import { ChordLyricsPair, SoftLineBreak, Tag } from '../index';
 import { Fret } from '../constants';
 import { getCapos } from '../helpers';
+import Condition from './pdf_formatter/condition';
 
 import {
   isChordLyricsPair,
@@ -29,7 +30,6 @@ import {
 
 import {
   Alignment,
-  Condition,
   FontConfiguration,
   LayoutContentItem,
   LayoutContentItemWithImage,
@@ -112,6 +112,10 @@ class PdfFormatter extends Formatter {
 
     // Must render the footer and header after all formatting
     // to ensure the correct total number of pages
+    this.renderHeadersAndFooters();
+  }
+
+  private renderHeadersAndFooters() {
     for (let i = 1; i <= this.totalPages; i += 1) {
       this.currentPage = i;
       this.doc.setPage(i);
@@ -304,77 +308,15 @@ class PdfFormatter extends Formatter {
       return true;
     }
 
-    return this.evaluateCondition(contentItem.condition);
+    return new Condition(contentItem.condition, this.metadata).evaluate();
   }
 
-  private evaluateCondition(condition: Condition): boolean {
-    if ('and' in condition && Array.isArray(condition.and)) {
-      // All conditions in the 'and' array must be true
-      return condition.and.every((subCondition) => this.evaluateCondition(subCondition));
-    }
-
-    if ('or' in condition && Array.isArray(condition.or)) {
-      // At least one condition in the 'or' array must be true
-      return condition.or.some((subCondition) => this.evaluateCondition(subCondition));
-    }
-
-    // Evaluate a single condition
-    const [field, rule] = Object.entries(condition)[0];
-    const value = field === 'totalPages' ? this.totalPages : (this.song.metadata[field] ?? this[field]);
-
-    if (!rule) {
-      return false;
-    }
-
-    // Handle all supported conditions
-    if ('equals' in rule) {
-      return value === rule.equals;
-    }
-    if ('not_equals' in rule) {
-      return value !== rule.not_equals;
-    }
-    if ('greater_than' in rule) {
-      return typeof value === 'number' && value > rule.greater_than;
-    }
-    if ('greater_than_equal' in rule) {
-      return typeof value === 'number' && value >= rule.greater_than_equal;
-    }
-    if ('less_than' in rule) {
-      return typeof value === 'number' && value < rule.less_than;
-    }
-    if ('less_than_equal' in rule) {
-      return typeof value === 'number' && value <= rule.less_than_equal;
-    }
-    if ('like' in rule) {
-      return typeof value === 'string' && value.toLowerCase().includes(rule.like.toLowerCase());
-    }
-    if ('contains' in rule) {
-      return typeof value === 'string' && value.toLowerCase().includes(rule.contains.toLowerCase());
-    }
-    if ('in' in rule) {
-      return Array.isArray(rule.in) && rule.in.includes(value);
-    }
-    if ('not_in' in rule) {
-      return Array.isArray(rule.not_in) && !rule.not_in.includes(value);
-    }
-    if ('all' in rule) {
-      return Array.isArray(value) && rule.all.every((item: any) => value.includes(item));
-    }
-    if ('exists' in rule) {
-      return rule.exists ? value !== undefined : value === undefined;
-    }
-
-    // Check for first page condition
-    if ('first' in rule) {
-      return rule.first && this.currentPage === 1;
-    }
-
-    // Check for last page condition
-    if ('last' in rule) {
-      return rule.last && this.currentPage === this.totalPages;
-    }
-
-    return false;
+  private get metadata(): Record<string, any> {
+    return {
+      ...this.song.metadata.metadata,
+      page: this.currentPage,
+      pages: this.totalPages,
+    };
   }
 
   private renderTextItem(textItem: LayoutContentItemWithText, sectionY: number) {
