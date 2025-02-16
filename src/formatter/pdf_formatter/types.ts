@@ -1,9 +1,19 @@
 import {
-  ImageCompression, ImageOptions, jsPDFOptions, RGBAData, TextOptionsLight,
+  ImageCompression,
+  ImageOptions,
+  jsPDFOptions,
+  RGBAData,
+  TextOptionsLight,
 } from 'jspdf';
+
 import {
-  ChordLyricsPair, Comment, Line, SoftLineBreak, Tag,
+  ChordLyricsPair,
+  Comment,
+  Line,
+  SoftLineBreak,
+  Tag,
 } from '../../index';
+
 import Item from '../../chord_sheet/item';
 import { ParagraphType } from '../../constants';
 
@@ -11,14 +21,29 @@ type FontSection = 'title' | 'subtitle' | 'metadata' | 'text' | 'chord' | 'comme
 export type LayoutSection = 'header' | 'footer';
 export type Alignment = 'left' | 'center' | 'right';
 
-type SingleCondition = Record<string, {
+export type ConditionRule = Partial<{
+  equals: any;
+  not_equals: any;
+  greater_than: number;
+  greater_than_equal: number;
+  less_than: number;
+  less_than_equal: number;
+  like: string;
+  contains: string;
+  in: any[];
+  not_in: any[];
+  all: any[];
   exists: boolean;
+  first: boolean;
+  last: boolean;
 }>;
 
-export type Condition = {
-and?: Condition[];
-or?: Condition[];
-} | SingleCondition;
+export type SingleCondition = Record<string, ConditionRule>;
+
+export type ConditionalRule = Partial<{
+  and: SingleCondition[];
+  or: SingleCondition[];
+}> | SingleCondition;
 
 export interface Margins {
   top: number;
@@ -44,7 +69,7 @@ interface Dimension {
 interface ILayoutContentItem {
   type: string,
   position: Position,
-  condition?: Condition,
+  condition?: ConditionalRule,
 }
 
 export interface FontConfiguration {
@@ -72,7 +97,7 @@ export interface SectionTypeConfig {
   fonts?: FontConfigurations;
   display?: SectionDisplay;
   overrides?: {
-    condition: Condition;
+    condition: ConditionalRule;
     display: Partial<SectionDisplay>;
   }[];
 }
@@ -134,7 +159,7 @@ export interface LayoutContentItemWithLine {
       width: number | 'auto';
       height?: number;
   };
-  condition?: Condition;
+  condition?: ConditionalRule;
 }
 
 export type LayoutContentItem =
