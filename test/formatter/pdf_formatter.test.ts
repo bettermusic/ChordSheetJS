@@ -10,7 +10,7 @@ describe('PdfFormatter', () => {
     const formatter = new PdfFormatter();
     const config = configure({});
     formatter.format(exampleSongSymbol, config, defaultConfiguration, StubbedPdfDoc);
-    const doc = formatter.doc as StubbedPdfDoc;
+    const doc = formatter.doc.doc as StubbedPdfDoc;
 
     expect(doc).toHaveText('Written by: ', 45, 95);
     expect(doc).toHaveText('Verse 1', 45, 119);

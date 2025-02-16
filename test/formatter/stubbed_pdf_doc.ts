@@ -44,12 +44,23 @@ export interface RenderedLine {
 }
 
 export interface RenderedRect {
-  type: 'rect',
-  x: number,
-  y: number,
-  width: number,
-  height: number,
-  style?: string | null,
+  type: 'rect';
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+  style?: string | null;
+}
+
+export interface RenderedRoundedRect {
+  type: 'roundedRect';
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+  rx: number;
+  ry: number;
+  style?: string | null;
 }
 
 export interface RenderedText {
@@ -66,7 +77,13 @@ export interface RenderedText {
   color: RenderColor;
 }
 
-export type RenderedItem = RenderedCircle | RenderedLine | RenderedImage | RenderedRect | RenderedText;
+export type RenderedItem =
+  RenderedCircle |
+  RenderedLine |
+  RenderedImage |
+  RenderedRect |
+  RenderedRoundedRect |
+  RenderedText;
 
 class StubbedPdfDoc {
   drawColor: RenderColor = '0 G';
@@ -265,6 +282,29 @@ class StubbedPdfDoc {
       y: Math.round(y),
       width: Math.round(width),
       height: Math.round(height),
+      style,
+    });
+
+    return this;
+  }
+
+  roundedRect(
+    x: number,
+    y: number,
+    w: number,
+    h: number,
+    rx: number,
+    ry: number,
+    style?: string | null,
+  ): StubbedPdfDoc {
+    this.renderedItems.push({
+      type: 'roundedRect',
+      x: Math.round(x),
+      y: Math.round(y),
+      rx,
+      ry,
+      width: Math.round(w),
+      height: Math.round(h),
       style,
     });
 

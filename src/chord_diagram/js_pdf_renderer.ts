@@ -1,14 +1,14 @@
-import JsPDF from 'jspdf';
-
 import {
   DimensionOpts, FillOpts, PositionOpts, RadiusOpts, Renderer, SizeOpts, ThicknessOpts,
 } from './renderer';
+
+import DocWrapper from '../formatter/pdf_formatter/doc_wrapper';
 
 const defaultWidth = 272;
 const defaultHeight = 568;
 
 class JsPDFRenderer implements Renderer {
-  doc: JsPDF;
+  doc: DocWrapper;
 
   readonly #x: number;
 
@@ -20,7 +20,7 @@ class JsPDFRenderer implements Renderer {
 
   width: number;
 
-  constructor(doc: JsPDF, { x, y, width }: { x: number; y: number, width: number }) {
+  constructor(doc: DocWrapper, { x, y, width }: { x: number; y: number, width: number }) {
     this.doc = doc;
     this.#x = x;
     this.#y = y;
@@ -49,7 +49,7 @@ class JsPDFRenderer implements Renderer {
     x, y, size, fill, thickness,
   }: FillOpts & PositionOpts & SizeOpts & ThicknessOpts) {
     this.withLineWidth(thickness, () => {
-      this.withDrawColor(0, () => {
+      this.doc.withDrawColor(0, () => {
         this.doc.circle(this.tx(x), this.ty(y), this.scale(size / 2), fill ? 'F' : 'S');
       });
     });
@@ -59,7 +59,7 @@ class JsPDFRenderer implements Renderer {
     x1, y1, x2, y2, thickness,
   }: { x1: number, y1: number, x2: number, y2: number } & ThicknessOpts) {
     this.withLineWidth(thickness, () => {
-      this.withDrawColor(0, () => {
+      this.doc.withDrawColor(0, () => {
         this.doc.line(this.tx(x1), this.ty(y1), this.tx(x2), this.ty(y2));
       });
     });
@@ -69,7 +69,7 @@ class JsPDFRenderer implements Renderer {
     x, y, width, height, fill, thickness, radius,
   }: DimensionOpts & FillOpts & PositionOpts & RadiusOpts & ThicknessOpts) {
     this.withLineWidth(thickness, () => {
-      this.withDrawColor(0, () => {
+      this.doc.withDrawColor(0, () => {
         this.doc.roundedRect(
           this.tx(x),
           this.ty(y),
@@ -90,32 +90,12 @@ class JsPDFRenderer implements Renderer {
     });
   }
 
-  withDrawColor(drawColor: number, callback: () => void) {
-    const previousDrawColor = this.doc.getDrawColor();
-    this.doc.setDrawColor(drawColor);
-    callback();
-    this.doc.setDrawColor(previousDrawColor);
-  }
-
-  withFillColor(fillColor: string, callback: () => void) {
-    const previousFillColor = this.doc.getFillColor();
-    this.doc.setFillColor(fillColor);
-    callback();
-    this.doc.setFillColor(previousFillColor);
-  }
-
   withFontSize(fontSize: number, callback: () => void) {
-    const previousFontSize = this.doc.getFontSize();
-    this.doc.setFontSize(this.scale(fontSize));
-    callback();
-    this.doc.setFontSize(previousFontSize);
+    this.doc.withFontSize(this.scale(fontSize), callback);
   }
 
   withLineWidth(lineWidth: number, callback: () => void) {
-    const previousLineWidth = this.doc.getLineWidth();
-    this.doc.setLineWidth(this.scale(lineWidth));
-    callback();
-    this.doc.setLineWidth(previousLineWidth);
+    this.doc.withLineWidth(this.scale(lineWidth), callback);
   }
 }
 
