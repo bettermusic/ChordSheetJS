@@ -812,7 +812,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@bettermusic/chordsheetjs@workspace:."
   dependencies:
-    "@eslint/core": "npm:^0.11.0"
+    "@eslint/core": "npm:^0.12.0"
     "@eslint/js": "npm:^9.20.0"
     "@martijnversluis/unibuild": "npm:1.3.0"
     "@parcel/packager-ts": "npm:^2.13.3"
@@ -1079,6 +1079,15 @@ __metadata:
   dependencies:
     "@types/json-schema": "npm:^7.0.15"
   checksum: 10c0/1e0671d035c908175f445864a7864cf6c6a8b67a5dfba8c47b2ac91e2d3ed36e8c1f2fd81d98a73264f8677055559699d4adb0f97d86588e616fc0dc9a4b86c9
+  languageName: node
+  linkType: hard
+
+"@eslint/core@npm:^0.12.0":
+  version: 0.12.0
+  resolution: "@eslint/core@npm:0.12.0"
+  dependencies:
+    "@types/json-schema": "npm:^7.0.15"
+  checksum: 10c0/d032af81195bb28dd800c2b9617548c6c2a09b9490da3c5537fd2a1201501666d06492278bb92cfccac1f7ac249e58601dd87f813ec0d6a423ef0880434fa0c3
   languageName: node
   linkType: hard
 
