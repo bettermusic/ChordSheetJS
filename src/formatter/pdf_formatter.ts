@@ -130,10 +130,16 @@ class PdfFormatter extends Formatter {
 
   newPage() {
     this.doc.newPage();
+    this.currentColumn = 1;
+    this.x = this.dimensions.minX;
     this.y = this.dimensions.minY;
   }
 
   renderChordDiagrams() {
+    if (this.currentColumn > 1) {
+      this.newPage();
+    }
+
     this.x = this.dimensions.minX;
     const chordDiagramWidth = 60;
     const chordDiagramHeight = JsPDFRenderer.calculateHeight(chordDiagramWidth);
