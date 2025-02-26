@@ -165,13 +165,9 @@ export const configExamples = [
                 y: 50,
               },
               condition: {
-                and: [
-                  {
-                    pages: {
-                      greater_than: 1,
-                    },
-                  },
-                ],
+                pages: {
+                  greater_than: 1,
+                },
               },
             },
             {
@@ -209,13 +205,9 @@ export const configExamples = [
                 width: 360,
               },
               condition: {
-                and: [
-                  {
-                    page: {
-                      first: true,
-                    },
-                  },
-                ],
+                page: {
+                  first: true,
+                },
               },
             },
           ],
@@ -402,13 +394,9 @@ export const configExamples = [
                 y: 50,
               },
               condition: {
-                and: [
-                  {
-                    pages: {
-                      greater_than: 1,
-                    },
-                  },
-                ],
+                pages: {
+                  greater_than: 1,
+                },
               },
             },
             {
@@ -446,13 +434,9 @@ export const configExamples = [
                 width: 360,
               },
               condition: {
-                and: [
-                  {
-                    page: {
-                      first: true,
-                    },
-                  },
-                ],
+                page: {
+                  first: true,
+                },
               },
             },
             {
@@ -646,13 +630,9 @@ export const configExamples = [
                 y: 50,
               },
               condition: {
-                and: [
-                  {
-                    pages: {
-                      greater_than: 1,
-                    },
-                  },
-                ],
+                pages: {
+                  greater_than: 1,
+                },
               },
             },
             {
@@ -690,13 +670,9 @@ export const configExamples = [
                 width: 360,
               },
               condition: {
-                and: [
-                  {
-                    page: {
-                      first: true,
-                    },
-                  },
-                ],
+                page: {
+                  first: true,
+                },
               },
             },
           ],
@@ -883,13 +859,9 @@ export const configExamples = [
                 y: 50,
               },
               condition: {
-                and: [
-                  {
-                    pages: {
-                      greater_than: 1,
-                    },
-                  },
-                ],
+                pages: {
+                  greater_than: 1,
+                },
               },
             },
             {
@@ -927,13 +899,9 @@ export const configExamples = [
                 width: 360,
               },
               condition: {
-                and: [
-                  {
-                    page: {
-                      first: true,
-                    },
-                  },
-                ],
+                page: {
+                  first: true,
+                },
               },
             },
           ],
