@@ -153,7 +153,7 @@ export const configExamples = [
             },
             {
               type: 'text',
-              template: 'Page %{currentPage} of %{totalPages}',
+              template: 'Page %{page} of %{pages}',
               style: {
                 name: 'NimbusSansL-Reg',
                 style: 'normal',
@@ -167,7 +167,7 @@ export const configExamples = [
               condition: {
                 and: [
                   {
-                    totalPages: {
+                    pages: {
                       greater_than: 1,
                     },
                   },
@@ -390,7 +390,7 @@ export const configExamples = [
             },
             {
               type: 'text',
-              template: 'Page %{currentPage} of %{totalPages}',
+              template: 'Page %{page} of %{pages}',
               style: {
                 name: 'NimbusSansL-Reg',
                 style: 'normal',
@@ -404,7 +404,7 @@ export const configExamples = [
               condition: {
                 and: [
                   {
-                    totalPages: {
+                    pages: {
                       greater_than: 1,
                     },
                   },
@@ -634,7 +634,7 @@ export const configExamples = [
             },
             {
               type: 'text',
-              template: 'Page %{currentPage} of %{totalPages}',
+              template: 'Page %{page} of %{pages}',
               style: {
                 name: 'NimbusSansL-Reg',
                 style: 'normal',
@@ -648,7 +648,7 @@ export const configExamples = [
               condition: {
                 and: [
                   {
-                    totalPages: {
+                    pages: {
                       greater_than: 1,
                     },
                   },
@@ -871,7 +871,7 @@ export const configExamples = [
             },
             {
               type: 'text',
-              template: 'Page %{currentPage} of %{totalPages}',
+              template: 'Page %{page} of %{pages}',
               style: {
                 name: 'NimbusSansL-Reg',
                 style: 'normal',
@@ -885,7 +885,7 @@ export const configExamples = [
               condition: {
                 and: [
                   {
-                    totalPages: {
+                    pages: {
                       greater_than: 1,
                     },
                   },
