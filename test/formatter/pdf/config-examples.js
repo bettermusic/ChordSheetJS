@@ -120,7 +120,7 @@ export const configExamples = [
             },
             {
               type: 'text',
-              template: '%{key|Key: %{}} · %{capo|Capo: %{capoKey}} · %{tempo|Tempo: %{}} · %{time|Time: %{}}',
+              template: '%{key|Key: %{}} %{capo|· Capo: %{capoKey}} %{tempo|· Tempo: %{}} %{time|· Time: %{}}',
               style: {
                 name: 'NimbusSansL-Reg',
                 style: 'normal',
@@ -349,7 +349,7 @@ export const configExamples = [
             },
             {
               type: 'text',
-              template: '%{key|Key: %{}} · %{capo|Capo: %{capoKey}} · %{tempo|Tempo: %{}} · %{time|Time: %{}}',
+              template: '%{key|Key: %{}} %{capo|· Capo: %{capoKey}} %{tempo|· Tempo: %{}} %{time|· Time: %{}}',
               style: {
                 name: 'NimbusSansL-Reg',
                 style: 'normal',
@@ -585,7 +585,7 @@ export const configExamples = [
             },
             {
               type: 'text',
-              template: '%{key|Key: %{}} · %{capo|Capo: %{capoKey}} · %{tempo|Tempo: %{}} · %{time|Time: %{}}',
+              template: '%{key|Key: %{}} %{capo|· Capo: %{capoKey}} %{tempo|· Tempo: %{}} %{time|· Time: %{}}',
               style: {
                 name: 'NimbusSansL-Reg',
                 style: 'normal',
@@ -814,7 +814,7 @@ export const configExamples = [
             },
             {
               type: 'text',
-              template: '%{key|Key: %{}} · %{capo|Capo: %{capoKey}} · %{tempo|Tempo: %{}} · %{time|Time: %{}}',
+              template: '%{key|Key: %{}} %{capo|· Capo: %{capoKey}} %{tempo|· Tempo: %{}} %{time|· Time: %{}}',
               style: {
                 name: 'NimbusSansL-Reg',
                 style: 'normal',
