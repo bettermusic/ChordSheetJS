@@ -102,7 +102,7 @@ const updatePDF = async (key, capo) => {
   const selectedExampleIndex = parseInt(chordproSelect.value);
   const selectedExample = allExamples[selectedExampleIndex];
   const configText = configEditor.getValue();
-  
+
   if (!configText.trim()) {
     return;
   }
@@ -117,7 +117,7 @@ const updatePDF = async (key, capo) => {
 
   try {
     let song;
-    
+
     // Check if this example is a pre-defined Song object
     if (selectedExample.songObject) {
       song = selectedExample.songObject;
@@ -125,10 +125,10 @@ const updatePDF = async (key, capo) => {
       try {
         // This displays a basic representation of the song for reference
         const songTags = [];
-        
+
         if (song.title) songTags.push(`{title: ${song.title}}`);
         if (song.key) songTags.push(`{key: ${song.key}}`);
-        
+
         // Extract sections and content
         let displayContent = '';
         song.sections.forEach(section => {
@@ -142,7 +142,7 @@ const updatePDF = async (key, capo) => {
           });
           displayContent += `{end_of_${section.type}}\n\n`;
         });
-        
+
         editor.setValue(songTags.join('\n') + '\n\n' + displayContent);
         editor.setOption('readOnly', true);
       } catch (e) {
@@ -195,7 +195,7 @@ const updatePDF = async (key, capo) => {
 // Function to load example (ChordPro text or Song object)
 function loadExample(index) {
   const example = allExamples[index];
-  
+
   // Update the editor content
   if (example.songObject) {
     // For Song objects, set a placeholder message
@@ -206,7 +206,7 @@ function loadExample(index) {
     editor.setValue(example.content);
     editor.setOption('readOnly', false);
   }
-  
+
   updatePDF();
 }
 
