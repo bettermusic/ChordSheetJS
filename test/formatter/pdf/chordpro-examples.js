@@ -1,6 +1,13 @@
 /* eslint-disable max-len */
 export const chordproExamples = [
   {
+    name: 'Goodness of God',
+    content: `{t:Test}
+    {key: G}
+[G]In the forest deep and dark, [D]whispers float and fire sparks
+[Em]Soft and slow, [C]soft and slow`,
+  },
+  {
     name: 'Kingdom',
     content: `{title: Kingdom}
 {subtitle: (feat. Naomi Raine & Chandler Moore)}

@@ -3,35 +3,101 @@
 <head>
     <meta charset="UTF-8">
     <title>Chordsheet Editor</title>
-    <!-- CodeMirror CSS -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/codemirror.min.css">
-    <!-- CodeMirror JS and necessary modes/plugins -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/codemirror.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/javascript/javascript.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/json/json.min.js"></script>
     <style>
         #editors { height: 98vh; width: 49%; float: left; }
-        #pdfViewer { height: 98vh; width: 49%; float: right; }
-        #editor, #configEditor {
-            border: 1px solid #ccc;
-            margin-top: 10px;
-        }
-        .dropdown-container {
+        #viewer { height: 98vh; width: 49%; float: right; overflow: auto; }
+        #editor, #configEditor { border: 1px solid #ccc; margin-top: 10px; }
+        .dropdown-container { display: flex; align-items: center; gap: 10px; margin-bottom: 5px; }
+        .key-controls { margin-left: auto; display: flex; align-items: center; gap: 10px; }
+        #textViewer { 
+            white-space: pre-wrap; 
+            font-family: monospace; 
+            padding: 10px; 
+            padding: 0 16px;
+            margin: 0;
+            overflow-y: auto;
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif !important;
+            color: var(--studio-gray-800);
+            background-color: var(--studio-gray-50);
+            height: 100%;
+            border-bottom-right-radius: 0.5rem/* 8px */;
+            border-bottom-width: 1px;
+            border-color: var(--studio-gray-300);
+            border-left-width: 1px;
+            border-right-width: 1px;
             display: flex;
-            align-items: center;
-            gap: 10px;
-            margin-bottom: 5px;
+            flex-direction: column;
         }
-        .key-controls {
-            margin-left: auto;
+
+        -webkit-scrollbar {
+            display: none;
+        }
+
+        .comment {
+            font-weight: bold;
+            padding-top: .5rem;
+            text-decoration: underline;
+            text-underline-offset: 0.2rem;
+            color: #ba4839;
+        }
+
+        .chord-sheet {
             display: flex;
-            align-items: center;
-            gap: 10px;
+            flex-direction: column;
+            height: 93%;
+            column-gap: 1em;
+            row-gap: 0rem;
+            flex-wrap: wrap;
         }
+
+
+        .paragraph {
+            display: inline-flex;
+            flex-direction: column;
+            flex: 0 1 auto;
+            flex-wrap: nowrap;
+        }
+
+        .row {
+            display: flex;
+            flex-direction: row;
+            justify-content: flex-start;
+            flex-wrap: nowrap;
+            padding-top: 0.3rem;
+            padding-bottom: 0.3rem;
+        }
+
+        .column {
+            display: inline-flex;
+            flex-direction: column;
+            justify-content: space-between;
+            white-space: pre;
+        }
+
+        .chord {
+            color: #0481aa;
+            font-weight: 700;
+        }
+        
     </style>
 </head>
 <body style="height: 100%;">
     <div id="editors">
+        <div class="dropdown-container">
+            <label for="formatterSelect">Formatter: </label>
+            <select id="formatterSelect">
+                <option value="PdfFormatter">PDF</option>
+                <option value="HtmlDivFormatter">HTML Div</option>
+                <option value="HtmlTableFormatter">HTML Table</option>
+                <option value="TextFormatter">Text</option>
+                <option value="ChordProFormatter">ChordPro</option>
+                <option value="ChordsOverWordsFormatter">Chords Over Words</option>
+            </select>
+        </div>
         <div id="chordproEditorContainer">
             <div class="dropdown-container">
                 <label for="chordproSelect">ChordPro File: </label>
@@ -40,9 +106,7 @@
                     <label for="keySelect">Key: </label>
                     <select id="keySelect"></select>
                     <label for="capoSelect">Capo: </label>
-                    <select id="capoSelect">
-                        <option value="none">None</option>
-                    </select>
+                    <select id="capoSelect"><option value="none">None</option></select>
                 </div>
             </div>
             <div id="editor" class="readonly"></div>
@@ -55,7 +119,10 @@
             <div id="configEditor" class="readonly"></div>
         </div>
     </div>
-    <div id="pdfViewer"></div>
+    <div id="viewer">
+        <iframe id="pdfViewer" style="width: 100%; height: 100%; display: none;"></iframe>
+        <div id="textViewer" style="display: none;"></div>
+    </div>
     <script type="module" src="./pdf-dev.js"></script>
 </body>
 </html>
