@@ -41,7 +41,8 @@ class Dimensions {
 
     const availableSpace = this.pageWidth - this.margins.left - this.margins.right;
     const totalColumnSpacing = (columnCount - 1) * columnSpacing;
-    return (availableSpace - totalColumnSpacing) / columnCount;
+    const columnWidth = (availableSpace - totalColumnSpacing) / columnCount;
+    return columnWidth;
   }
 }
 

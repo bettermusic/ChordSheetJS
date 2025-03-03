@@ -108,28 +108,11 @@ const updateOutput = async (key, capo) => {
     let song;
     if (selectedExample.songObject) {
       song = selectedExample.songObject;
-      const songTags = [];
-      if (song.title) songTags.push(`{title: ${song.title}}`);
-      if (song.key) songTags.push(`{key: ${song.key}}`);
-      let displayContent = '';
-      song.sections.forEach(section => {
-        displayContent += `{start_of_${section.type}: ${section.name || ''}}\n`;
-        section.lines.forEach(line => {
-          const lineContent = line.items.map(item => {
-            if (item.chords) return `[${item.chords}]${item.lyrics || ''}`;
-            return item.lyrics || '';
-          }).join('');
-          displayContent += lineContent + '\n';
-        });
-        displayContent += `{end_of_${section.type}}\n\n`;
-      });
-      editor.setValue(songTags.join('\n') + '\n\n' + displayContent);
       editor.setOption('readOnly', true);
     } else {
       const chordProText = editor.getValue();
       if (!chordProText.trim()) return;
       song = new ChordProParser().parse(chordProText, { softLineBreaks: true });
-      console.log(song);
       editor.setOption('readOnly', false);
     }
 

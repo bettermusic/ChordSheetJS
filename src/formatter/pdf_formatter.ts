@@ -7,13 +7,17 @@ import ChordDiagram, { Barre, StringMarker } from '../chord_diagram/chord_diagra
 import Configuration, { defaultConfiguration } from './configuration';
 import Dimensions from './pdf_formatter/dimensions';
 import Formatter from './formatter';
-import Item from '../chord_sheet/item';
 import JsPDFRenderer from '../chord_diagram/js_pdf_renderer';
 import Line from '../chord_sheet/line';
 import Paragraph from '../chord_sheet/paragraph';
 import Song from '../chord_sheet/song';
 import defaultPDFConfiguration from './pdf_formatter/default_configuration';
-import { ChordLyricsPair, SoftLineBreak, Tag } from '../index';
+import {
+  ChordLyricsPair,
+  JsPdfMeasurer,
+  SoftLineBreak,
+  Tag,
+} from '../index';
 import {
   FingerNumber,
   Fret,
@@ -24,11 +28,8 @@ import { getCapos } from '../helpers';
 import Condition from './pdf_formatter/condition';
 
 import {
-  isChordLyricsPair,
   isColumnBreak,
   isComment,
-  isSoftLineBreak,
-  isTag,
   lineHasContents,
   renderChord,
 } from '../template_helpers';
@@ -42,16 +43,17 @@ import {
   LayoutContentItemWithText,
   LayoutItem,
   LayoutSection,
-  LineLayout,
   Margins,
   MeasuredItem,
   PDFConfiguration,
   PdfConstructor,
 } from './pdf_formatter/types';
+
 import DocWrapper from './pdf_formatter/doc_wrapper';
 import ChordProParser from '../parser/chord_pro_parser';
 import TextFormatter from './text_formatter';
 import Metadata from '../chord_sheet/metadata';
+import { LayoutConfig, LayoutEngine, LineLayout } from './layout/layout_engine';
 
 declare const performance: Performance;
 
@@ -80,13 +82,19 @@ class PdfFormatter extends Formatter {
 
   _dimensions: Dimensions | null = null;
 
+  _dimensionCacheKey: string | null = null;
+
   renderTime = 0;
 
   songMetadata: Record<string, string | string[]> = {};
 
+  layoutEngine: LayoutEngine|null = null;
+
   get dimensions(): Dimensions {
-    if (!this._dimensions) {
+    const currentKey = this.generateDimensionCacheKey();
+    if (this._dimensionCacheKey !== currentKey || this._dimensions === null) {
       this._dimensions = this.buildDimensions();
+      this._dimensionCacheKey = currentKey;
     }
     return this._dimensions;
   }
@@ -104,6 +112,22 @@ class PdfFormatter extends Formatter {
     this.configuration = configuration;
     this.pdfConfiguration = pdfConfiguration;
     this.doc = DocWrapper.setup(docConstructor);
+
+    const layoutConfig: LayoutConfig = {
+      width: this.dimensions.columnWidth,
+      fonts: {
+        chord: this.pdfConfiguration.fonts.chord,
+        lyrics: this.pdfConfiguration.fonts.text,
+        comment: this.pdfConfiguration.fonts.comment,
+        sectionLabel: this.pdfConfiguration.fonts.sectionLabel,
+      },
+      chordSpacing: this.pdfConfiguration.layout.sections.global.chordSpacing,
+      chordLyricSpacing: this.pdfConfiguration.layout.sections.global.chordLyricSpacing,
+      linePadding: this.pdfConfiguration.layout.sections.global.linePadding,
+      useUnicodeModifiers: this.configuration.useUnicodeModifiers,
+      normalizeChords: this.configuration.normalizeChords,
+    };
+    this.layoutEngine = new LayoutEngine(this.song, new JsPdfMeasurer(this.doc), layoutConfig);
 
     this.y = this.dimensions.minY;
     this.x = this.dimensions.minX;
@@ -145,7 +169,6 @@ class PdfFormatter extends Formatter {
       renderingConfig,
       enabled,
       fonts,
-      definitions = { hiddenChords: [] },
       overrides = { global: {}, byKey: {} },
     } = this.pdfConfiguration.layout.chordDiagrams;
 
@@ -156,13 +179,12 @@ class PdfFormatter extends Formatter {
     const diagramSpacing = renderingConfig?.diagramSpacing || 7;
     const maxDiagramsPerRow = renderingConfig?.maxDiagramsPerRow || null;
 
-    const { columnCount } = this.pdfConfiguration.layout.sections.global;
     const { columnWidth } = this.dimensions;
     const yMargin = diagramSpacing; // Vertical spacing
 
     // Define minimum and maximum widths for readability
     const minChordDiagramWidth = 30; // Minimum width for legibility
-    const maxChordDiagramWidth = 50; // Maximum width to prevent excessive growth
+    const maxChordDiagramWidth = 35; // Maximum width to prevent excessive growth
 
     // Estimate how many diagrams can fit per row, considering spacing
     const potentialDiagramsPerRow = Math.floor(columnWidth / (minChordDiagramWidth + diagramSpacing));
@@ -191,129 +213,70 @@ class PdfFormatter extends Formatter {
 
     const songKey = this.song.key || 0;
 
-    if (columnCount === 1) {
-      // Single-column: stack vertically
-      this.chordDefinitions.forEach((chordDefinitionFromSong: ChordDefinition) => {
-        let chordDefinition = chordDefinitionFromSong;
-        const chordName = chordDefinition.name;
+    // Multi-column: wrap horizontally with dynamic width
+    let diagramsInRow = 0;
+    this.chordDefinitions.forEach((chordDefinitionFromSong: ChordDefinition) => {
+      let chordDefinition = chordDefinitionFromSong;
+      const chordName = chordDefinition.name;
 
-        // Check for overrides, prioritizing key-specific > global > defaults
-        let shouldHide = definitions.hiddenChords.includes(chordName);
-        let customDefinition: string|null = null;
+      // Check for overrides, prioritizing key-specific > global > defaults
+      let shouldHide = false;
+      let customDefinition: string|null = null;
 
-        // Check key-specific overrides first
-        if (overrides?.byKey?.[songKey]?.[chordName]) {
-          const keyOverride = overrides.byKey[songKey][chordName];
-          if (keyOverride.hide !== undefined) {
-            shouldHide = keyOverride.hide;
+      // Check key-specific overrides first
+      if (overrides?.byKey?.[songKey]?.[chordName]) {
+        const keyOverride = overrides.byKey[songKey][chordName];
+        if (keyOverride.hide !== undefined) {
+          shouldHide = keyOverride.hide;
+        }
+        if (keyOverride.definition) {
+          customDefinition = keyOverride.definition;
+        }
+      }
+
+      // Fall back to global overrides if no key-specific override exists or if byKey[songKey] is undefined
+      if (!overrides?.byKey?.[songKey]?.[chordName]) {
+        if (overrides?.global?.[chordName]) {
+          const globalOverride = overrides.global[chordName];
+          if (globalOverride.hide !== undefined) {
+            shouldHide = globalOverride.hide;
           }
-          if (keyOverride.definition) {
-            customDefinition = keyOverride.definition;
+          if (globalOverride.definition) {
+            customDefinition = globalOverride.definition;
           }
         }
+      }
 
-        // Fall back to global overrides if no key-specific override exists or if byKey[songKey] is undefined
-        if (!overrides?.byKey?.[songKey]?.[chordName]) {
-          if (overrides?.global?.[chordName]) {
-            const globalOverride = overrides.global[chordName];
-            if (globalOverride.hide !== undefined) {
-              shouldHide = globalOverride.hide;
-            }
-            if (globalOverride.definition) {
-              customDefinition = globalOverride.definition;
-            }
-          }
-        }
+      if (shouldHide) {
+        return;
+      }
 
-        if (shouldHide) {
-          return;
-        }
+      if (customDefinition) {
+        chordDefinition = ChordDefinition.parse(customDefinition);
+      }
 
-        if (customDefinition) {
-          chordDefinition = ChordDefinition.parse(customDefinition); // Assume this method exists
-        }
-
-        if (this.y + chordDiagramHeight > currentPageBottom) {
-          this.newPage();
-          this.y = this.dimensions.minY;
-          this.x = this.columnStartX();
-        }
-        const chordDiagram = this.buildChordDiagram(chordDefinition);
-        const renderer = new JsPDFRenderer(this.doc, {
-          x: this.x,
-          y: this.y,
-          width: chordDiagramWidth,
-          fonts,
-        });
-        chordDiagram.render(renderer);
+      if (diagramsInRow >= diagramsPerRow || this.x + chordDiagramWidth > this.columnStartX() + columnWidth) {
         this.y += chordDiagramHeight + yMargin;
+        this.x = this.columnStartX();
+        diagramsInRow = 0;
+      }
+      if (this.y + chordDiagramHeight > currentPageBottom) {
+        this.moveToNextColumn();
+        this.y = this.dimensions.minY;
+        this.x = this.columnStartX();
+        diagramsInRow = 0;
+      }
+      const chordDiagram = this.buildChordDiagram(chordDefinition);
+      const renderer = new JsPDFRenderer(this.doc, {
+        x: this.x,
+        y: this.y,
+        width: chordDiagramWidth,
+        fonts,
       });
-    } else {
-      // Multi-column: wrap horizontally with dynamic width
-      let diagramsInRow = 0;
-      this.chordDefinitions.forEach((chordDefinitionFromSong: ChordDefinition) => {
-        let chordDefinition = chordDefinitionFromSong;
-        const chordName = chordDefinition.name;
-
-        // Check for overrides, prioritizing key-specific > global > defaults
-        let shouldHide = false;
-        let customDefinition: string|null = null;
-
-        // Check key-specific overrides first
-        if (overrides?.byKey?.[songKey]?.[chordName]) {
-          const keyOverride = overrides.byKey[songKey][chordName];
-          if (keyOverride.hide !== undefined) {
-            shouldHide = keyOverride.hide;
-          }
-          if (keyOverride.definition) {
-            customDefinition = keyOverride.definition;
-          }
-        }
-
-        // Fall back to global overrides if no key-specific override exists or if byKey[songKey] is undefined
-        if (!overrides?.byKey?.[songKey]?.[chordName]) {
-          if (overrides?.global?.[chordName]) {
-            const globalOverride = overrides.global[chordName];
-            if (globalOverride.hide !== undefined) {
-              shouldHide = globalOverride.hide;
-            }
-            if (globalOverride.definition) {
-              customDefinition = globalOverride.definition;
-            }
-          }
-        }
-
-        if (shouldHide) {
-          return;
-        }
-
-        if (customDefinition) {
-          chordDefinition = ChordDefinition.parse(customDefinition);
-        }
-
-        if (diagramsInRow >= diagramsPerRow || this.x + chordDiagramWidth > this.columnStartX() + columnWidth) {
-          this.y += chordDiagramHeight + yMargin;
-          this.x = this.columnStartX();
-          diagramsInRow = 0;
-        }
-        if (this.y + chordDiagramHeight > currentPageBottom) {
-          this.moveToNextColumn();
-          this.y = this.dimensions.minY;
-          this.x = this.columnStartX();
-          diagramsInRow = 0;
-        }
-        const chordDiagram = this.buildChordDiagram(chordDefinition);
-        const renderer = new JsPDFRenderer(this.doc, {
-          x: this.x,
-          y: this.y,
-          width: chordDiagramWidth,
-          fonts,
-        });
-        chordDiagram.render(renderer);
-        this.x += chordDiagramWidth + diagramSpacing;
-        diagramsInRow += 1;
-      });
-    }
+      chordDiagram.render(renderer);
+      this.x += chordDiagramWidth + diagramSpacing;
+      diagramsInRow += 1;
+    });
   }
 
   buildChordDiagram(chordDefinition: ChordDefinition): ChordDiagram {
@@ -431,7 +394,26 @@ class PdfFormatter extends Formatter {
   buildDimensions() {
     const { width, height } = this.doc.pageSize;
     const { columnCount, columnSpacing } = this.pdfConfiguration.layout.sections.global;
+
     return new Dimensions(width, height, this.pdfConfiguration.layout, { columnCount, columnSpacing });
+  }
+
+  private generateDimensionCacheKey(): string {
+    const { width, height } = this.doc.pageSize;
+    const { layout } = this.pdfConfiguration;
+    const { global } = layout.sections;
+
+    return [
+      width,
+      height,
+      layout.global.margins.left,
+      layout.global.margins.right,
+      layout.global.margins.top,
+      layout.global.margins.bottom,
+      layout.header.height,
+      global.columnCount,
+      global.columnSpacing,
+    ].join('-');
   }
 
   private getFontConfiguration(objectType: string): FontConfiguration {
@@ -663,351 +645,14 @@ class PdfFormatter extends Formatter {
   }
 
   private measureAndComputeLineLayouts(line: Line): LineLayout[] {
-    const measuredItems: MeasuredItem[] = line.items.flatMap(
-      (item: Item, index: number): MeasuredItem[] => {
-        const nextItem = line.items[index + 1] ?? null;
-
-        // Find the next item with lyrics after the current index and get its index
-        let nextItemWithLyrics: ChordLyricsPair | null = null;
-        let nextItemWithLyricsIndex: number | null = null;
-        if (this.pdfConfiguration.layout.sections.base.display?.lyricsOnly && index === 0) {
-          for (let i = index + 1; i < line.items.length; i += 1) {
-            if (isChordLyricsPair(line.items[i]) && (line.items[i] as ChordLyricsPair).lyrics?.trim() !== '') {
-              nextItemWithLyrics = line.items[i] as ChordLyricsPair;
-              nextItemWithLyricsIndex = i;
-              break;
-            }
-          }
-        }
-
-        if (isChordLyricsPair(item)) {
-          if (nextItemWithLyrics && nextItemWithLyricsIndex) {
-            for (let i = index + 1; i < nextItemWithLyricsIndex; i += 1) {
-              if (isChordLyricsPair(line.items[i])) {
-                const chordLyricsPair = line.items[i] as ChordLyricsPair;
-                chordLyricsPair.lyrics = '';
-              }
-            }
-          }
-          if (this.pdfConfiguration.layout.sections.base.display?.lyricsOnly &&
-            index === 0 && (item as ChordLyricsPair).lyrics?.trim() === '') {
-            const chordLyricsPairItem = item as ChordLyricsPair;
-            chordLyricsPairItem.lyrics = '';
-          }
-          const items: (ChordLyricsPair | SoftLineBreak)[] =
-            this.addSoftLineBreaksToChordLyricsPair(item as ChordLyricsPair);
-          return items.flatMap((i): MeasuredItem[] => this.measureItem(i, nextItem, line));
-        }
-
-        const itemIsTag = isTag(item);
-        const itemIsComment = itemIsTag && isComment(item as Tag);
-        const itemIsSectionDelimiter = itemIsTag && (item as Tag).isSectionDelimiter();
-
-        if (isTag(item) && (itemIsComment || itemIsSectionDelimiter)) {
-          return this.measureTag(item as Tag);
-        }
-
-        if (isSoftLineBreak(item)) {
-          return this.measureItem(
-            item as SoftLineBreak,
-            nextItem,
-            line,
-          );
-        }
-
-        return [{ item, width: 0 }];
-      },
+    if (!this.layoutEngine) {
+      throw new Error('Layout engine not initialized');
+    }
+    return this.layoutEngine.computeLineLayouts(
+      line,
+      this.columnAvailableWidth(),
+      this.pdfConfiguration.layout.sections.base.display?.lyricsOnly,
     );
-
-    const lines = this.computeLineLayouts(measuredItems, this.paragraphY, line);
-    return lines;
-  }
-
-  // Compute line layouts
-  private computeLineLayouts(items: MeasuredItem[], startY: number, originalLine: Line): LineLayout[] {
-    const lines: LineLayout[] = []; // Stores the final lines to render
-    let currentLine: MeasuredItem[] = []; // Items on the current line
-    let currentLineWidth = 0; // Width of the current line
-    let currentY = startY; // Current vertical position
-    let lastSoftLineBreakIndex = -1; // Index of the last SoftLineBreak
-    let i = 0; // Index to iterate over items
-
-    while (i < items.length) {
-      let item = items[i];
-      let itemWidth = item.width;
-
-      // Check if the item fits in the current line
-      if (currentLineWidth + itemWidth > this.columnAvailableWidth()) {
-        let breakIndex = -1;
-
-        if (lastSoftLineBreakIndex >= 0) {
-          // **Case 1: Break at the last SoftLineBreak**
-          breakIndex = lastSoftLineBreakIndex;
-
-          // Remove the SoftLineBreak from currentLine
-          currentLine.splice(breakIndex, 1);
-
-          // Recalculate currentLineWidth after removing SoftLineBreak
-          currentLineWidth = currentLine.reduce((sum, mi) => sum + mi.width, 0);
-        } else if (itemWidth > this.columnAvailableWidth()) {
-          // **Attempt to split the item**
-          const [firstPart, secondPart] =
-            this.splitMeasuredItem(item, this.columnAvailableWidth() - currentLineWidth);
-
-          if (secondPart) {
-            // Insert the second part back into items to process next
-            items.splice(i + 1, 0, secondPart);
-          }
-
-          // Update the current item to the first part
-          item = firstPart;
-          itemWidth = item.width;
-
-          // Add the first part to currentLine
-          currentLine.push(item);
-          currentLineWidth += itemWidth;
-
-          // Increment 'i' to process the second part in the next iteration
-          i += 1;
-
-          // Proceed to break the line after adding the first part
-          breakIndex = currentLine.length;
-        } else {
-          // **Case 3: Move the item to the next line**
-          breakIndex = currentLine.length;
-
-          if (breakIndex === 0) {
-            // **Special Case: Item is too wide even for an empty line**
-            // Add the item to currentLine and increment 'i' to avoid infinite loop
-            currentLine.push(item);
-            currentLineWidth += itemWidth;
-            i += 1;
-            breakIndex = currentLine.length;
-          }
-        }
-
-        // **Actual Line Break Occurs Here**
-
-        // Get the items for the current line
-        const lineItems = currentLine.slice(0, breakIndex);
-
-        // Remove trailing commas from the last item's lyrics
-        const lastItemInLineItems = lineItems[lineItems.length - 1];
-        if (lastItemInLineItems.item instanceof ChordLyricsPair) {
-          const lastItemLyrics = (lastItemInLineItems.item as ChordLyricsPair).lyrics;
-          if (lastItemLyrics && lastItemLyrics.endsWith(',')) {
-            (lineItems[lineItems.length - 1].item as ChordLyricsPair).lyrics = lastItemLyrics.slice(0, -1);
-          }
-        }
-
-        // Create a LineLayout and add it to lines
-        const lineLayout = this.createLineLayout(lineItems, originalLine);
-        lines.push(lineLayout);
-
-        // Update currentY for the next line
-        currentY += lineLayout.lineHeight;
-
-        // Prepare currentLine and currentLineWidth for the next line
-        currentLine = currentLine.slice(breakIndex);
-        currentLineWidth = currentLine.reduce((sum, mi) => sum + mi.width, 0);
-        lastSoftLineBreakIndex = -1;
-
-        // **Capitalize the first word of the next item's lyrics**
-        const nextItemWithLyrics = this.findNextItemWithLyrics(currentLine, items, i);
-        if (nextItemWithLyrics) {
-          const nextItem = nextItemWithLyrics.item;
-          const { lyrics } = nextItemWithLyrics;
-          const nextPair = nextItem.item as ChordLyricsPair;
-          nextPair.lyrics = this.capitalizeFirstWord(lyrics);
-
-          // // next item has to be re-measured becasue the lyrics have changed
-          const lyricsFont = this.getFontConfiguration('text');
-          const lyricsWidth = lyrics ? this.doc.getTextWidth(nextPair.lyrics, lyricsFont) : 0;
-          if (lyricsWidth > nextItem.width) {
-            nextItem.width = lyricsWidth;
-          }
-        }
-      } else {
-        // **Item fits in the current line; add it**
-        currentLine.push(item);
-        currentLineWidth += itemWidth;
-
-        // Update lastSoftLineBreakIndex if the item is a SoftLineBreak
-        if (item.item instanceof SoftLineBreak) {
-          lastSoftLineBreakIndex = currentLine.length - 1;
-        }
-
-        // Move to the next item
-        i += 1;
-      }
-    }
-
-    // **Handle any remaining items in currentLine**
-    if (currentLine.length > 0) {
-      const lineLayout = this.createLineLayout(currentLine, originalLine);
-      lines.push(lineLayout);
-      currentY += lineLayout.lineHeight;
-    }
-
-    // Update the vertical position
-    this.paragraphY = currentY;
-
-    return lines;
-  }
-
-  // Splits a MeasuredItem into two parts based on available width
-  private splitMeasuredItem(item: MeasuredItem, availableWidth: number): [MeasuredItem, MeasuredItem | null] {
-    if (item.item instanceof ChordLyricsPair) {
-      const lyricsFont = this.getFontConfiguration('text');
-
-      const { chords } = item.item;
-      const { lyrics } = item.item;
-
-      // Use splitTextToSize to split lyrics into lines that fit the available width
-      const lyricLines = this.doc.withFontConfiguration(
-        lyricsFont,
-        () => this.doc.splitTextToSize(lyrics, availableWidth),
-      );
-
-      if (lyricLines.length === 1) {
-      // Cannot split further; return the original item as is
-        return [item, null];
-      }
-
-      // Create two ChordLyricsPair items
-      const firstLyrics = lyricLines[0];
-      const secondLyrics = lyricLines.slice(1).join(' ');
-
-      // Measure widths of new items
-      const firstWidth = this.doc.getTextWidth(firstLyrics, lyricsFont);
-      const secondWidth = this.doc.getTextWidth(secondLyrics, lyricsFont);
-
-      // First part with chords
-      const firstItem: MeasuredItem = {
-        item: new ChordLyricsPair(chords, firstLyrics),
-        width: firstWidth,
-        chordHeight: item.chordHeight,
-      };
-
-      // Second part without chords
-      const secondItem: MeasuredItem = {
-        item: new ChordLyricsPair('', secondLyrics),
-        width: secondWidth,
-        chordHeight: 0,
-      };
-
-      return [firstItem, secondItem];
-    }
-    // Cannot split other item types; return the original item
-    return [item, null];
-  }
-
-  // Helper function to find the next item with lyrics
-  private findNextItemWithLyrics(
-    currentLine: MeasuredItem[],
-    items: MeasuredItem[],
-    currentIndex: number,
-  ): { item: MeasuredItem; lyrics: string } | null {
-    // Check currentLine first
-    let foundItem: { item: MeasuredItem; lyrics: string } | null = null;
-
-    currentLine.some((item) => {
-      if (item.item instanceof ChordLyricsPair) {
-        const pair = item.item as ChordLyricsPair;
-        if (pair.lyrics && pair.lyrics.trim() !== '') {
-          foundItem = { item, lyrics: pair.lyrics };
-          return true;
-        }
-      }
-      return false;
-    });
-
-    if (foundItem) {
-      return foundItem;
-    }
-
-    // Then check the remaining items
-    for (let idx = currentIndex; idx < items.length; idx += 1) {
-      const item = items[idx];
-      if (item.item instanceof ChordLyricsPair) {
-        const pair = item.item as ChordLyricsPair;
-        if (pair.lyrics && pair.lyrics.trim() !== '') {
-          return { item, lyrics: pair.lyrics };
-        }
-      }
-    }
-
-    return null;
-  }
-
-  private capitalizeFirstWord(lyrics: string): string {
-    if (!lyrics || lyrics.length === 0) return lyrics;
-    return lyrics.replace(/^\s*\S*/, (word) => word.charAt(0).toUpperCase() + word.slice(1));
-  }
-
-  private createLineLayout(items: MeasuredItem[], originalLine: Line): LineLayout {
-    const lineHeight = this.estimateLineHeight(items);
-    const hasChords = items.some(({ item }) => item instanceof ChordLyricsPair && item.chords);
-    const hasLyrics = items.some(
-      ({ item }) => item instanceof ChordLyricsPair && item.lyrics && item.lyrics.trim() !== '',
-    );
-    const hasComments = items.some(({ item }) => item instanceof Tag && isComment(item));
-    const hasSectionLabel = items.some(({ item }) => item instanceof Tag && item.isSectionDelimiter());
-    const hasTags = items.some(({ item }) => item instanceof Tag);
-    const allItemsAreNull = items.every(({ item }) => item == null);
-
-    let type;
-    if (hasChords || hasLyrics) {
-      type = 'ChordLyricsPair';
-    } else if (hasComments && !hasSectionLabel) {
-      type = 'Comment';
-    } else if (hasSectionLabel) {
-      type = 'SectionLabel';
-    } else if (hasTags) {
-      type = 'Tag';
-    } else if (allItemsAreNull) {
-      type = 'Empty';
-    }
-
-    if (this.pdfConfiguration.layout.sections.base.display?.lyricsOnly && type === 'ChordLyricsPair') {
-      const indexOfFirstItemContainingLyrics = items.findIndex(
-        ({ item }) => (
-          item instanceof ChordLyricsPair &&
-          item.lyrics &&
-          item.lyrics.trim() !== ''
-        ),
-      );
-
-      // Create a new array of updated items without modifying the original parameter.
-      const updatedItems = items.map((measuredItem, i) => {
-        if (i < indexOfFirstItemContainingLyrics && measuredItem.item instanceof ChordLyricsPair) {
-          const updatedChordLyricsPair = {
-            ...measuredItem.item,
-            lyrics: '',
-          } as ChordLyricsPair;
-
-          return {
-            ...measuredItem,
-            item: updatedChordLyricsPair,
-            width: 0,
-          };
-        }
-        return measuredItem;
-      });
-
-      return {
-        type,
-        items: updatedItems,
-        lineHeight,
-      };
-    }
-
-    return {
-      type,
-      items,
-      lineHeight,
-      line: originalLine,
-    };
   }
 
   private getChordLyricYOffset(items: MeasuredItem[], yOffset) {
@@ -1342,46 +987,6 @@ class PdfFormatter extends Formatter {
     };
   }
 
-  // Estimate the line height
-  private estimateLineHeight(items: MeasuredItem[]): number {
-    const maxChordHeight = this.maxChordHeight(items);
-    const { chordLyricSpacing, linePadding } = this.pdfConfiguration.layout.sections.global;
-
-    const hasChords = items.some(({ item }) => item instanceof ChordLyricsPair && item.chords);
-    const hasLyrics = items.some(
-      ({ item }) => item instanceof ChordLyricsPair && item.lyrics && item.lyrics.trim() !== '',
-    );
-    const hasComments = items.some(({ item }) => item instanceof Tag && isComment(item));
-
-    const hasSectionDelimiter = items.some(({ item }) => item instanceof Tag && item.isSectionDelimiter());
-
-    let estimatedHeight = linePadding;
-    let lineHeight = 1;
-    let fontConfiguration: FontConfiguration | null = null;
-
-    if (hasChords && hasLyrics) {
-      fontConfiguration = this.getFontConfiguration('text');
-      estimatedHeight += maxChordHeight + chordLyricSpacing + fontConfiguration.size;
-    } else if (hasChords && !hasLyrics) {
-      estimatedHeight += maxChordHeight;
-    } else if (!hasChords && hasLyrics) {
-      fontConfiguration = this.getFontConfiguration('text');
-      estimatedHeight += fontConfiguration.size;
-    } else if (hasComments) {
-      fontConfiguration = this.getFontConfiguration('comment');
-      estimatedHeight += fontConfiguration.size;
-    } else if (hasSectionDelimiter) {
-      fontConfiguration = this.getFontConfiguration('sectionLabel');
-      estimatedHeight += fontConfiguration.size;
-    }
-
-    if (fontConfiguration && fontConfiguration.lineHeight) {
-      lineHeight = fontConfiguration.lineHeight;
-    }
-
-    return estimatedHeight * lineHeight;
-  }
-
   // Get the maximum chord height
   private maxChordHeight(items: MeasuredItem[]): number {
     return items.reduce((maxHeight, { chordHeight }) => Math.max(maxHeight, chordHeight || 0), 0);
@@ -1414,7 +1019,11 @@ class PdfFormatter extends Formatter {
 
   // Helper methods for layout calculations
   private columnAvailableWidth(): number {
-    return this.dimensions.columnWidth - (this.x - this.columnStartX());
+    const columnStartPosition = this.columnStartX();
+    const currentXPosition = this.x;
+    const totalColumnWidth = this.dimensions.columnWidth;
+    const availableWidth = totalColumnWidth - (currentXPosition - columnStartPosition);
+    return availableWidth;
   }
 
   private columnStartX(): number {
@@ -1428,196 +1037,6 @@ class PdfFormatter extends Formatter {
 
   private formatComment(commentText: string, x: number, y: number): void {
     this.doc.text(commentText, x, y, this.getFontConfiguration('comment'));
-  }
-
-  // Measure items
-  private measureItem(
-    item: ChordLyricsPair | SoftLineBreak | Item,
-    nextItem: ChordLyricsPair | SoftLineBreak | Item,
-    line: Line,
-  ): MeasuredItem[] {
-    if (item instanceof ChordLyricsPair) {
-      let nextItemHasChords = false;
-      let lyrics = item.lyrics ?? '';
-      if (nextItem && nextItem instanceof ChordLyricsPair) {
-        const nextLyrics = nextItem.lyrics ?? '';
-        const nextChords = nextItem.chords;
-
-        // Check if the next item has chords
-        if (nextChords && nextChords.trim() !== '') {
-          nextItemHasChords = true;
-        }
-
-        // Check if the next item has a hyphen
-        if (this.pdfConfiguration.layout.sections.base.display?.lyricsOnly) {
-          if (nextLyrics.startsWith(' -') || nextLyrics.startsWith('-')) {
-            lyrics = lyrics.trimEnd();
-            // eslint-disable-next-line no-param-reassign
-            nextItem.lyrics = this.removeHyphens(nextLyrics);
-          }
-        }
-      }
-      if (this.pdfConfiguration.layout.sections.base.display?.lyricsOnly) {
-        // clean next lyrics and this lyrics
-        // eslint-disable-next-line no-param-reassign
-        item.lyrics = this.removeHyphens(lyrics);
-      }
-      return this.measureChordLyricsPair(line, item, nextItemHasChords);
-    }
-
-    if (item instanceof Tag && (isComment(item) || item.isSectionDelimiter())) {
-      return this.measureTag(item);
-    }
-
-    if (item instanceof SoftLineBreak) {
-      const lyricsFont = this.getFontConfiguration('text');
-      const width = this.doc.getTextWidth(item.content, lyricsFont);
-      return [{ item, width }];
-    }
-
-    return [];
-  }
-
-  private removeHyphens(lyrics: string): string {
-    let cleanedLyrics = lyrics;
-    // Remove hyphenated word splits (e.g., "well - known" -> "wellknown")
-    cleanedLyrics = lyrics.replace(/\b(\w+)\s*-\s*(\w+)\b/g, '$1$2');
-
-    // Remove trailing hyphens and hyphen-space combinations
-    cleanedLyrics = cleanedLyrics.replace(/(?:\b(\w+)\s*-\s*$)|(?:-\s*$)|(?:\s+-\s+$)/g, '$1');
-
-    // If the entire string is just hyphens and spaces, return an empty string
-    if (/^\s*-\s*$/.test(cleanedLyrics)) {
-      return '';
-    }
-
-    return cleanedLyrics;
-  }
-
-  private measureChordLyricsPair(
-    line: Line,
-    item: ChordLyricsPair,
-    nextItemHasChords = false,
-  ): MeasuredItem[] {
-    const chordFont = this.getFontConfiguration('chord');
-    const lyricsFont = this.getFontConfiguration('text');
-
-    let { chords } = item;
-    let beforeChords = chords || '';
-    const { lyrics } = item;
-
-    chords = renderChord(
-      chords,
-      line,
-      this.song,
-      {
-        renderKey: null,
-        useUnicodeModifier: this.configuration.useUnicodeModifiers,
-        normalizeChords: this.configuration.normalizeChords,
-      },
-    );
-    const chordWidth = chords ? this.doc.getTextWidth(chords, chordFont) : 0;
-    const lyricsWidth = lyrics ? this.doc.getTextWidth(lyrics, lyricsFont) : 0;
-
-    if (this.pdfConfiguration.layout.sections.base.display?.lyricsOnly) {
-      if (lyrics === '') {
-        return [
-          {
-            item: null,
-            width: 0,
-          },
-        ];
-      }
-      return [
-        {
-          item: new ChordLyricsPair('', lyrics),
-          width: lyricsWidth,
-          chordHeight: 0,
-        },
-      ];
-    }
-
-    let adjustedChords = chords || '';
-    const adjustedLyrics = lyrics || '';
-    if (chordWidth >= (lyricsWidth - this.doc.getSpaceWidth()) && nextItemHasChords) {
-      adjustedChords += this.chordSpacingAsSpaces;
-      beforeChords += this.chordSpacingAsSpaces;
-    }
-
-    const adjustedChordWidth = this.doc.getTextWidth(adjustedChords, chordFont);
-    const totalWidth = Math.max(adjustedChordWidth, lyricsWidth);
-    const chordLyricWidthDifference =
-      adjustedChordWidth > 0 && adjustedChordWidth > lyricsWidth ?
-        Math.abs(adjustedChordWidth - lyricsWidth) : 0;
-
-    return [
-      {
-        // even though we measure against the "rendered" chord
-        // we have to keep the original chord in the item so that
-        // when it is rendered, it is rendered correctly
-        item: new ChordLyricsPair(beforeChords, adjustedLyrics),
-        width: totalWidth,
-        chordLyricWidthDifference,
-        chordHeight: chords ? this.doc.getTextHeight(chords, chordFont) : 0,
-      },
-    ];
-  }
-
-  private measureTag(item: Tag): MeasuredItem[] {
-    const commentFont = this.getFontConfiguration('comment');
-    const sectionLabelFont = this.getFontConfiguration('sectionLabel');
-
-    const font = isComment(item) ? commentFont : sectionLabelFont;
-
-    const columnWidth = this.columnAvailableWidth();
-    const tagLines = this.doc.splitTextToSize(item.label, columnWidth, font);
-
-    return tagLines.map((line) => ({
-      item: new Tag(item.name, line),
-      width: this.doc.getTextWidth(line, font),
-    }));
-  }
-
-  private addSoftLineBreaksToChordLyricsPair(
-    chordLyricsPair: ChordLyricsPair,
-  ): (ChordLyricsPair | SoftLineBreak)[] {
-    const { chords, lyrics, annotation } = chordLyricsPair;
-
-    if (!lyrics || lyrics.trim() === '') {
-      return [chordLyricsPair];
-    }
-
-    const lyricFragments = lyrics.split(/,\s*/);
-
-    const items: (ChordLyricsPair | SoftLineBreak)[] = [];
-
-    lyricFragments.forEach((fragment, index) => {
-      if (index > 0 && index !== 0) {
-        items.push(new SoftLineBreak(' '));
-        if (fragment.trim() !== '') {
-          items.push(new ChordLyricsPair('', fragment, ''));
-        }
-      }
-
-      if (index === 0 && lyricFragments.length === 1) {
-        items.push(new ChordLyricsPair(chords, fragment, annotation));
-      } else if (index === 0 && lyricFragments.length > 1) {
-        let commaAdjustedFragment = fragment;
-        commaAdjustedFragment += ',';
-        items.push(new ChordLyricsPair(chords, commaAdjustedFragment, annotation));
-      }
-    });
-
-    return items;
-  }
-
-  // Get chord spacing
-  private get chordSpacingAsSpaces(): string {
-    let str = '';
-    for (let i = 0; i < this.pdfConfiguration.layout.sections.global.chordSpacing; i += 1) {
-      str += ' ';
-    }
-    return str;
   }
 
   // Record formatting time

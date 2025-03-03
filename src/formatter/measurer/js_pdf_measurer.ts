@@ -12,15 +12,25 @@ export class JsPdfMeasurer extends BaseMeasurer {
 
   measureText(text: string, fontConfig: FontConfiguration): TextDimensions {
     let result: TextDimensions;
-    
+
     this.doc.withFontConfiguration(fontConfig, () => {
       const dimensions = this.doc.getTextDimensions(text);
       result = {
         width: dimensions.w,
-        height: dimensions.h
+        height: dimensions.h,
       };
     });
 
     return result!;
+  }
+
+  splitTextToSize(text: string, maxWidth: number, fontConfig: FontConfiguration) {
+    let lines: string[] = [];
+
+    this.doc.withFontConfiguration(fontConfig, () => {
+      lines = this.doc.splitTextToSize(text, maxWidth);
+    });
+
+    return lines;
   }
 }

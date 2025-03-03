@@ -1,11 +1,13 @@
 import { Measurer } from '../measurer/measurer';
 import { FontConfiguration } from '../pdf_formatter/types';
-import Song from '../../chord_sheet/song';
 import Line from '../../chord_sheet/line';
 import ChordLyricsPair from '../../chord_sheet/chord_lyrics_pair';
 import Tag from '../../chord_sheet/tag';
-import Comment from '../../chord_sheet/comment';
-import { isChordLyricsPair, isComment, isTag } from '../../template_helpers';
+import {
+  isChordLyricsPair, isComment, isSoftLineBreak, isTag, renderChord,
+} from '../../template_helpers';
+import SoftLineBreak from '../../chord_sheet/soft_line_break';
+import Song from '../../chord_sheet/song';
 
 /**
  * Represents a break point in text for line wrapping
@@ -19,27 +21,19 @@ export interface BreakPoint {
  * Represents a measured chord-lyrics pair with position information
  */
 export interface MeasuredItem {
-  item: ChordLyricsPair | Comment | Tag;
-  text: string;
-  chord?: string;
-  textWidth: number;
-  textHeight: number;
-  chordWidth: number;
-  chordHeight: number;
-  xPosition: number;
-  breakPoints: BreakPoint[];
-}
-
+    item: ChordLyricsPair | Tag | SoftLineBreak | null;
+    width: number;
+    chordHeight?: number;
+    chordLyricWidthDifference?: number;
+  }
 /**
  * Represents a single line in the layout
  */
 export interface LineLayout {
-  lineIndex: number;
-  type: string;
-  totalWidth: number;
-  totalHeight: number;
-  fitsContainer: boolean;
+  type: 'ChordLyricsPair' | 'Comment' | 'SectionLabel' | 'Tag' | 'Empty';
+  lineHeight: number;
   items: MeasuredItem[];
+  line?: Line;
 }
 
 /**
@@ -63,294 +57,349 @@ export interface SongLayout {
  * Configuration for the layout engine
  */
 export interface LayoutConfig {
-  width: number;
-  fonts: {
-    chord: FontConfiguration;
-    lyrics: FontConfiguration;
-    title: FontConfiguration;
-    subtitle: FontConfiguration;
-    comment: FontConfiguration;
-    label: FontConfiguration;
-  };
-  chordSpacing: number;
-}
+    width: number;
+    fonts: {
+      chord: FontConfiguration;
+      lyrics: FontConfiguration;
+      comment: FontConfiguration;
+      sectionLabel: FontConfiguration;
+    };
+    chordSpacing: number;
+    chordLyricSpacing: number;
+    linePadding: number;
+    useUnicodeModifiers: boolean;
+    normalizeChords: boolean;
+  }
 
 export class LayoutEngine {
   constructor(
+    private song: Song,
     private measurer: Measurer,
-    private config: LayoutConfig
-  ) {}
+    private config: LayoutConfig,
+  ) {
+    this.song = song;
+    this.measurer = measurer;
+    this.config = config;
+  }
 
-  /**
-   * Compute a complete layout for a song
-   */
-  computeLayout(song: Song): SongLayout {
-    const layout: SongLayout = {
-      paragraphs: [],
-      totalHeight: 0
-    };
+  public computeLineLayouts(line: Line, availableWidth: number, lyricsOnly = false): LineLayout[] {
+    const measuredItems = this.measureLineItems(line, lyricsOnly);
+    const lines: LineLayout[] = [];
+    let currentLine: MeasuredItem[] = [];
+    let currentWidth = 0;
+    let lastSoftLineBreakIndex = -1;
+    let i = 0;
 
-    song.paragraphs.forEach((paragraph, paragraphIndex) => {
-      const paragraphLayout: ParagraphLayout = {
-        paragraphIndex,
-        lines: [],
-        totalHeight: 0
-      };
+    while (i < measuredItems.length) {
+      let item = measuredItems[i];
+      let itemWidth = item.width;
 
-      paragraph.lines.forEach((line, lineIndex) => {
-        if (this.lineHasContents(line)) {
-          const lineLayout = this.computeLineLayout(line, lineIndex);
-          paragraphLayout.totalHeight += lineLayout.totalHeight;
-          paragraphLayout.lines.push(lineLayout);
+      if (currentWidth + itemWidth > availableWidth) {
+        let breakIndex = -1;
+
+        if (lastSoftLineBreakIndex >= 0) {
+          breakIndex = lastSoftLineBreakIndex;
+          currentLine.splice(breakIndex, 1);
+          currentWidth = currentLine.reduce((sum, mi) => sum + mi.width, 0);
+        } else if (itemWidth > availableWidth) {
+          const [firstPart, secondPart] = this.splitMeasuredItem(item, availableWidth - currentWidth);
+          if (secondPart) {
+            measuredItems.splice(i + 1, 0, secondPart);
+          }
+          item = firstPart;
+          itemWidth = item.width;
+          currentLine.push(item);
+          currentWidth += itemWidth;
+          i += 1;
+          breakIndex = currentLine.length;
+        } else if (currentLine.length === 0) {
+          currentLine.push(item);
+          currentWidth += itemWidth;
+          i += 1;
+          breakIndex = currentLine.length;
+        } else {
+          breakIndex = currentLine.length;
         }
-      });
 
-      layout.paragraphs.push(paragraphLayout);
-      layout.totalHeight += paragraphLayout.totalHeight;
-    });
+        if (breakIndex >= 0) {
+          const lineItems = currentLine.slice(0, breakIndex);
+          const lastItem = lineItems[lineItems.length - 1];
+          if (lastItem?.item instanceof ChordLyricsPair && lastItem.item.lyrics?.endsWith(',')) {
+            lastItem.item.lyrics = lastItem.item.lyrics.slice(0, -1) || '';
+            lastItem.width = this.measurer.measureTextWidth(lastItem.item.lyrics, this.config.fonts.lyrics);
+          }
 
-    return layout;
-  }
+          lines.push(this.createLineLayout(lineItems, line));
+          currentLine = currentLine.slice(breakIndex);
+          currentWidth = currentLine.reduce((sum, mi) => sum + mi.width, 0);
+          lastSoftLineBreakIndex = -1;
 
-  /**
-   * Compute layout for a single line
-   */
-  private computeLineLayout(line: Line, lineIndex: number): LineLayout {
-    const measuredItems = this.measureLineItems(line);
-    
-    // Calculate total dimensions
-    let totalWidth = 0;
-    let maxHeight = 0;
-    
-    measuredItems.forEach(item => {
-      const itemWidth = Math.max(item.textWidth, item.chordWidth);
-      totalWidth += itemWidth;
-      maxHeight = Math.max(maxHeight, item.textHeight, item.chordHeight);
-    });
-    
-    // Check if line fits container width
-    const fitsContainer = totalWidth <= this.config.width;
-    
-    return {
-      lineIndex,
-      type: line.type || 'normal',
-      totalWidth,
-      totalHeight: maxHeight,
-      fitsContainer,
-      items: measuredItems
-    };
-  }
-
-  /**
-   * Measure all items in a line
-   */
-  private measureLineItems(line: Line): MeasuredItem[] {
-    const items: MeasuredItem[] = [];
-    let xPosition = 0;
-
-    line.items.forEach(item => {
-      if (isChordLyricsPair(item)) {
-        const chordText = item.chords || '';
-        const lyricText = item.lyrics || '';
-        
-        // Measure chord and lyric dimensions
-        const chordDimensions = this.measurer.measureText(chordText, this.config.fonts.chord);
-        const lyricDimensions = this.measurer.measureText(lyricText, this.config.fonts.lyrics);
-        
-        // Find break points in lyrics
-        const breakPoints = this.findBreakPoints(lyricText);
-        
-        const measuredItem: MeasuredItem = {
-          item,
-          text: lyricText,
-          chord: chordText,
-          textWidth: lyricDimensions.width,
-          textHeight: lyricDimensions.height,
-          chordWidth: chordDimensions.width,
-          chordHeight: chordDimensions.height,
-          xPosition,
-          breakPoints
-        };
-        
-        items.push(measuredItem);
-        
-        // Update x position for next item, ensuring enough space for chord
-        const itemWidth = Math.max(lyricDimensions.width, chordDimensions.width) + this.config.chordSpacing;
-        xPosition += itemWidth;
-      } else if (isComment(item)) {
-        const commentText = item.comment || '';
-        const dimensions = this.measurer.measureText(commentText, this.config.fonts.comment);
-        
-        items.push({
-          item,
-          text: commentText,
-          textWidth: dimensions.width,
-          textHeight: dimensions.height,
-          chordWidth: 0,
-          chordHeight: 0,
-          xPosition,
-          breakPoints: []
-        });
-        
-        xPosition += dimensions.width + this.config.chordSpacing;
-      } else if (isTag(item)) {
-        const tagText = item.name || '';
-        const dimensions = this.measurer.measureText(tagText, this.config.fonts.label);
-        
-        items.push({
-          item,
-          text: tagText,
-          textWidth: dimensions.width,
-          textHeight: dimensions.height,
-          chordWidth: 0,
-          chordHeight: 0,
-          xPosition,
-          breakPoints: []
-        });
-        
-        xPosition += dimensions.width + this.config.chordSpacing;
+          // Capitalize next item's lyrics
+          const nextItemWithLyrics = this.findNextItemWithLyrics(currentLine, measuredItems, i);
+          if (nextItemWithLyrics && nextItemWithLyrics.item instanceof ChordLyricsPair) {
+            const currentLyrics = nextItemWithLyrics.item.lyrics ?? '';
+            nextItemWithLyrics.item.lyrics = this.capitalizeFirstWord(currentLyrics);
+            nextItemWithLyrics.width = this.measurer.measureTextWidth(
+              nextItemWithLyrics.item.lyrics, // Now guaranteed to be a string
+              this.config.fonts.lyrics,
+            );
+          }
+        }
+      } else {
+        currentLine.push(item);
+        currentWidth += itemWidth;
+        if (item.item instanceof SoftLineBreak) {
+          lastSoftLineBreakIndex = currentLine.length - 1;
+        }
+        i += 1;
       }
-    });
-    
+    }
+
+    if (currentLine.length > 0) {
+      lines.push(this.createLineLayout(currentLine, line));
+    }
+
+    return lines;
+  }
+
+  private measureLineItems(line: Line, lyricsOnly = false): MeasuredItem[] {
+    const items: MeasuredItem[] = [];
+
+    for (let index = 0; index < line.items.length; index += 1) {
+      const item = line.items[index];
+      const nextItem = line.items[index + 1] ?? null;
+
+      if (isChordLyricsPair(item)) {
+        const pair = item as ChordLyricsPair;
+        let lyrics = pair.lyrics || '';
+
+        // Handle lyricsOnly mode
+        if (lyricsOnly) {
+          lyrics = this.removeHyphens(lyrics);
+          if (nextItem && isChordLyricsPair(nextItem)) {
+            const nextLyrics = (nextItem as ChordLyricsPair).lyrics || '';
+            if (nextLyrics.startsWith(' -') || nextLyrics.startsWith('-')) {
+              lyrics = lyrics.trimEnd();
+              (nextItem as ChordLyricsPair).lyrics = this.removeHyphens(nextLyrics);
+            }
+          }
+          if (lyrics === '') {
+            items.push({ item: null, width: 0 });
+          }
+        }
+
+        const splitItems = this.splitChordLyricsPair(pair);
+        splitItems.forEach((splitItem) => {
+          if (splitItem instanceof ChordLyricsPair) {
+            let splitChords = splitItem.chords || '';
+            let splitLyrics = splitItem.lyrics || '';
+
+            if (lyricsOnly) {
+              splitChords = ''; // No chords in lyricsOnly mode
+              splitLyrics = this.removeHyphens(splitLyrics);
+              if (splitLyrics === '') {
+                items.push({ item: null, width: 0 });
+                return;
+              }
+            }
+
+            const nextItemHasChords = nextItem &&
+              isChordLyricsPair(nextItem) &&
+              (nextItem as ChordLyricsPair).chords?.trim() !== '';
+
+            const renderedChords = renderChord(
+              splitChords,
+              line,
+              this.song,
+              {
+                renderKey: null,
+                useUnicodeModifier: this.config.useUnicodeModifiers,
+                normalizeChords: this.config.normalizeChords,
+              },
+            );
+
+            const chordFont = this.config.fonts.chord;
+            const lyricsFont = this.config.fonts.lyrics;
+
+            const chordWidth = renderedChords ? this.measurer.measureTextWidth(renderedChords, chordFont) : 0;
+            const lyricsWidth = splitLyrics ? this.measurer.measureTextWidth(splitLyrics, lyricsFont) : 0;
+            const spaceWidth = this.getSpaceWidth(lyricsFont);
+
+            let adjustedChordWidth = chordWidth;
+            if (!lyricsOnly && nextItemHasChords && chordWidth >= (lyricsWidth - spaceWidth)) {
+              const spacing = this.getChordSpacingAsSpaces();
+              adjustedChordWidth = this.measurer.measureTextWidth(renderedChords + spacing, chordFont);
+            }
+
+            const totalWidth = Math.max(adjustedChordWidth, lyricsWidth);
+            const chordHeight = renderedChords ? this.measurer.measureTextHeight(renderedChords, chordFont) : 0;
+
+            items.push({
+              item: new ChordLyricsPair(splitChords, splitLyrics), // Use original chords without spacing
+              width: totalWidth,
+              chordHeight,
+            });
+          } else if (splitItem instanceof SoftLineBreak) {
+            const width = this.measurer.measureTextWidth(splitItem.content, this.config.fonts.lyrics);
+            items.push({ item: splitItem, width });
+          }
+        });
+      } else if (isSoftLineBreak(item)) {
+        const softLineBreak = item as SoftLineBreak;
+        const width = this.measurer.measureTextWidth(softLineBreak.content, this.config.fonts.lyrics);
+        items.push({ item: softLineBreak, width });
+      } else if (isTag(item)) {
+        const tag = item as Tag;
+        if (isComment(tag) || tag.isSectionDelimiter()) {
+          const font = isComment(tag) ? this.config.fonts.comment : this.config.fonts.sectionLabel;
+          const columnWidth = this.config.width; // Adjust based on your context
+          const tagText = tag.label || tag.value || '';
+          const tagLines = this.measurer.splitTextToSize(tagText, columnWidth, font);
+
+          tagLines.forEach((tagLine) => {
+            const width = this.measurer.measureTextWidth(tagLine, font);
+            items.push({ item: new Tag(tag.name, tagLine), width });
+          });
+        }
+      } else {
+        // TODO: add support for Literal
+        items.push({ item: null, width: 0 });
+      }
+    }
+
     return items;
   }
 
-  /**
-   * Find potential break points in text for line wrapping
-   */
-  private findBreakPoints(text: string): BreakPoint[] {
-    const breakPoints: BreakPoint[] = [];
-    
-    // Search for spaces, hyphens, and other potential break points
-    for (let i = 0; i < text.length; i++) {
-      const char = text[i];
-      
-      if (char === ' ') {
-        breakPoints.push({ index: i, type: 'space' });
-      } else if (char === '-') {
-        breakPoints.push({ index: i, type: 'hyphen' });
-      } else if (char === ',') {
-        breakPoints.push({ index: i, type: 'comma' });
-      }
+  private removeHyphens(lyrics: string): string {
+    let cleanedLyrics = lyrics;
+    cleanedLyrics = lyrics.replace(/\b(\w+)\s*-\s*(\w+)\b/g, '$1$2');
+    cleanedLyrics = cleanedLyrics.replace(/(?:\b(\w+)\s*-\s*$)|(?:-\s*$)|(?:\s+-\s+$)/g, '$1');
+    if (/^\s*-\s*$/.test(cleanedLyrics)) {
+      return '';
     }
-    
-    return breakPoints;
+    return cleanedLyrics;
   }
 
-  /**
-   * Check if a line has any renderable contents
-   */
-  private lineHasContents(line: Line): boolean {
-    if (!line.items || line.items.length === 0) {
-      return false;
+  private getChordSpacingAsSpaces(): string {
+    return ' '.repeat(this.config.chordSpacing); // e.g., 2 spaces if chordSpacing is 2
+  }
+
+  private getSpaceWidth(fontConfig: FontConfiguration): number {
+    return this.measurer.measureTextWidth(' ', fontConfig);
+  }
+
+  private createLineLayout(items: MeasuredItem[], line: Line): LineLayout {
+    const hasChords = items.some((mi) => mi.item instanceof ChordLyricsPair && mi.item.chords);
+    const hasLyrics = items.some((mi) => mi.item instanceof ChordLyricsPair && mi.item.lyrics?.trim());
+    const hasComments = items.some((mi) => mi.item instanceof Tag && isComment(mi.item));
+    const hasSectionLabel = items.some((mi) => mi.item instanceof Tag && (mi.item as Tag).isSectionDelimiter());
+
+    let type: LineLayout['type'] = 'Empty';
+    if (hasChords || hasLyrics) type = 'ChordLyricsPair';
+    else if (hasComments) type = 'Comment';
+    else if (hasSectionLabel) type = 'SectionLabel';
+    else if (items.some((mi) => mi.item instanceof Tag)) type = 'Tag';
+
+    const maxChordHeight = Math.max(...items.map((mi) => mi.chordHeight || 0));
+    let baseHeight = this.config.linePadding;
+    let fontConfiguration: { size: number; lineHeight?: number } | null = null;
+
+    if (hasChords && hasLyrics) {
+      fontConfiguration = this.config.fonts.lyrics;
+      baseHeight += maxChordHeight + this.config.chordLyricSpacing + fontConfiguration.size;
+    } else if (hasChords) {
+      baseHeight += maxChordHeight;
+      // No fontConfiguration needed since height is based solely on chords
+    } else if (hasLyrics) {
+      fontConfiguration = this.config.fonts.lyrics;
+      baseHeight += fontConfiguration.size;
+    } else if (hasComments) {
+      fontConfiguration = this.config.fonts.comment;
+      baseHeight += fontConfiguration.size;
+    } else if (hasSectionLabel) {
+      fontConfiguration = this.config.fonts.sectionLabel;
+      baseHeight += fontConfiguration.size;
     }
 
-    return line.items.some(item => {
-      if (isChordLyricsPair(item)) {
-        return !!(item.chords || item.lyrics);
-      }
-      if (isComment(item)) {
-        return !!item.comment;
-      }
-      if (isTag(item)) {
-        return !!item.name;
-      }
-      return false;
-    });
-  }
-  
-  /**
-   * Apply line breaking based on container width
-   * Creates new lines as needed for text that doesn't fit
-   */
-  applyLineBreaking(layout: SongLayout): SongLayout {
-    const newLayout: SongLayout = {
-      paragraphs: [],
-      totalHeight: 0
+    // Apply the line height factor if a font configuration is selected
+    let lineHeightFactor = 1;
+    if (fontConfiguration && fontConfiguration.lineHeight) {
+      lineHeightFactor = fontConfiguration.lineHeight;
+    }
+    const lineHeight = baseHeight * lineHeightFactor;
+
+    return {
+      type,
+      items,
+      lineHeight,
+      line,
     };
-    
-    layout.paragraphs.forEach(paragraph => {
-      const newParagraph: ParagraphLayout = {
-        paragraphIndex: paragraph.paragraphIndex,
-        lines: [],
-        totalHeight: 0
-      };
-      
-      paragraph.lines.forEach(line => {
-        // If the line fits, keep it as is
-        if (line.fitsContainer) {
-          newParagraph.lines.push(line);
-          newParagraph.totalHeight += line.totalHeight;
-        } else {
-          // Line breaking logic for lines that don't fit
-          const brokenLines = this.breakLine(line);
-          brokenLines.forEach(brokenLine => {
-            newParagraph.lines.push(brokenLine);
-            newParagraph.totalHeight += brokenLine.totalHeight;
-          });
+  }
+
+  private splitChordLyricsPair(pair: ChordLyricsPair): (ChordLyricsPair | SoftLineBreak)[] {
+    const { chords, lyrics, annotation } = pair;
+
+    if (!lyrics || lyrics.trim() === '') {
+      return [pair];
+    }
+
+    const lyricFragments = lyrics.split(/,\s*/);
+
+    const items: (ChordLyricsPair | SoftLineBreak)[] = [];
+
+    lyricFragments.forEach((fragment, index) => {
+      if (index > 0 && index !== 0) {
+        items.push(new SoftLineBreak(' '));
+        if (fragment.trim() !== '') {
+          items.push(new ChordLyricsPair('', fragment, ''));
         }
-      });
-      
-      newLayout.paragraphs.push(newParagraph);
-      newLayout.totalHeight += newParagraph.totalHeight;
-    });
-    
-    return newLayout;
-  }
-  
-  /**
-   * Break a line that doesn't fit into multiple lines
-   */
-  private breakLine(line: LineLayout): LineLayout[] {
-    // Implementation for line breaking algorithm
-    // Based on the PDF formatter's line breaking logic
-    // This is a simplified version - actual implementation would be more complex
-    const lines: LineLayout[] = [];
-    let currentLine: LineLayout = {
-      lineIndex: line.lineIndex,
-      type: line.type,
-      totalWidth: 0,
-      totalHeight: line.totalHeight,
-      fitsContainer: true,
-      items: []
-    };
-    
-    let currentWidth = 0;
-    
-    line.items.forEach(item => {
-      if (currentWidth + item.textWidth <= this.config.width) {
-        // Item fits in the current line
-        currentLine.items.push({
-          ...item,
-          xPosition: currentWidth
-        });
-        currentWidth += Math.max(item.textWidth, item.chordWidth) + this.config.chordSpacing;
-      } else {
-        // Need to find a break point and split the item
-        // ... Complex breaking logic would go here
-        // For now, just add the current line and start a new one
-        
-        lines.push(currentLine);
-        
-        currentLine = {
-          lineIndex: line.lineIndex,
-          type: line.type,
-          totalWidth: 0,
-          totalHeight: line.totalHeight,
-          fitsContainer: true,
-          items: [{ ...item, xPosition: 0 }]
-        };
-        
-        currentWidth = Math.max(item.textWidth, item.chordWidth) + this.config.chordSpacing;
+      }
+
+      if (index === 0 && lyricFragments.length === 1) {
+        items.push(new ChordLyricsPair(chords, fragment, annotation));
+      } else if (index === 0 && lyricFragments.length > 1) {
+        let commaAdjustedFragment = fragment;
+        commaAdjustedFragment += ',';
+        items.push(new ChordLyricsPair(chords, commaAdjustedFragment, annotation));
       }
     });
-    
-    // Add the last line if it has items
-    if (currentLine.items.length > 0) {
-      currentLine.totalWidth = currentWidth;
-      lines.push(currentLine);
-    }
-    
-    return lines;
+
+    return items;
+  }
+
+  private splitMeasuredItem(item: MeasuredItem, availableWidth: number): [MeasuredItem, MeasuredItem | null] {
+    if (!(item.item instanceof ChordLyricsPair) || !item.item.lyrics) return [item, null];
+    const { lyrics } = item.item;
+    const lyricsFont = this.config.fonts.lyrics;
+    const splitLines = this.measurer.splitTextToSize(lyrics, availableWidth, lyricsFont);
+    if (splitLines.length === 1) return [item, null];
+
+    const firstLyrics = splitLines[0];
+    const secondLyrics = splitLines.slice(1).join(' ');
+    return [
+      {
+        item: new ChordLyricsPair(item.item.chords, firstLyrics),
+        width: this.measurer.measureTextWidth(firstLyrics, lyricsFont),
+        chordHeight: item.chordHeight,
+      },
+      {
+        item: new ChordLyricsPair('', secondLyrics),
+        width: this.measurer.measureTextWidth(secondLyrics, lyricsFont),
+        chordHeight: 0,
+      },
+    ];
+  }
+
+  private findNextItemWithLyrics(
+    currentLine: MeasuredItem[],
+    items: MeasuredItem[],
+    index: number,
+  ): MeasuredItem | null {
+    const remainingItems = [...currentLine, ...items.slice(index)];
+    return remainingItems.find((mi) => mi.item instanceof ChordLyricsPair && mi.item.lyrics?.trim()) || null;
+  }
+
+  private capitalizeFirstWord(lyrics: string): string {
+    return lyrics.replace(/^\s*\w/, (c) => c.toUpperCase());
   }
 }

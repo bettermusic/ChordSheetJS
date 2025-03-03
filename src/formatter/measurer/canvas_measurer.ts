@@ -1,12 +1,15 @@
 import { BaseMeasurer, TextDimensions } from './measurer';
 import { FontConfiguration } from '../pdf_formatter/types';
+declare const document: any;
+declare type CanvasRenderingContext2D = any;
 
 /**
  * Measures text using HTML5 Canvas API for client-side measurement
  */
 export class CanvasMeasurer extends BaseMeasurer {
   private ctx: CanvasRenderingContext2D;
-  private measureCache: Map<string, TextDimensions> = new Map();
+
+  private measureCache = new Map<string, TextDimensions>();
 
   constructor() {
     super();
@@ -21,8 +24,8 @@ export class CanvasMeasurer extends BaseMeasurer {
 
   measureText(text: string, fontConfig: FontConfiguration): TextDimensions {
     // Create cache key from text and font config
-    const cacheKey = `${text}|${fontConfig.family}|${fontConfig.size}|${fontConfig.style || 'normal'}`;
-    
+    const cacheKey = `${text}|${fontConfig.name}|${fontConfig.size}|${fontConfig.style || 'normal'}`;
+
     // Return cached result if available
     if (this.measureCache.has(cacheKey)) {
       return this.measureCache.get(cacheKey)!;
@@ -30,11 +33,11 @@ export class CanvasMeasurer extends BaseMeasurer {
 
     // Set font on canvas context
     const fontStyle = fontConfig.style || 'normal';
-    this.ctx.font = `${fontStyle} ${fontConfig.size}px ${fontConfig.family}`;
-    
+    this.ctx.font = `${fontStyle} ${fontConfig.size}px ${fontConfig.name}`;
+
     // Measure text width
     const metrics = this.ctx.measureText(text);
-    
+
     // Calculate height (Canvas doesn't directly provide height)
     // Use font metrics or approximation based on font size
     let height: number;
@@ -48,14 +51,14 @@ export class CanvasMeasurer extends BaseMeasurer {
 
     const dimensions: TextDimensions = {
       width: metrics.width,
-      height
+      height,
     };
 
     // Cache the result
     this.measureCache.set(cacheKey, dimensions);
     return dimensions;
   }
-  
+
   /**
    * Clear the measurement cache
    */
