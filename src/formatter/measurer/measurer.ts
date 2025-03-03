@@ -37,7 +37,7 @@ export interface Measurer {
    * @param fontConfig The font configuration to apply
    * @returns The lines of text
    */
-  splitTextToSize(text: string, maxWidth: number, fontConfig: FontConfiguration);
+  splitTextToSize(text: string, maxWidth: number, fontConfig: FontConfiguration): string[];
 }
 
 /**
@@ -54,7 +54,5 @@ export abstract class BaseMeasurer implements Measurer {
     return this.measureText(text, fontConfig).height;
   }
 
-  splitTextToSize(text: string, maxWidth: number, fontConfig: FontConfiguration) {
-    return this.splitTextToSize(text, maxWidth, fontConfig);
-  }
+  abstract splitTextToSize(text: string, maxWidth: number, fontConfig: FontConfiguration): string[];
 }
