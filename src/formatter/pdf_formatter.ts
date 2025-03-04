@@ -51,7 +51,8 @@ import DocWrapper from './pdf_formatter/doc_wrapper';
 import ChordProParser from '../parser/chord_pro_parser';
 import TextFormatter from './text_formatter';
 import Metadata from '../chord_sheet/metadata';
-import { LayoutConfig, LayoutEngine, LineLayout } from './layout/layout_engine';
+import { LayoutEngine } from './layout/layout_engine';
+import { LayoutConfig, LineLayout } from './layout';
 
 declare const performance: Performance;
 
@@ -763,6 +764,8 @@ class PdfFormatter extends Formatter {
   private recordFormattingTime(): void {
     const endTime = performance.now();
     this.renderTime = ((endTime - this.startTime) / 1000);
+    // eslint-disable-next-line no-console
+    console.log(`Rendered in ${this.renderTime.toFixed(2)} seconds`);
   }
 }
 
