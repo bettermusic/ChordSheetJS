@@ -57,3 +57,30 @@ export function updatePosition(
     newColumn: currentColumn,
   };
 }
+
+/**
+ * Count different types of lines within layouts
+ */
+export function countLineTypes(lineLayouts: LineLayout[][]) {
+  const flattened = lineLayouts.flat();
+
+  return {
+    chordLyricPairLines: flattened.filter((ll) => ll.type === 'ChordLyricsPair').length,
+    commentLines: flattened.filter((ll) => ll.type === 'Comment').length,
+    sectionLabelLines: flattened.filter((ll) => ll.type === 'SectionLabel').length,
+    tagLines: flattened.filter((ll) => ll.type === 'Tag').length,
+    emptyLines: flattened.filter((ll) => ll.type === 'Empty').length,
+    nonLyricLines: flattened.filter((ll) => ll.type === 'Comment' || ll.type === 'SectionLabel').length,
+  };
+}
+
+/**
+ * Determine if a paragraph should be skipped in lyrics-only mode
+ */
+export function shouldSkipParagraph(lineLayouts: LineLayout[][], lyricsOnly = false): boolean {
+  if (!lyricsOnly) return false;
+
+  const counts = countLineTypes(lineLayouts);
+
+  return counts.nonLyricLines === 1 && counts.chordLyricPairLines === 0;
+}

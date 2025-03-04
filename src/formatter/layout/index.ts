@@ -1,10 +1,22 @@
+// Main components
+export { LayoutEngine } from './layout_engine';
+export { ItemProcessor } from './item_processor';
+export { LayoutFactory } from './layout_factory';
+export { LineBreaker } from './line_breaker';
+
+// Helpers and utilities
+export * from './layout_helpers';
+
 // Types
-export * from './types';
+export {
+  BreakPoint,
+  MeasuredItem,
+  LineLayout,
+  ParagraphLayout,
+  SongLayout,
+  LayoutConfig,
+  ParagraphLayoutResult,
+} from './types';
 
-// Paragraph splitting
-export * from './paragraph_splitter/strategies/three_or_less_lines_paragraph_split_strategy';
-export * from './paragraph_splitter/strategies/four_lines_paragraph_split_strategy';
-export * from './paragraph_splitter/strategies/five_or_more_lines_paragraph_split_strategy';
-export * from './paragraph_splitter/paragraph_splitter';
-
-// Processors and utilities
+// Paragraph splitter
+export { ParagraphSplitter } from './paragraph_splitter';
