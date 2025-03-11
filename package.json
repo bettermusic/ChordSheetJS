@@ -76,6 +76,7 @@
     "dev:pdf": "parcel test/formatter/pdf/index.html --port=3000",
     "eslint": "node_modules/.bin/eslint",
     "lint": "yarn unibuild lint",
+    "lint:fix": "yarn unibuild lint --fix",
     "prepare": "yarn install && yarn build:code-generate",
     "release": "yarn unibuild release",
     "readme": "yarn unibuild build readme -f",
