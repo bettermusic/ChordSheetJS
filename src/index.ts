@@ -50,6 +50,11 @@ import {
   PART,
 } from './constants';
 
+import { BaseMeasurer } from './formatter/measurer/measurer';
+import { CanvasMeasurer } from './formatter/measurer/canvas_measurer';
+import { JsPdfMeasurer } from './formatter/measurer/js_pdf_measurer';
+import { LayoutEngine } from './formatter/layout/layout_engine';
+
 export { default as Chord } from './chord';
 export { default as ChordDefinition } from './chord_definition/chord_definition';
 export { default as ChordLyricsPair } from './chord_sheet/chord_lyrics_pair';
@@ -78,6 +83,10 @@ export { default as Ternary } from './chord_sheet/chord_pro/ternary';
 export { default as TextFormatter } from './formatter/text_formatter';
 export { default as UltimateGuitarParser } from './parser/ultimate_guitar_parser';
 export { default as templateHelpers } from './template_helpers';
+
+export { BaseMeasurer } from './formatter/measurer/measurer';
+export { JsPdfMeasurer } from './formatter/measurer/js_pdf_measurer';
+export { LayoutEngine } from './formatter/layout/layout_engine';
 
 export {
   ABC,
@@ -125,6 +134,10 @@ export default {
   TextFormatter,
   UltimateGuitarParser,
   VERSE,
+  BaseMeasurer,
+  CanvasMeasurer,
+  JsPdfMeasurer,
+  LayoutEngine,
   templateHelpers: {
     isEvaluatable,
     isChordLyricsPair,
