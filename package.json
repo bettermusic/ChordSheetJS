@@ -81,7 +81,7 @@
     "unibuild": "tsx ./unibuild.ts"
   },
   "dependencies": {
-    "jspdf": "^3.0.0"
+    "jspdf": "^3.0.1"
   },
   "packageManager": "yarn@4.2.2"
 }
