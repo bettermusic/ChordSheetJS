@@ -1,58 +1,65 @@
 import { normalize } from 'path';
-import { ChordProParser, PdfFormatter, Configuration } from '../../../src';
+import { ChordProParser, PdfFormatter, HtmlDivFormatter, HtmlTableFormatter, TextFormatter, ChordProFormatter, ChordsOverWordsFormatter, Configuration } from '../../../src';
 import { getKeys, getCapos } from '../../../src/helpers';
-
 import { chordproExamples } from './chordpro-examples';
 import { configExamples } from './config-examples';
+import { exampleSongSymbol, exampleSongSolfege } from '../../fixtures/song';
 
 // Initialize CodeMirror instances
 const editor = CodeMirror(document.getElementById('editor'), {
   mode: 'javascript',
   lineNumbers: true,
-  value: '', // Empty initially
+  value: '',
 });
 editor.setSize('100%', '46vh');
 
 const configEditor = CodeMirror(document.getElementById('configEditor'), {
   mode: 'javascript',
   lineNumbers: true,
-  value: '', // Empty initially
+  value: '',
 });
 configEditor.setSize('100%', '46vh');
 
-// Populate the dropdowns
+// DOM elements
 const chordproSelect = document.getElementById('chordproSelect');
 const configSelect = document.getElementById('configSelect');
 const keySelect = document.getElementById('keySelect');
 const capoSelect = document.getElementById('capoSelect');
+const formatterSelect = document.getElementById('formatterSelect');
+const pdfViewer = document.getElementById('pdfViewer');
+const textViewer = document.getElementById('textViewer');
+
+// Formatter instances
+const formatters = {
+  PdfFormatter: new PdfFormatter(),
+  HtmlDivFormatter: new HtmlDivFormatter(),
+  HtmlTableFormatter: new HtmlTableFormatter(),
+  TextFormatter: new TextFormatter(),
+  ChordProFormatter: new ChordProFormatter(),
+  ChordsOverWordsFormatter: new ChordsOverWordsFormatter(),
+};
+
+// Add song objects to examples
+const allExamples = [
+  ...chordproExamples,
+  { name: '[TEST] Example Song Symbol', content: '', songObject: exampleSongSymbol },
+  { name: '[TEST] Example Song Solfege', content: '', songObject: exampleSongSolfege },
+];
 
 function populateSelect(selectElement, options) {
   selectElement.innerHTML = '';
   options.forEach((option, index) => {
     const opt = document.createElement('option');
-    opt.value = index; // Use index to reference the array
+    opt.value = index;
     opt.text = option.name;
     selectElement.add(opt);
   });
 }
 
-populateSelect(chordproSelect, chordproExamples);
+populateSelect(chordproSelect, allExamples);
 populateSelect(configSelect, configExamples);
 
-// Function to render PDF in an <iframe>
-const renderPDFInBrowser = async (pdfBlob) => {
-  const pdfContainer = document.getElementById('pdfViewer');
-  pdfContainer.innerHTML = ''; // Clear previous content
-  const iframe = document.createElement('iframe');
-  iframe.style.width = '100%';
-  iframe.style.height = '100%';
-  const blobUrl = URL.createObjectURL(pdfBlob);
-  iframe.src = blobUrl;
-  pdfContainer.appendChild(iframe);
-};
-
 function initializeKeyAndCapoSelectors(songKey) {
-  // Initialize key selector
   const keys = getKeys(songKey);
   keySelect.innerHTML = '';
   keys.forEach(key => {
@@ -63,17 +70,12 @@ function initializeKeyAndCapoSelectors(songKey) {
   });
   keySelect.value = songKey;
 
-  // Initialize capo selector
   const capoPositions = getCapos(songKey);
   capoSelect.innerHTML = '';
-
-  // Add 'None' option first
   const noneOption = document.createElement('option');
   noneOption.value = 'none';
   noneOption.textContent = 'None';
   capoSelect.appendChild(noneOption);
-
-  // Add capo positions with their resulting keys
   Object.entries(capoPositions).forEach(([position, resultingKey]) => {
     const option = document.createElement('option');
     option.value = position;
@@ -82,107 +84,130 @@ function initializeKeyAndCapoSelectors(songKey) {
   });
 }
 
-const updatePDF = async (key, capo) => {
-  const chordProText = editor.getValue();
+const updateOutput = async (key, capo) => {
+  const selectedExampleIndex = parseInt(chordproSelect.value);
+  const selectedExample = allExamples[selectedExampleIndex];
   const configText = configEditor.getValue();
-  if (!chordProText.trim() || !configText.trim()) {
+  const selectedFormatter = formatterSelect.value;
+
+  if (!configText.trim() && selectedFormatter === 'PdfFormatter') {
     return;
   }
 
-  let configJson;
-  try {
-    configJson = JSON.parse(configText);
-  } catch (e) {
-    console.error('Invalid JSON in config editor:', e);
-    return;
+  let configJson = {};
+  if (selectedFormatter === 'PdfFormatter') {
+    try {
+      configJson = JSON.parse(configText);
+    } catch (e) {
+      console.error('Invalid JSON in config editor:', e);
+      return;
+    }
   }
 
   try {
-    let song = new ChordProParser().parse(chordProText, { softLineBreaks: true });
+    let song;
+    if (selectedExample.songObject) {
+      song = selectedExample.songObject;
+      editor.setOption('readOnly', true);
+    } else {
+      const chordProText = editor.getValue();
+      if (!chordProText.trim()) return;
+      song = new ChordProParser().parse(chordProText, { softLineBreaks: true });
+      editor.setOption('readOnly', false);
+    }
 
-    // If this is the first load or selectors haven't been initialized
-    if (!keySelect.options.length) {
+    if (!keySelect.options.length && song.key) {
       initializeKeyAndCapoSelectors(song.key);
     }
 
-    // Use either the provided key/capo or the current selector values
-    const initialKey = key || keySelect.value;
+    const initialKey = key || (keySelect.value || song.key);
     const capoPosition = capo || capoSelect.value;
+    if (initialKey && song.key) song = song.changeKey(initialKey);
+    if (capoPosition !== 'none') song = song.setCapo(parseInt(capoPosition));
 
-    // Set the key first
-    song = song.changeKey(initialKey);
-
-    // Apply capo if it's not 'none'
-    if (capoPosition !== 'none') {
-      song = song.setCapo(parseInt(capoPosition));
-    }
-
-    const formatter = new PdfFormatter();
+    const formatter = formatters[selectedFormatter];
     const configuration = {
       key: initialKey,
       normalizeChords: true,
       useUnicodeModifiers: false,
     };
-    formatter.format(song, configuration, configJson);
-    const pdfBlob = await formatter.generatePDF();
-    renderPDFInBrowser(pdfBlob);
+
+    // Render based on formatter type
+    if (selectedFormatter === 'PdfFormatter') {
+      formatter.format(song, configuration, configJson);
+      const pdfBlob = await formatter.generatePDF();
+      const blobUrl = URL.createObjectURL(pdfBlob);
+      pdfViewer.src = blobUrl;
+      pdfViewer.style.display = 'block';
+      textViewer.style.display = 'none';
+    } else {
+      const output = formatter.format(song, configuration);
+      textViewer.innerHTML = selectedFormatter.includes('Html') ? output : `<pre>${output}</pre>`;
+      textViewer.style.display = 'block';
+      pdfViewer.style.display = 'none';
+    }
   } catch (e) {
-    console.log('⚠️ Error generating PDF:', e);
+    console.log(`⚠️ Error generating output with ${selectedFormatter}:`, e);
   }
 };
 
-// Function to load ChordPro example
-function loadChordproExample(index) {
-  const example = chordproExamples[index];
-  editor.setValue(example.content);
-  updatePDF();
+function loadExample(index) {
+  const example = allExamples[index];
+  if (example.songObject) {
+    editor.setValue(`// Using pre-defined Song object: ${example.name}\n// Editor is read-only`);
+    editor.setOption('readOnly', true);
+  } else {
+    editor.setValue(example.content);
+    editor.setOption('readOnly', false);
+  }
+  updateOutput();
 }
 
-// Function to load config example
 function loadConfigExample(index) {
   const example = configExamples[index];
   const configString = JSON.stringify(example.content, null, 4);
   configEditor.setValue(configString);
-  updatePDF();
+  updateOutput();
 }
 
 // Event Listeners
 keySelect.addEventListener('change', (e) => {
-  const newKey = e.target.value;
-  // Reinitialize both selectors for the new key
-  initializeKeyAndCapoSelectors(newKey);
-  updatePDF(newKey, capoSelect.value);
+  initializeKeyAndCapoSelectors(e.target.value);
+  updateOutput(e.target.value, capoSelect.value);
 });
 
 capoSelect.addEventListener('change', (e) => {
-  updatePDF(keySelect.value, e.target.value);
+  updateOutput(keySelect.value, e.target.value);
 });
 
-
 chordproSelect.addEventListener('change', () => {
-  loadChordproExample(chordproSelect.value);
+  loadExample(chordproSelect.value);
 });
 
 configSelect.addEventListener('change', () => {
   loadConfigExample(configSelect.value);
 });
 
+formatterSelect.addEventListener('change', () => {
+  const isPdf = formatterSelect.value === 'PdfFormatter';
+  configSelect.disabled = !isPdf;
+  configEditor.setOption('readOnly', !isPdf);
+  if (!isPdf) configEditor.setValue('// Configs only apply to PdfFormatter');
+  updateOutput();
+});
+
 editor.on('change', () => {
-  updatePDF();
+  if (!editor.getOption('readOnly')) updateOutput();
 });
 
 configEditor.on('change', () => {
-  updatePDF();
+  if (formatterSelect.value === 'PdfFormatter') updateOutput();
 });
 
-// Initialize the application
 function initialize() {
-  // Set default selections
   chordproSelect.value = 0;
   configSelect.value = 0;
-
-  // Initial loading of examples
-  loadChordproExample(chordproSelect.value);
+  loadExample(chordproSelect.value);
   loadConfigExample(configSelect.value);
 }
 
