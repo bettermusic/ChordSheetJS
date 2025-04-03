@@ -1,4 +1,4 @@
-import { FontConfiguration, LineStyle, PdfConstructor } from './types';
+import { PdfConstructor } from './types';
 import { ImageCompression, jsPDFOptions } from 'jspdf';
 import {
   NimbusSansLBolBold,
@@ -6,7 +6,7 @@ import {
   NimbusSansLRegItaItalic,
   NimbusSansLRegNormal,
 } from './fonts/NimbusSansLFonts.base64';
-import defaultPDFConfiguration from './default_configuration';
+import { LineStyle, defaultFontConfigurations, FontConfiguration } from '../configuration';
 
 const defaultOptions: jsPDFOptions = {
   orientation: 'p',
@@ -19,7 +19,7 @@ const defaultOptions: jsPDFOptions = {
 class DocWrapper {
   currentPage = 1;
 
-  fontConfiguration: FontConfiguration = defaultPDFConfiguration.fonts.text;
+  fontConfiguration: FontConfiguration = defaultFontConfigurations.text;
 
   totalPages = 1;
 

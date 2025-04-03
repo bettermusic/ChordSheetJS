@@ -164,7 +164,7 @@ class ChordsOverWordsFormatter extends Formatter {
   }
 
   private formatEvaluatable(item: Ternary, metadata: Metadata) {
-    return item.evaluate(metadata, this.configuration.metadataSeparator);
+    return item.evaluate(metadata, this.configuration.metadata.separator);
   }
 
   private formatChordLyricsPair(item: ChordLyricsPair, line: Line) {

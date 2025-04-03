@@ -1,22 +1,27 @@
-import { ColumnConfig, LayoutConfig } from './types';
+import { MeasurementBasedLayoutConfig, ColumnConfig, Margins } from '../configuration';
 
 class Dimensions {
   pageWidth: number;
 
   pageHeight: number;
 
-  layoutConfig: LayoutConfig;
+  layoutConfig: MeasurementBasedLayoutConfig;
 
   columns: ColumnConfig;
 
-  constructor(pageWidth: number, pageHeight: number, layoutConfig: LayoutConfig, columns: ColumnConfig) {
+  constructor(
+    pageWidth: number,
+    pageHeight: number,
+    layoutConfig: MeasurementBasedLayoutConfig,
+    columns: ColumnConfig,
+  ) {
     this.pageWidth = pageWidth;
     this.pageHeight = pageHeight;
     this.layoutConfig = layoutConfig;
     this.columns = columns;
   }
 
-  get margins() {
+  get margins(): Margins {
     return this.layoutConfig.global.margins;
   }
 

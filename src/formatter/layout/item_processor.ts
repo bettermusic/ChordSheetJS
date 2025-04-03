@@ -2,7 +2,7 @@ import Line from '../../chord_sheet/line';
 import ChordLyricsPair from '../../chord_sheet/chord_lyrics_pair';
 import Tag from '../../chord_sheet/tag';
 import SoftLineBreak from '../../chord_sheet/soft_line_break';
-import { FontConfiguration } from '../pdf_formatter/types';
+import { FontConfiguration } from '../configuration';
 import { Measurer } from '../measurer/measurer';
 import { LayoutConfig, MeasuredItem } from './types';
 import Song from '../../chord_sheet/song';
