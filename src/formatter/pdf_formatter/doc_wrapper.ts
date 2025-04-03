@@ -151,6 +151,14 @@ class DocWrapper {
     });
   }
 
+  setDrawColor(color: number | string) {
+    this.doc.setDrawColor(color);
+  }
+
+  setLineWidth(width: number) {
+    this.doc.setLineWidth(width);
+  }
+
   splitTextToSize(text: string | null, maxWidth: number, fontStyle?: FontConfiguration) {
     return this.withFontConfiguration(fontStyle || null, () => this.doc.splitTextToSize(text, maxWidth));
   }
