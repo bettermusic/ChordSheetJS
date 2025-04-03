@@ -12,12 +12,11 @@ import {
   Ternary,
 } from '../src';
 
-import { configure } from '../src/formatter/configuration';
+import { configure, defaultCssClasses } from '../src/formatter/configuration';
 import Font from '../src/chord_sheet/font';
 import FontSize from '../src/chord_sheet/font_size';
 import { newlinesToBreaks, renderSection } from '../src/template_helpers';
 import { createLine, createLiteral, createParagraph } from './utilities';
-import { defaultCssClasses } from '../src/formatter/html_formatter';
 
 const {
   isChordLyricsPair,

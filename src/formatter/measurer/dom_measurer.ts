@@ -1,5 +1,5 @@
 import { BaseMeasurer, TextDimensions } from './measurer';
-import { FontConfiguration } from '../pdf_formatter/types';
+import { FontConfiguration } from '../configuration';
 declare const document: any;
 declare type HTMLElement = any;
 

@@ -6,14 +6,15 @@ import Item from './chord_sheet/item';
 import Line from './chord_sheet/line';
 import Paragraph from './chord_sheet/paragraph';
 import Metadata from './chord_sheet/metadata';
-import Configuration, { defaultDelegate, Delegate } from './formatter/configuration';
+import {
+  Configuration, defaultDelegate, Delegate, HtmlTemplateCssClasses,
+} from './formatter/configuration';
 import Evaluatable from './chord_sheet/chord_pro/evaluatable';
 import Font from './chord_sheet/font';
 import { renderChord } from './helpers';
 import When from './template_helpers/when';
 import { Literal, SoftLineBreak } from './index';
 import WhenCallback from './template_helpers/when_callback';
-import { HtmlTemplateCssClasses } from './formatter/html_formatter';
 
 type EachCallback = (_item: any) => string;
 

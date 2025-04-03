@@ -1,4 +1,5 @@
-import HtmlFormatter, { Template, CSS, HtmlTemplateCssClasses } from './html_formatter';
+import { HtmlTemplateCssClasses } from './configuration';
+import HtmlFormatter, { Template, CSS } from './html_formatter';
 import template from './templates/html_table_formatter';
 
 function defaultCss(cssClasses: HtmlTemplateCssClasses): CSS {
@@ -50,7 +51,7 @@ class HtmlTableFormatter extends HtmlFormatter {
   }
 
   get defaultCss(): CSS {
-    return defaultCss(this.cssClasses);
+    return defaultCss(this.configuration.cssClasses);
   }
 }
 

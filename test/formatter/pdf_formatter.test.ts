@@ -1,17 +1,14 @@
 import '../matchers';
 import { exampleSongSymbol } from '../fixtures/song';
 import PdfFormatter from '../../src/formatter/pdf_formatter';
-import defaultConfiguration from '../../src/formatter/pdf_formatter/default_configuration';
 import StubbedPdfDoc from './stubbed_pdf_doc';
-import { configure } from '../../src/formatter/configuration';
+import { PDFConfigurationProperties } from '../../src/formatter/configuration';
 import Song from '../../src/chord_sheet/song';
-import { PDFConfiguration } from '../../src/formatter/pdf_formatter/types';
 
 describe('PdfFormatter', () => {
   it('correctly formats a basic song', () => {
     const formatter = new PdfFormatter();
-    const config = configure({});
-    formatter.format(exampleSongSymbol, config, defaultConfiguration, StubbedPdfDoc);
+    formatter.format(exampleSongSymbol, StubbedPdfDoc);
     const doc = formatter.doc.doc as StubbedPdfDoc;
 
     expect(doc).toHaveText('Written by: ', 45, 95);
@@ -98,10 +95,8 @@ describe('PdfFormatter', () => {
       time: '7/8',
     });
 
-    const config: PDFConfiguration = {
-      ...defaultConfiguration,
+    const config: PDFConfigurationProperties = {
       layout: {
-        ...defaultConfiguration.layout,
         header: {
           height: 60,
           content: [
@@ -118,7 +113,7 @@ describe('PdfFormatter', () => {
       },
     };
 
-    formatter.format(song, configure({}), config, StubbedPdfDoc);
+    formatter.configure(config).format(song, StubbedPdfDoc);
     const doc = formatter.doc.doc as StubbedPdfDoc;
 
     expect(doc).toHaveText('Key of Ab - BPM 140 - Time 7/8', 45, 63);
@@ -128,10 +123,8 @@ describe('PdfFormatter', () => {
     const formatter = new PdfFormatter();
     const song = new Song();
 
-    const config: PDFConfiguration = {
-      ...defaultConfiguration,
+    const config: PDFConfigurationProperties = {
       layout: {
-        ...defaultConfiguration.layout,
         header: {
           height: 60,
           content: [],
@@ -152,7 +145,7 @@ describe('PdfFormatter', () => {
       },
     };
 
-    formatter.format(song, configure({}), config, StubbedPdfDoc);
+    formatter.configure(config).format(song, StubbedPdfDoc);
     const doc = formatter.doc.doc as StubbedPdfDoc;
 
     expect(doc.renderedItems).toHaveLength(1);
@@ -164,10 +157,8 @@ describe('PdfFormatter', () => {
     const formatter = new PdfFormatter();
     const song = new Song();
 
-    const config: PDFConfiguration = {
-      ...defaultConfiguration,
+    const config: PDFConfigurationProperties = {
       layout: {
-        ...defaultConfiguration.layout,
         header: {
           height: 60,
           content: [],
@@ -193,7 +184,7 @@ describe('PdfFormatter', () => {
       },
     };
 
-    formatter.format(song, configure({}), config, StubbedPdfDoc);
+    formatter.configure(config).format(song, StubbedPdfDoc);
     const doc = formatter.doc.doc as StubbedPdfDoc;
 
     expect(doc.renderedItems).toHaveLength(1);
@@ -205,10 +196,8 @@ describe('PdfFormatter', () => {
     const formatter = new PdfFormatter();
     const song = new Song();
 
-    const config: PDFConfiguration = {
-      ...defaultConfiguration,
+    const config: PDFConfigurationProperties = {
       layout: {
-        ...defaultConfiguration.layout,
         header: {
           height: 60,
           content: [],
@@ -232,7 +221,7 @@ describe('PdfFormatter', () => {
       },
     };
 
-    formatter.format(song, configure({}), config, StubbedPdfDoc);
+    formatter.configure(config).format(song, StubbedPdfDoc);
     const doc = formatter.doc.doc as StubbedPdfDoc;
 
     expect(doc.renderedItems).toHaveLength(0);
@@ -240,12 +229,45 @@ describe('PdfFormatter', () => {
 
   it('hides spefcific chord diagrams when using the global override', () => {
     const formatter = new PdfFormatter();
-    const config: PDFConfiguration = {
-      ...defaultConfiguration,
+    const config: PDFConfigurationProperties = {
       layout: {
-        ...defaultConfiguration.layout,
         chordDiagrams: {
-          ...defaultConfiguration.layout.chordDiagrams,
+          enabled: true,
+          renderingConfig: {
+            titleY: 28,
+            neckWidth: 120,
+            neckHeight: 160,
+            nutThickness: 10,
+            fretThickness: 4,
+            nutColor: 0,
+            fretColor: '#929292',
+            stringIndicatorSize: 14,
+            fingerIndicatorSize: 16,
+            stringColor: 0,
+            fingerIndicatorOffset: 0,
+            stringThickness: 3,
+            fretLineThickness: 4,
+            openStringIndicatorThickness: 2,
+            unusedStringIndicatorThickness: 2,
+            markerThickness: 2,
+            barreThickness: 2,
+            titleFontSize: 48,
+            baseFretFontSize: 8,
+            fingerNumberFontSize: 28,
+            showFingerNumbers: true,
+            diagramSpacing: 7,
+          },
+          fonts: {
+            title: {
+              name: 'NimbusSansL-Bol', style: 'bold', size: 9, color: 'black',
+            },
+            fingerings: {
+              name: 'NimbusSansL-Bol', style: 'bold', size: 6, color: 'black',
+            },
+            baseFret: {
+              name: 'NimbusSansL-Bol', style: 'bold', size: 6, color: 'black',
+            },
+          },
           overrides: {
             global: {
               'G': {
@@ -256,7 +278,7 @@ describe('PdfFormatter', () => {
         },
       },
     };
-    formatter.format(exampleSongSymbol, configure({}), config, StubbedPdfDoc);
+    formatter.configure(config).format(exampleSongSymbol, StubbedPdfDoc);
     const doc = formatter.doc.doc as StubbedPdfDoc;
 
     expect(doc).toHaveText('Am', 54, 538);

@@ -1,6 +1,34 @@
-import { PDFConfiguration } from './types';
+import {
+  MeasurementBasedFormatterConfiguration,
+  MeasurementBasedConfigurationProperties,
+  MeasurementBasedLayoutConfig,
+  ChordDiagramsConfig,
+  SectionsConfig,
+} from './measurement_based_configuration';
 
-const defaultConfiguration: PDFConfiguration = {
+// PDF layout configuration extends measurement-based layout
+export interface PDFLayoutConfig extends MeasurementBasedLayoutConfig {
+  // PDF requires these fields that are optional in the base config
+  header: MeasurementBasedLayoutConfig['header'];
+  footer: MeasurementBasedLayoutConfig['footer'];
+  sections: SectionsConfig;
+  chordDiagrams: ChordDiagramsConfig;
+}
+
+// PDF formatter configuration
+export interface PDFFormatterConfiguration extends MeasurementBasedFormatterConfiguration {
+  version: string;
+  // Override layout with the PDF layout config
+  layout: PDFLayoutConfig;
+}
+
+// PDF ConfigurationProperties type
+export interface PDFConfigurationProperties extends MeasurementBasedConfigurationProperties {
+  version?: string;
+  layout?: Partial<PDFLayoutConfig>;
+}
+
+export const pdfSpecificDefaults: Partial<PDFFormatterConfiguration> = {
   // Font settings for various elements
   fonts: {
     title: {
@@ -135,5 +163,3 @@ const defaultConfiguration: PDFConfiguration = {
     },
   },
 };
-
-export default defaultConfiguration;

@@ -3,7 +3,7 @@ import {
 } from './renderer';
 
 import DocWrapper from '../formatter/pdf_formatter/doc_wrapper';
-import { ChordDiagramFontConfigurations, FontConfiguration } from '../formatter/pdf_formatter/types';
+import { ChordDiagramFontConfigurations, FontConfiguration } from '../formatter/configuration';
 
 const defaultWidth = 150;
 const defaultHeight = 270;

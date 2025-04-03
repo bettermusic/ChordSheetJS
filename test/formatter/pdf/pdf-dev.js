@@ -1,5 +1,13 @@
 import { normalize } from 'path';
-import { ChordProParser, PdfFormatter, HtmlDivFormatter, HtmlTableFormatter, TextFormatter, ChordProFormatter, ChordsOverWordsFormatter, Configuration } from '../../../src';
+import { 
+  ChordProParser, 
+  PdfFormatter, 
+  HtmlDivFormatter, 
+  HtmlTableFormatter, 
+  TextFormatter, 
+  ChordProFormatter, 
+  ChordsOverWordsFormatter,
+} from '../../../src';
 import { getKeys, getCapos } from '../../../src/helpers';
 import { chordproExamples } from './chordpro-examples';
 import { configExamples } from './config-examples';
@@ -31,9 +39,9 @@ const textViewer = document.getElementById('textViewer');
 
 // Formatter instances
 const formatters = {
+  HtmlTableFormatter: new HtmlTableFormatter(),
   PdfFormatter: new PdfFormatter(),
   HtmlDivFormatter: new HtmlDivFormatter(),
-  HtmlTableFormatter: new HtmlTableFormatter(),
   TextFormatter: new TextFormatter(),
   ChordProFormatter: new ChordProFormatter(),
   ChordsOverWordsFormatter: new ChordsOverWordsFormatter(),
@@ -90,12 +98,14 @@ const updateOutput = async (key, capo) => {
   const configText = configEditor.getValue();
   const selectedFormatter = formatterSelect.value;
 
-  if (!configText.trim() && selectedFormatter === 'PdfFormatter') {
+  // Check if config is needed for this formatter type
+  const formatterNeedsConfig = ['PdfFormatter', 'LayoutHtmlFormatter'].includes(selectedFormatter);
+  if (!configText.trim() && formatterNeedsConfig) {
     return;
   }
 
   let configJson = {};
-  if (selectedFormatter === 'PdfFormatter') {
+  if (formatterNeedsConfig) {
     try {
       configJson = JSON.parse(configText);
     } catch (e) {
@@ -130,24 +140,27 @@ const updateOutput = async (key, capo) => {
       key: initialKey,
       normalizeChords: true,
       useUnicodeModifiers: false,
+      ...configJson
     };
 
     // Render based on formatter type
     if (selectedFormatter === 'PdfFormatter') {
-      formatter.format(song, configuration, configJson);
+      formatter.configure(configuration)
+        .format(song);
       const pdfBlob = await formatter.generatePDF();
       const blobUrl = URL.createObjectURL(pdfBlob);
       pdfViewer.src = blobUrl;
       pdfViewer.style.display = 'block';
       textViewer.style.display = 'none';
     } else {
-      const output = formatter.format(song, configuration);
+      const output = formatter.format(song);
       textViewer.innerHTML = selectedFormatter.includes('Html') ? output : `<pre>${output}</pre>`;
       textViewer.style.display = 'block';
       pdfViewer.style.display = 'none';
     }
   } catch (e) {
     console.log(`⚠️ Error generating output with ${selectedFormatter}:`, e);
+    console.error(e);
   }
 };
 
@@ -189,10 +202,20 @@ configSelect.addEventListener('change', () => {
 });
 
 formatterSelect.addEventListener('change', () => {
-  const isPdf = formatterSelect.value === 'PdfFormatter';
-  configSelect.disabled = !isPdf;
-  configEditor.setOption('readOnly', !isPdf);
-  if (!isPdf) configEditor.setValue('// Configs only apply to PdfFormatter');
+  const needsConfig = ['PdfFormatter', 'LayoutHtmlFormatter'].includes(formatterSelect.value);
+  configSelect.disabled = !needsConfig;
+  configEditor.setOption('readOnly', !needsConfig);
+  
+  if (!needsConfig) {
+    configEditor.setValue('// Configs only apply to PdfFormatter and LayoutHtmlFormatter');
+  } else if (formatterSelect.value === 'LayoutHtmlFormatter') {
+    // Find the Layout HTML Config index
+    const layoutConfigIndex = configExamples.findIndex(config => config.name === 'Layout HTML Config');
+    if (layoutConfigIndex >= 0) {
+      configSelect.value = layoutConfigIndex;
+      loadConfigExample(layoutConfigIndex);
+    }
+  }
   updateOutput();
 });
 
@@ -201,14 +224,31 @@ editor.on('change', () => {
 });
 
 configEditor.on('change', () => {
-  if (formatterSelect.value === 'PdfFormatter') updateOutput();
+  const formatter = formatterSelect.value;
+  if (['PdfFormatter', 'LayoutHtmlFormatter'].includes(formatter)) {
+    updateOutput();
+  }
 });
 
 function initialize() {
+  // Add Layout HTML formatter to the dropdown
+  const layoutOption = document.createElement('option');
+  layoutOption.value = 'LayoutHtmlFormatter';
+  layoutOption.text = 'Layout HTML';
+  formatterSelect.add(layoutOption);
+  
   chordproSelect.value = 0;
   configSelect.value = 0;
   loadExample(chordproSelect.value);
   loadConfigExample(configSelect.value);
 }
 
+// Initialize on load
 document.addEventListener('DOMContentLoaded', initialize);
+
+// Handle window resize to update layout HTML formatter if active
+window.addEventListener('resize', () => {
+  if (formatterSelect.value === 'LayoutHtmlFormatter') {
+    updateOutput();
+  }
+});

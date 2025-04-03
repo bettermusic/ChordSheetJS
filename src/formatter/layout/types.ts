@@ -2,7 +2,7 @@ import ChordLyricsPair from '../../chord_sheet/chord_lyrics_pair';
 import Line from '../../chord_sheet/line';
 import SoftLineBreak from '../../chord_sheet/soft_line_break';
 import Tag from '../../chord_sheet/tag';
-import { FontConfiguration } from '../pdf_formatter/types';
+import { FontConfiguration } from '../configuration';
 
 export interface Measurer {
   measureTextWidth(text: string, font: { size: number; lineHeight?: number }): number;

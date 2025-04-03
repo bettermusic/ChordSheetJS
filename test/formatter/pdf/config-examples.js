@@ -1,6 +1,6 @@
-/* eslint-disable max-len */
-import defaultConfiguration from '../../../src/formatter/pdf_formatter/default_configuration';
+import { pdfSpecificDefaults } from '../../../src/formatter/configuration';
 
+/* eslint-disable max-len */
 export const configExamples = [
   {
     name: 'Default Config (2 Col)',
@@ -988,6 +988,6 @@ export const configExamples = [
   },
   {
     name: 'Library Default',
-    content: defaultConfiguration,
+    content: pdfSpecificDefaults,
   },
 ];

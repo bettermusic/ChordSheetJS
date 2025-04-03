@@ -1,4 +1,4 @@
-import { FontConfiguration } from '../pdf_formatter/types';
+import { FontConfiguration } from '../configuration';
 
 export interface TextDimensions {
   width: number;
