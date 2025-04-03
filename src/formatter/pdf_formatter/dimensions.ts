@@ -1,22 +1,27 @@
-import { ColumnConfig, LayoutConfig } from './types';
+import { MeasurementBasedLayoutConfig, ColumnConfig, Margins } from '../configuration';
 
 class Dimensions {
   pageWidth: number;
 
   pageHeight: number;
 
-  layoutConfig: LayoutConfig;
+  layoutConfig: MeasurementBasedLayoutConfig;
 
   columns: ColumnConfig;
 
-  constructor(pageWidth: number, pageHeight: number, layoutConfig: LayoutConfig, columns: ColumnConfig) {
+  constructor(
+    pageWidth: number,
+    pageHeight: number,
+    layoutConfig: MeasurementBasedLayoutConfig,
+    columns: ColumnConfig,
+  ) {
     this.pageWidth = pageWidth;
     this.pageHeight = pageHeight;
     this.layoutConfig = layoutConfig;
     this.columns = columns;
   }
 
-  get margins() {
+  get margins(): Margins {
     return this.layoutConfig.global.margins;
   }
 
@@ -41,7 +46,8 @@ class Dimensions {
 
     const availableSpace = this.pageWidth - this.margins.left - this.margins.right;
     const totalColumnSpacing = (columnCount - 1) * columnSpacing;
-    return (availableSpace - totalColumnSpacing) / columnCount;
+    const columnWidth = (availableSpace - totalColumnSpacing) / columnCount;
+    return columnWidth;
   }
 }
 
