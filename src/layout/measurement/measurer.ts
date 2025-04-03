@@ -1,4 +1,4 @@
-import { FontConfiguration } from '../configuration';
+import { FontConfiguration } from '../../formatter/configuration';
 
 export interface TextDimensions {
   width: number;

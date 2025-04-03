@@ -1,6 +1,6 @@
 import { BaseMeasurer, TextDimensions } from './measurer';
-import { FontConfiguration } from '../configuration';
-import DocWrapper from '../pdf_formatter/doc_wrapper';
+import { FontConfiguration } from '../../formatter/configuration';
+import DocWrapper from '../../formatter/pdf_formatter/doc_wrapper';
 
 /**
  * Measures text using jsPDF

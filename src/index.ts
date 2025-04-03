@@ -50,11 +50,11 @@ import {
   PART,
 } from './constants';
 
-import { BaseMeasurer } from './formatter/measurer/measurer';
-import { CanvasMeasurer } from './formatter/measurer';
-import { JsPdfMeasurer } from './formatter/measurer';
-import { LayoutEngine } from './formatter/layout/layout_engine';
-import { DomMeasurer } from './formatter/measurer';
+import { BaseMeasurer } from './layout/measurement/measurer';
+import { CanvasMeasurer } from './layout/measurement';
+import { JsPdfMeasurer } from './layout/measurement';
+import { LayoutEngine } from './layout/engine/layout_engine';
+import { DomMeasurer } from './layout/measurement';
 
 export { default as Chord } from './chord';
 export { default as ChordDefinition } from './chord_definition/chord_definition';
@@ -85,11 +85,11 @@ export { default as TextFormatter } from './formatter/text_formatter';
 export { default as UltimateGuitarParser } from './parser/ultimate_guitar_parser';
 export { default as templateHelpers } from './template_helpers';
 
-export { BaseMeasurer } from './formatter/measurer/measurer';
-export { JsPdfMeasurer } from './formatter/measurer';
-export { DomMeasurer } from './formatter/measurer';
-export { CanvasMeasurer } from './formatter/measurer';
-export { LayoutEngine } from './formatter/layout/layout_engine';
+export { BaseMeasurer } from './layout/measurement/measurer';
+export { JsPdfMeasurer } from './layout/measurement';
+export { DomMeasurer } from './layout/measurement';
+export { CanvasMeasurer } from './layout/measurement';
+export { LayoutEngine } from './layout/engine/layout_engine';
 
 export {
   ABC,

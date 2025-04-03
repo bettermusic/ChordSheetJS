@@ -48,8 +48,7 @@ import Condition from './pdf_formatter/condition';
 import ChordProParser from '../parser/chord_pro_parser';
 import TextFormatter from './text_formatter';
 import Metadata from '../chord_sheet/metadata';
-import { LayoutEngine } from './layout/layout_engine';
-import { LayoutConfig, LineLayout } from './layout';
+import { LayoutConfig, LineLayout, LayoutEngine } from '../layout/engine';
 
 import { PdfConstructor } from './pdf_formatter/types';
 import { getPDFDefaultConfig } from './configuration/default_config_manager';

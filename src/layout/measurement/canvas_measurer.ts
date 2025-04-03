@@ -1,5 +1,5 @@
 import { BaseMeasurer, TextDimensions } from './measurer';
-import { FontConfiguration } from '../configuration';
+import { FontConfiguration } from '../../formatter/configuration';
 declare const document: any;
 declare type CanvasRenderingContext2D = any;
 declare type HTMLCanvasElement = any;

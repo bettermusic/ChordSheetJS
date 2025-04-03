@@ -1,4 +1,4 @@
-import { Measurer } from '../measurer/measurer';
+import { Measurer } from '../measurement/measurer';
 import Song from '../../chord_sheet/song';
 import Paragraph from '../../chord_sheet/paragraph';
 import {
