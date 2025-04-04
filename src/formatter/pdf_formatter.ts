@@ -10,6 +10,7 @@ import { PdfConstructor } from './pdf_formatter/types';
 import { getPDFDefaultConfig } from './configuration/default_config_manager';
 import MeasurementBasedFormatter from './measurement_based_formatter';
 import JsPdfRenderer from '../rendering/js_pdf_renderer';
+import DocWrapper from './pdf_formatter/doc_wrapper';
 
 class PdfFormatter extends MeasurementBasedFormatter<PDFFormatterConfiguration> {
   private song: Song = new Song();
@@ -116,6 +117,18 @@ class PdfFormatter extends MeasurementBasedFormatter<PDFFormatterConfiguration> 
       return this.renderer.generatePDF();
     }
     throw new Error('Renderer not initialized');
+  }
+
+  /**
+   * Get the document wrapper - primarily for testing purposes
+   * @returns {DocWrapper} The document wrapper
+   * @throws {Error} If the renderer is not initialized
+   */
+  getDocumentWrapper(): DocWrapper {
+    if (!this.renderer) {
+      throw new Error('Renderer not initialized');
+    }
+    return this.renderer.doc;
   }
 }
 

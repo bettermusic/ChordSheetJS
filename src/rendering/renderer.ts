@@ -76,7 +76,7 @@ abstract class Renderer {
    * @param paragraphLayouts The layouts to render
    * @param config Additional configuration options
    */
-  render(paragraphLayouts: ParagraphLayout[], config?: any): void {
+  render(paragraphLayouts: ParagraphLayout[], _config?: any): void {
     this.initialize();
 
     // Render the main content
@@ -224,14 +224,17 @@ abstract class Renderer {
    * Start a new page
    */
   protected startNewPage(): void {
-    this.currentPage++;
+    this.currentPage += 1;
     this.createNewPage();
   }
 
   /**
    * Calculate chord and lyrics Y offsets based on the line content
    */
-  protected calculateChordLyricYOffsets(items: MeasuredItem[], yOffset: number): { chordsYOffset: number; lyricsYOffset: number } {
+  protected calculateChordLyricYOffsets(
+    items: MeasuredItem[],
+    yOffset: number,
+  ): { chordsYOffset: number; lyricsYOffset: number } {
     // Determine line types
     const hasChords = items.some(({ item }) => item instanceof ChordLyricsPair && item.chords);
     const hasLyrics = items.some(
@@ -385,6 +388,7 @@ abstract class Renderer {
   protected recordRenderingTime(): void {
     const endTime = performance.now();
     this.renderTime = (endTime - this.startTime) / 1000;
+    // eslint-disable-next-line no-console
     console.log(`Rendered in ${this.renderTime.toFixed(2)} seconds`);
   }
 

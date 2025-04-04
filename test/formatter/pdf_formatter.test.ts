@@ -9,7 +9,7 @@ describe('PdfFormatter', () => {
   it('correctly formats a basic song', () => {
     const formatter = new PdfFormatter();
     formatter.format(exampleSongSymbol, StubbedPdfDoc);
-    const doc = formatter.doc.doc as StubbedPdfDoc;
+    const doc = formatter.getDocumentWrapper().doc as StubbedPdfDoc;
 
     expect(doc).toHaveText('Written by: ', 45, 95);
     expect(doc).toHaveText('Verse 1', 45, 119);
@@ -114,7 +114,7 @@ describe('PdfFormatter', () => {
     };
 
     formatter.configure(config).format(song, StubbedPdfDoc);
-    const doc = formatter.doc.doc as StubbedPdfDoc;
+    const doc = formatter.getDocumentWrapper().doc as StubbedPdfDoc;
 
     expect(doc).toHaveText('Key of Ab - BPM 140 - Time 7/8', 45, 63);
   });
@@ -146,7 +146,7 @@ describe('PdfFormatter', () => {
     };
 
     formatter.configure(config).format(song, StubbedPdfDoc);
-    const doc = formatter.doc.doc as StubbedPdfDoc;
+    const doc = formatter.getDocumentWrapper().doc as StubbedPdfDoc;
 
     expect(doc.renderedItems).toHaveLength(1);
 
@@ -185,7 +185,7 @@ describe('PdfFormatter', () => {
     };
 
     formatter.configure(config).format(song, StubbedPdfDoc);
-    const doc = formatter.doc.doc as StubbedPdfDoc;
+    const doc = formatter.getDocumentWrapper().doc as StubbedPdfDoc;
 
     expect(doc.renderedItems).toHaveLength(1);
 
@@ -222,7 +222,7 @@ describe('PdfFormatter', () => {
     };
 
     formatter.configure(config).format(song, StubbedPdfDoc);
-    const doc = formatter.doc.doc as StubbedPdfDoc;
+    const doc = formatter.getDocumentWrapper().doc as StubbedPdfDoc;
 
     expect(doc.renderedItems).toHaveLength(0);
   });
@@ -279,7 +279,7 @@ describe('PdfFormatter', () => {
       },
     };
     formatter.configure(config).format(exampleSongSymbol, StubbedPdfDoc);
-    const doc = formatter.doc.doc as StubbedPdfDoc;
+    const doc = formatter.getDocumentWrapper().doc as StubbedPdfDoc;
 
     expect(doc).toHaveText('Am', 54, 538);
     expect(doc).toHaveText('C/G', 95, 538);

@@ -29,13 +29,13 @@ import {
 import { Blob } from 'buffer';
 
 class JsPdfRenderer extends Renderer {
-  private doc: DocWrapper;
-
   private configuration: PDFFormatterConfiguration;
 
   private _dimensions: Dimensions | null = null;
 
   private _dimensionCacheKey: string | null = null;
+
+  doc: DocWrapper;
 
   constructor(
     song: Song,
@@ -259,17 +259,17 @@ class JsPdfRenderer extends Renderer {
     }
 
     // Draw elements for each page
-    for (let page = 1; page <= pageCount; page++) {
+    for (let page = 1; page <= pageCount; page += 1) {
       const pageElements = this.getElementsForPage(page);
-      if (pageElements.length === 0) continue;
+      if (pageElements.length > 0) {
+        // Go to this page
+        this.doc.setPage(page);
 
-      // Go to this page
-      this.doc.setPage(page);
-
-      // Draw the elements
-      pageElements.forEach((element) => {
-        this.drawElement(element);
-      });
+        // Draw the elements
+        pageElements.forEach((element) => {
+          this.drawElement(element);
+        });
+      }
     }
   }
 
@@ -374,12 +374,17 @@ class JsPdfRenderer extends Renderer {
         break;
       // Handle other element types if needed
       default:
+        // eslint-disable-next-line no-console
         console.warn(`Unknown element type: ${element.type}`);
         break;
     }
   }
 
-  private processChordOverrides(chordName: string, songKey: number | string, overrides: any): { shouldHide: boolean; customDefinition: string | null } {
+  private processChordOverrides(
+    chordName: string,
+    songKey: number | string,
+    overrides: any,
+  ): { shouldHide: boolean; customDefinition: string | null } {
     let shouldHide = false;
     let customDefinition: string | null = null;
 
@@ -617,15 +622,22 @@ class JsPdfRenderer extends Renderer {
     }
   }
 
-  private renderMultilineText(textValue: string, position: any, availableWidth: number, y: number, style: FontConfiguration): void {
+  private renderMultilineText(
+    textValue: string,
+    position: any,
+    availableWidth: number,
+    y: number,
+    style: FontConfiguration,
+  ): void {
     const lines = this.doc.splitTextToSize(textValue, availableWidth);
+    let tempY = y;
 
     lines.forEach((line: string) => {
       const lineWidth = this.doc.getTextWidth(line);
       const x = this.calculateX(position.x, lineWidth);
 
-      this.doc.text(line, x, y);
-      y += style.size * (style.lineHeight ?? 1.2);
+      this.doc.text(line, x, tempY);
+      tempY += style.size * (style.lineHeight ?? 1.2);
     });
   }
 
