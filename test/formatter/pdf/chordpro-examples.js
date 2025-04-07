@@ -3,7 +3,7 @@ export const chordproExamples = [
 //   {
 //     name: 'Goodness of God',
 //     content: `{t:Test}
-//     {key: G}
+// {key: G}
 // [G]In the forest deep and dark, [D]whispers float and fire sparks
 // [Em]Soft and slow, [C]soft and slow`,
 //   },

@@ -1,5 +1,5 @@
-import Condition from '../../../src/formatter/pdf_formatter/condition';
 import { ConditionalRule } from '../../../src/formatter/configuration';
+import Condition from '../../../src/layout/engine/condition';
 
 describe('Condition', () => {
   describe('#evaluate', () => {

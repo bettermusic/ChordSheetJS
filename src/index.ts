@@ -3,6 +3,7 @@ import ChordDefinition from './chord_definition/chord_definition';
 import ChordLyricsPair from './chord_sheet/chord_lyrics_pair';
 import ChordProFormatter from './formatter/chord_pro_formatter';
 import PdfFormatter from './formatter/pdf_formatter';
+import MeasuredHtmlFormatter from './formatter/measured_html_formatter';
 import ChordProParser from './parser/chord_pro_parser';
 import ChordSheetParser from './parser/chord_sheet_parser';
 import ChordSheetSerializer from './chord_sheet_serializer';
@@ -61,6 +62,7 @@ export { default as ChordDefinition } from './chord_definition/chord_definition'
 export { default as ChordLyricsPair } from './chord_sheet/chord_lyrics_pair';
 export { default as ChordProFormatter } from './formatter/chord_pro_formatter';
 export { default as PdfFormatter } from './formatter/pdf_formatter';
+export { default as MeasuredHtmlFormatter } from './formatter/measured_html_formatter';
 export { default as ChordProParser } from './parser/chord_pro_parser';
 export { default as ChordSheetParser } from './parser/chord_sheet_parser';
 export { default as ChordSheetSerializer } from './chord_sheet_serializer';
@@ -113,6 +115,7 @@ export default {
   ChordLyricsPair,
   ChordProFormatter,
   PdfFormatter,
+  MeasuredHtmlFormatter,
   ChordProParser,
   ChordSheetParser,
   ChordSheetSerializer,

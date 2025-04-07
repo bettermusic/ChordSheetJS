@@ -45,7 +45,7 @@ export class DomMeasurer extends BaseMeasurer {
    */
   private setFont(fontConfig: FontConfiguration): void {
     const {
-      name, size, weight = 'normal', style = 'normal',
+      name, size, weight = 'normal', style = 'normal', lineHeight = 1,
     } = fontConfig;
 
     Object.assign(this.measureElement.style, {
@@ -53,6 +53,7 @@ export class DomMeasurer extends BaseMeasurer {
       fontSize: `${size}px`,
       fontWeight: weight,
       fontStyle: style,
+      lineHeight,
     });
   }
 

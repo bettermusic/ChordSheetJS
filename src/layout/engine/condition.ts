@@ -1,4 +1,4 @@
-import { ConditionalRule, ConditionRule, SingleCondition } from '../configuration';
+import { ConditionalRule, ConditionRule, SingleCondition } from '../../formatter/configuration';
 
 function isNumber(value: any): boolean {
   return !Number.isNaN(parseInt(value, 10));

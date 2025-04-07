@@ -3,12 +3,12 @@ import Song from '../chord_sheet/song';
 import { FontConfiguration, PDFFormatterConfiguration } from '../formatter/configuration';
 import { MeasuredItem } from '../layout/engine';
 import DocWrapper from '../formatter/pdf_formatter/doc_wrapper';
-import Dimensions from '../formatter/pdf_formatter/dimensions';
+import Dimensions from '../layout/engine/dimensions';
 import { PdfConstructor } from '../formatter/pdf_formatter/types';
 import ChordDefinition, { isNonSoundingString, isOpenFret } from '../chord_definition/chord_definition';
 import ChordDiagram, { Barre, StringMarker } from '../chord_diagram/chord_diagram';
 import JsPDFRenderer from '../chord_diagram/js_pdf_renderer';
-import Condition from '../formatter/pdf_formatter/condition';
+import Condition from '../layout/engine/condition';
 import {
   Alignment,
   LayoutContentItem,

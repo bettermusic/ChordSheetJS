@@ -7,6 +7,7 @@ import {
   TextFormatter, 
   ChordProFormatter, 
   ChordsOverWordsFormatter,
+  MeasuredHtmlFormatter,
 } from '../../../src';
 import { getKeys, getCapos } from '../../../src/helpers';
 import { chordproExamples } from './chordpro-examples';
@@ -39,6 +40,7 @@ const textViewer = document.getElementById('textViewer');
 
 // Formatter instances
 const formatters = {
+  MeasuredHtmlFormatter: new MeasuredHtmlFormatter(textViewer),
   HtmlTableFormatter: new HtmlTableFormatter(),
   PdfFormatter: new PdfFormatter(),
   HtmlDivFormatter: new HtmlDivFormatter(),
@@ -99,7 +101,7 @@ const updateOutput = async (key, capo) => {
   const selectedFormatter = formatterSelect.value;
 
   // Check if config is needed for this formatter type
-  const formatterNeedsConfig = ['PdfFormatter', 'LayoutHtmlFormatter'].includes(selectedFormatter);
+  const formatterNeedsConfig = ['PdfFormatter', 'MeasuredHtmlFormatter'].includes(selectedFormatter);
   if (!configText.trim() && formatterNeedsConfig) {
     return;
   }
@@ -135,28 +137,66 @@ const updateOutput = async (key, capo) => {
     if (initialKey && song.key) song = song.changeKey(initialKey);
     if (capoPosition !== 'none') song = song.setCapo(parseInt(capoPosition));
 
-    const formatter = formatters[selectedFormatter];
-    const configuration = {
+    // Prepare for rendering
+    if (selectedFormatter === 'PdfFormatter') {
+      // PDF setup
+      pdfViewer.style.display = 'block';
+      textViewer.style.display = 'none';
+    } else {
+      // For all non-PDF formatters
+      textViewer.style.display = 'block';
+      pdfViewer.style.display = 'none';
+    }
+
+    // Create a configuration object
+    let configuration = {
       key: initialKey,
       normalizeChords: true,
       useUnicodeModifiers: false,
       ...configJson
     };
 
-    // Render based on formatter type
-    if (selectedFormatter === 'PdfFormatter') {
-      formatter.configure(configuration)
+    // Handle MeasuredHtmlFormatter specially
+    if (selectedFormatter === 'MeasuredHtmlFormatter') {
+      // Ensure the container is visible before measuring
+      if (textViewer.offsetWidth === 0) {
+        // Force a reflow and wait for the container to be visible
+        setTimeout(() => updateOutput(key, capo), 50);
+        return;
+      }
+      
+      // Get accurate dimensions now that we're sure container is in DOM and visible
+      const width = textViewer.clientWidth;
+      const height = textViewer.clientHeight;
+      
+      console.log('Measured container dimensions:', width, height);
+      
+      // Create a fresh formatter instance with the current container
+      formatters.MeasuredHtmlFormatter = new MeasuredHtmlFormatter(textViewer);
+      
+      // Set page size with proper dimensions
+      configuration.pageSize = {
+        width: width,
+        height: height,
+      };
+      
+      // Format and update
+      formatters.MeasuredHtmlFormatter.configure(configuration)
         .format(song);
-      const pdfBlob = await formatter.generatePDF();
+      const html = formatters.MeasuredHtmlFormatter.getHTMLString();
+      textViewer.innerHTML = html;
+    } else if (selectedFormatter === 'PdfFormatter') {
+      // PDF formatter logic
+      formatters.PdfFormatter.configure(configuration)
+        .format(song);
+      const pdfBlob = await formatters.PdfFormatter.generatePDF();
       const blobUrl = URL.createObjectURL(pdfBlob);
       pdfViewer.src = blobUrl;
-      pdfViewer.style.display = 'block';
-      textViewer.style.display = 'none';
     } else {
+      // All other formatters
+      const formatter = formatters[selectedFormatter];
       const output = formatter.format(song);
       textViewer.innerHTML = selectedFormatter.includes('Html') ? output : `<pre>${output}</pre>`;
-      textViewer.style.display = 'block';
-      pdfViewer.style.display = 'none';
     }
   } catch (e) {
     console.log(`⚠️ Error generating output with ${selectedFormatter}:`, e);
@@ -202,7 +242,7 @@ configSelect.addEventListener('change', () => {
 });
 
 formatterSelect.addEventListener('change', () => {
-  const needsConfig = ['PdfFormatter', 'LayoutHtmlFormatter'].includes(formatterSelect.value);
+  const needsConfig = ['PdfFormatter', 'MeasuredHtmlFormatter'].includes(formatterSelect.value);
   configSelect.disabled = !needsConfig;
   configEditor.setOption('readOnly', !needsConfig);
   
@@ -225,7 +265,7 @@ editor.on('change', () => {
 
 configEditor.on('change', () => {
   const formatter = formatterSelect.value;
-  if (['PdfFormatter', 'LayoutHtmlFormatter'].includes(formatter)) {
+  if (['PdfFormatter', 'MeasuredHtmlFormatter'].includes(formatter)) {
     updateOutput();
   }
 });
@@ -243,12 +283,24 @@ function initialize() {
   loadConfigExample(configSelect.value);
 }
 
+
+// Add a debounce function at the top of your file
+function debounce(func, wait) {
+  let timeout;
+  return function(...args) {
+    const context = this;
+    clearTimeout(timeout);
+    timeout = setTimeout(() => func.apply(context, args), wait);
+  };
+}
+
+
 // Initialize on load
 document.addEventListener('DOMContentLoaded', initialize);
 
 // Handle window resize to update layout HTML formatter if active
 window.addEventListener('resize', () => {
-  if (formatterSelect.value === 'LayoutHtmlFormatter') {
+  if (formatterSelect.value === 'MeasuredHtmlFormatter') {
     updateOutput();
   }
 });

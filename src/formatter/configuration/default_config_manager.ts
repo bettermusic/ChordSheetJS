@@ -4,6 +4,7 @@ import {
   defaultBaseConfiguration,
 } from './base_configuration';
 import { HTMLFormatterConfiguration, htmlSpecificDefaults } from './html_configuration';
+import { MeasuredHtmlFormatterConfiguration, measuredHtmlSpecificDefaults } from './measured_html_configuration';
 import {
   MeasurementBasedFormatterConfiguration,
   measurementSpecificDefaults,
@@ -15,6 +16,7 @@ const formatterDefaultParts: Record<string, any> = {
   'html': htmlSpecificDefaults,
   'measurement': measurementSpecificDefaults,
   'pdf': pdfSpecificDefaults,
+  'measured_html': measuredHtmlSpecificDefaults,
 };
 
 const inheritanceMap: Record<string, string[]> = {
@@ -22,6 +24,7 @@ const inheritanceMap: Record<string, string[]> = {
   html: ['base', 'html'],
   measurement: ['base', 'measurement'],
   pdf: ['base', 'measurement', 'pdf'],
+  measured_html: ['base', 'measurement', 'measured_html'],
 };
 
 /**
@@ -61,6 +64,9 @@ export const getMeasurementDefaultConfig = ():
 
 export const getPDFDefaultConfig = ():
   PDFFormatterConfiguration => getDefaultConfig<PDFFormatterConfiguration>('pdf');
+
+export const getMeasuredHtmlDefaultConfig = ():
+  MeasuredHtmlFormatterConfiguration => getDefaultConfig<MeasuredHtmlFormatterConfiguration>('measured_html');
 
 /**
  * Register a new formatter type with its specific defaults and inheritance chain
