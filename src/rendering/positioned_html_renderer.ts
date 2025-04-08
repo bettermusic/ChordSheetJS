@@ -1,7 +1,7 @@
 import Renderer, { PositionedElement } from './renderer';
 import Song from '../chord_sheet/song';
 import { FontConfiguration } from '../formatter/configuration';
-import { MeasuredItem } from '../layout/engine';
+import { LineLayout, MeasuredItem } from '../layout/engine';
 import Dimensions from '../layout/engine/dimensions';
 import ChordProParser from '../parser/chord_pro_parser';
 import TextFormatter from '../formatter/text_formatter';
@@ -19,6 +19,8 @@ import {
 import Condition from '../layout/engine/condition';
 import { MeasuredHtmlFormatterConfiguration } from '../formatter/configuration/measured_html_configuration';
 import HtmlDocWrapper from './html_doc_wrapper';
+import { isColumnBreak } from '../template_helpers';
+import Tag from '../chord_sheet/tag';
 
 declare const document: any;
 declare type HTMLElement = any;
@@ -225,7 +227,7 @@ class PositionedHtmlRenderer extends Renderer {
   }
 
   protected getPageHeight(): number {
-    return this.doc.pageSize.height === 'auto' ? 1000000 : this.doc.pageSize.height;
+    return this.doc.pageSize.height;
   }
 
   protected getLeftMargin(): number {
