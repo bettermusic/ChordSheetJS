@@ -22,7 +22,7 @@ class HtmlDocWrapper {
 
   constructor(container: HTMLElement, pageSize: { width: number; height: number }) {
     this.container = container;
-    this.container.style.width = 'fit-content';
+    this.container.style.width = '100%';
     this.container.style.margin = '0 auto';
     this.pageSize = pageSize;
     this.measurer = new DomMeasurer();

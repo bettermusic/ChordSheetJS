@@ -153,6 +153,7 @@ const updateOutput = async (key, capo) => {
       key: initialKey,
       normalizeChords: true,
       useUnicodeModifiers: false,
+      decapo: true,
       ...configJson
     };
 

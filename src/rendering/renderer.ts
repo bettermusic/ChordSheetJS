@@ -276,6 +276,7 @@ abstract class Renderer {
         renderKey: null,
         useUnicodeModifier: this.useUnicodeModifiers(),
         normalizeChords: this.normalizeChords(),
+        decapo: this.getConfiguration().decapo,
       },
     );
   }
@@ -441,6 +442,9 @@ abstract class Renderer {
   //
   // CONFIGURATION GETTERS - Must be implemented by concrete renderers
   //
+
+  protected abstract getConfiguration(): any;
+
 
   /**
    * Get the page width

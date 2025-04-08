@@ -101,6 +101,7 @@ class MeasuredHtmlFormatter extends MeasurementBasedFormatter<MeasuredHtmlFormat
       paragraphSpacing: this.configuration.layout.sections.global.paragraphSpacing || 0,
       columnBottomY: this.renderer.getContentBottomY(),
       displayLyricsOnly: !!this.configuration.layout.sections?.base?.display?.lyricsOnly,
+      decapo: this.configuration.decapo,
     };
 
     // Return the layout engine

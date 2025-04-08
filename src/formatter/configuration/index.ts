@@ -6,7 +6,12 @@ export * from './pdf_configuration';
 // export * from './font_configuration';
 
 import { BaseFormatterConfiguration as Configuration } from './base_configuration';
-import { getBaseDefaultConfig } from './default_config_manager';
+import { 
+  getBaseDefaultConfig,
+  getDefaultConfig,
+  getHTMLDefaultConfig,
+  getPDFDefaultConfig,
+} from './default_config_manager';
 
 import { mergeConfigs } from '../../utilities';
 
@@ -23,5 +28,10 @@ export function configure(config: ConfigurationProperties): BaseFormatterConfigu
   return mergeConfigs(defautlBaseConfig, config);
 }
 
-export { Configuration };
+export {
+  Configuration,
+  getDefaultConfig,
+  getHTMLDefaultConfig,
+  getPDFDefaultConfig,
+};
 export default Configuration;

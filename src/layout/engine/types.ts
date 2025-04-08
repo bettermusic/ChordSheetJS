@@ -80,6 +80,7 @@ export interface LayoutConfig {
   paragraphSpacing: number;
   columnBottomY: number;
   displayLyricsOnly?: boolean;
+  decapo: boolean;
 }
 
 export interface ParagraphLayoutResult {

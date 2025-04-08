@@ -216,6 +216,9 @@ class PositionedHtmlRenderer extends Renderer {
   //
   // CONFIGURATION GETTERS IMPLEMENTATION
   //
+  protected getConfiguration() {
+    return this.configuration;
+  }
 
   protected getPageWidth(): number {
     return this.doc.pageSize.width;
