@@ -6,7 +6,7 @@ export * from './pdf_configuration';
 // export * from './font_configuration';
 
 import { BaseFormatterConfiguration as Configuration } from './base_configuration';
-import { 
+import {
   getBaseDefaultConfig,
   getDefaultConfig,
   getHTMLDefaultConfig,

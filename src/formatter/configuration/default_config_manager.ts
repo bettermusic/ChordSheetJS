@@ -82,4 +82,3 @@ export const registerFormatterType = (
   formatterDefaultParts[formatterType] = specificDefaults;
   inheritanceMap[formatterType] = inheritsFrom;
 };
-

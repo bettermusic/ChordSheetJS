@@ -445,7 +445,6 @@ abstract class Renderer {
 
   protected abstract getConfiguration(): any;
 
-
   /**
    * Get the page width
    */
