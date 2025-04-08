@@ -226,7 +226,7 @@ const songActions = {
       }
       
       // Apply key and capo settings
-      // processedSong = processedSong.setKey(state.currentKey);
+      processedSong = processedSong.setKey(state.originalKey);
       processedSong = processedSong.changeKey(state.currentKey);
       processedSong = processedSong.setCapo(state.capo);
       

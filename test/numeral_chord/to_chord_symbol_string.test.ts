@@ -35,7 +35,7 @@ const majorExamples = {
 
   'Bb': {
     'I': 'Bb',
-    'bII': 'B',
+    'bII': 'Cb',
     'II': 'C',
     'bIII': 'Db',
     'III': 'D',

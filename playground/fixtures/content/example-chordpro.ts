@@ -2,9 +2,15 @@ export const chordproExamples = [
 //   {
 //     name: 'Goodness of God',
 //     content: `{t:Test}
-// {key: G}
-// [G]In the forest deep and dark, [D]whispers float and fire sparks
-// [Em]Soft and slow, [C]soft and slow`,
+// {artist: Cody Carnes}
+// {author: Cody Carnes, Austin Davis, Chandler Moore}
+// {key:Bb}
+// {tempo:150}
+// {time:6/8}
+// {copyright: @2021 Writers Roof Publishing, TBCO Publishing, A.L.K.D. Music, Capitol CMG Paragon  (Admin by Capitol CMG Publishing) For Humans, Maverick City Publishing (Admin by Essential Music Publishing)}
+
+// {c:Intro}
+// [Bb][/][|][/][/][|][Bbsus][/][|][/]`,
 //   },
   {
     name: 'Kingdom',

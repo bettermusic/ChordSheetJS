@@ -259,7 +259,7 @@ class Song extends MetadataAccessors {
 
     return song.mapItems((item) => {
       if (item instanceof Tag && item.name === KEY) {
-        transposedKey = Key.wrapOrFail(item.value).transpose(delta);
+        transposedKey = Key.wrapOrFail(item.value).transpose(delta).normalize();
 
         if (modifier) {
           transposedKey = transposedKey.useModifier(modifier);
