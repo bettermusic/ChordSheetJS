@@ -52,8 +52,8 @@ const initialFormatterConfigs = {
 // Create the formatter store with configurations
 const formatterStore = createStore<FormatterStoreState>({
   formatters: ['PDF', 'ChordPro', 'ChordsOverWords', 'HTML', 'MeasuredHTML'],
-  currentFormatter: 'ChordsOverWords',
-  currentConfig: initialFormatterConfigs['ChordsOverWords'],
+  currentFormatter: 'MeasuredHTML',
+  currentConfig: formatterConfigExamples['MeasuredHTML'][0].content,
   formatterConfigs: initialFormatterConfigs,
   formatter_instances: {
     PDF: new PdfFormatter(),

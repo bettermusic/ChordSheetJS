@@ -150,22 +150,6 @@ export class ConfigEditor extends HTMLElement {
     this.updateConfigEditor();
   };
   
-  handleApplyConfig() {
-    // Parse the JSON content and apply it as configuration
-    try {
-      const configContent = editorState.configInput;
-      const config = JSON.parse(configContent);
-      
-      const formatter = formatterState.currentFormatter;
-      if (formatter) {
-        formatterActions.updateFormatterConfig(formatter, config);
-        console.log(`Applied configuration to ${formatter} formatter`);
-      }
-    } catch (error) {
-      console.error('Error applying configuration:', error);
-    }
-  }
-  
   updateConfigEditor() {
     const configContent = this.getConfigContent();
     console.log('Updating config editor content');

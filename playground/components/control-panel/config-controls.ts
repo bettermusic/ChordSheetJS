@@ -10,6 +10,7 @@ import { APP_EVENTS } from '../../stores/init-store';
 export class ConfigControls extends HTMLElement {
   private presetSelector: HTMLSelectElement | null = null;
   private applyButton: HTMLButtonElement | null = null;
+  private isConfigValid: boolean = true;
   
   constructor() {
     super();
@@ -20,6 +21,7 @@ export class ConfigControls extends HTMLElement {
     this.render();
     this.setupEventListeners();
     this.updatePresetSelector();
+    this.validateConfig();
   }
   
   disconnectedCallback() {
@@ -63,16 +65,31 @@ export class ConfigControls extends HTMLElement {
         
         button {
           padding: 4px 8px;
-          background-color: #4CAF50;
-          color: white;
           border: none;
           border-radius: 4px;
           cursor: pointer;
           font-size: 14px;
+          display: flex;
+          align-items: center;
+          gap: 4px;
         }
         
-        button:hover {
+        button.valid {
+          background-color: #4CAF50;
+          color: white;
+        }
+        
+        button.invalid {
+          background-color: #f44336;
+          color: white;
+        }
+        
+        button.valid:hover {
           background-color: #45a049;
+        }
+        
+        button.invalid:hover {
+          background-color: #d32f2f;
         }
       </style>
       
@@ -83,7 +100,7 @@ export class ConfigControls extends HTMLElement {
           <!-- Presets will be added dynamically -->
         </select>
         
-        <button id="apply-button">Apply</button>
+        <button id="apply-button" class="valid">Config Applied</button>
       </div>
     `;
     
@@ -108,6 +125,11 @@ export class ConfigControls extends HTMLElement {
     
     // Listen for formatter pre-change
     document.addEventListener(APP_EVENTS.FORMATTER_WILL_CHANGE, this.handleFormatterWillChange);
+
+    document.addEventListener(APP_EVENTS.CONFIG_CHANGED, this.handleApplyConfig);
+    
+    // Listen for editor content changes to validate JSON
+    document.addEventListener(APP_EVENTS.EDITOR_CONTENT_CHANGED, this.validateConfig);
   }
   
   removeEventListeners() {
@@ -121,6 +143,36 @@ export class ConfigControls extends HTMLElement {
     
     document.removeEventListener(APP_EVENTS.FORMATTER_CHANGED, this.handleFormatterChange);
     document.removeEventListener(APP_EVENTS.FORMATTER_WILL_CHANGE, this.handleFormatterWillChange);
+    document.removeEventListener(APP_EVENTS.CONFIG_CHANGED, this.handleApplyConfig);
+    document.removeEventListener(APP_EVENTS.EDITOR_CONTENT_CHANGED, this.validateConfig);
+  }
+  
+  // Validate JSON configuration
+  validateConfig = () => {
+    try {
+      const configContent = editorState.configInput;
+      JSON.parse(configContent);
+      this.setConfigValidity(true);
+    } catch (error) {
+      this.setConfigValidity(false);
+    }
+  };
+  
+  // Update the UI to reflect config validity
+  setConfigValidity(isValid: boolean) {
+    this.isConfigValid = isValid;
+    
+    if (this.applyButton) {
+      if (isValid) {
+        this.applyButton.classList.add('valid');
+        this.applyButton.classList.remove('invalid');
+        this.applyButton.textContent = 'Config Applied';
+      } else {
+        this.applyButton.classList.add('invalid');
+        this.applyButton.classList.remove('valid');
+        this.applyButton.textContent = 'Invalid JSON';
+      }
+    }
   }
   
   // Event handler for formatter changes
@@ -143,12 +195,6 @@ export class ConfigControls extends HTMLElement {
     const select = e.target as HTMLSelectElement;
     const selectedValue = select.value;
     
-    if (selectedValue === 'current') {
-      // Just reload the current config
-      document.dispatchEvent(new CustomEvent(APP_EVENTS.CONFIG_RELOAD_REQUESTED));
-      return;
-    }
-    
     // Parse the preset index
     const presetIndex = parseInt(selectedValue, 10);
     if (!isNaN(presetIndex)) {
@@ -160,14 +206,13 @@ export class ConfigControls extends HTMLElement {
         // Update the editor with the preset config
         const presetConfig = JSON.stringify(presets[presetIndex].content, null, 2);
         editorActions.updateConfigContent(presetConfig);
+        this.validateConfig(); // Validate the newly loaded config
       }
     }
   };
   
   // Event handler for apply button
   handleApplyConfig = () => {
-    console.log('Apply button clicked, applying configuration');
-    // Parse the JSON content and apply it as configuration
     try {
       const configContent = editorState.configInput;
       const config = JSON.parse(configContent);
@@ -176,9 +221,11 @@ export class ConfigControls extends HTMLElement {
       if (formatter) {
         formatterActions.updateFormatterConfig(formatter, config);
         console.log(`Applied configuration to ${formatter} formatter`);
+        this.setConfigValidity(true);
       }
     } catch (error) {
       console.error('Error applying configuration:', error);
+      this.setConfigValidity(false);
     }
   };
   
