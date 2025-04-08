@@ -315,16 +315,15 @@ export class FormatterDisplay extends HTMLElement {
     const currentFormatter = formatterState.currentFormatter;
 
     if (currentFormatter === 'PDF') {
+      this.contentContainer.className = 'content-container';
       this.generateAndDisplayPDF();
     } else if (currentFormatter === 'MeasuredHTML') {
       console.log('Updating MeasuredHTML display');
       let song = songState.parsedSong;
       if (song) {
-
-
         // Measure the container's dimensions
         const width = this.contentContainer.clientWidth;
-        const height = 'auto';
+        const height = this.contentContainer.clientHeight // 'auto';
 
         // Check if the container is visible
         if (width === 0) {

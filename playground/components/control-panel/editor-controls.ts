@@ -1,6 +1,7 @@
 import { editorState, editorActions } from '../../stores/editor-store';
 import { APP_EVENTS } from '../../stores/init-store.js';
 import { songActions, songState } from '../../stores/song-store';
+import { chordproExamples } from '../../fixtures/content/example-chordpro';
 
 /**
  * Web component for editor controls
@@ -11,6 +12,7 @@ export class EditorControls extends HTMLElement {
   private parserSelector: HTMLSelectElement | null = null;
   private keySelector: HTMLSelectElement | null = null;
   private capoSelector: HTMLSelectElement | null = null;
+  private fileSelector: HTMLSelectElement | null = null;
   private parserChangeInProgress: boolean = false;
 
   constructor() {
@@ -63,7 +65,8 @@ export class EditorControls extends HTMLElement {
           border-radius: 4px;
           background-color: white;
           font-size: 14px;
-          min-width: 120px;
+          min-width: 40px;
+          max-width: 120px;
         }
         
         select:disabled {
@@ -73,6 +76,12 @@ export class EditorControls extends HTMLElement {
       </style>
       
       <div class="controls-container">
+        <div class="control-group">
+          <label>File:</label>
+          <select id="file-selector">
+            ${this.renderFileOptions()}
+          </select>
+        </div>
         <div class="control-group">
           <label>Parser:</label>
           <select id="parser-selector">
@@ -100,6 +109,7 @@ export class EditorControls extends HTMLElement {
     this.parserSelector = this.shadowRoot.getElementById('parser-selector') as HTMLSelectElement;
     this.keySelector = this.shadowRoot.getElementById('key-selector') as HTMLSelectElement;
     this.capoSelector = this.shadowRoot.getElementById('capo-selector') as HTMLSelectElement;
+    this.fileSelector = this.shadowRoot.getElementById('file-selector') as HTMLSelectElement;
     
     // Immediately set the values to ensure they match the state
     if (this.parserSelector) {
@@ -159,6 +169,13 @@ export class EditorControls extends HTMLElement {
     return options.join('');
   }
 
+  // Generate options for the file selector
+  renderFileOptions() {
+    return chordproExamples.map((example, index) => 
+      `<option value="${index}">${example.name}</option>`
+    ).join('');
+  }
+
   // Update selectors without full re-render
   updateSelectors() {
     if (!this.shadowRoot) return;
@@ -182,10 +199,23 @@ export class EditorControls extends HTMLElement {
         this.capoSelector.value = songState.capo.toString();
       }
     }
+
+    // Ensure file selector reflects current content
+    if (this.fileSelector) {
+      // Try to find current content in the examples
+      const currentContent = editorState.input;
+      const currentIndex = chordproExamples.findIndex(ex => ex.content === currentContent);
+      if (currentIndex !== -1) {
+        this.fileSelector.value = currentIndex.toString();
+      }
+    }
   }
   
   setupEventListeners() {
     if (!this.shadowRoot) return;
+    
+    // File selector
+    this.fileSelector?.addEventListener('change', this.handleFileChange);
     
     // Parser selector
     this.parserSelector?.addEventListener('change', this.handleParserChange);
@@ -205,6 +235,7 @@ export class EditorControls extends HTMLElement {
 
   removeEventListeners() {
     // Remove event listeners to prevent memory leaks
+    this.fileSelector?.removeEventListener('change', this.handleFileChange);
     this.parserSelector?.removeEventListener('change', this.handleParserChange);
     this.keySelector?.removeEventListener('change', this.handleKeyChange);
     this.capoSelector?.removeEventListener('change', this.handleCapoChange);
@@ -214,6 +245,20 @@ export class EditorControls extends HTMLElement {
     document.removeEventListener(APP_EVENTS.SONG_CAPO_CHANGED, this.handleCapoStateChange);
     document.removeEventListener(APP_EVENTS.SONG_PARSED, this.handleSongParsed);
   }
+
+  // Handle file selection change
+  handleFileChange = () => {
+    if (this.fileSelector) {
+      const selectedIndex = parseInt(this.fileSelector.value);
+      if (!isNaN(selectedIndex) && selectedIndex >= 0 && selectedIndex < chordproExamples.length) {
+        const selectedExample = chordproExamples[selectedIndex];
+        console.log('File changed to:', selectedExample.name);
+        
+        // Update editor content
+        editorActions.updateEditorContent(selectedExample.content);
+      }
+    }
+  };
 
   // Use arrow functions to preserve "this" context
   handleParserChange = () => {

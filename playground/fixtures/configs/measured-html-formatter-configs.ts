@@ -27,15 +27,15 @@ export const measuredHtmlConfigs = [
         text: {
           name: '"Atkinson Hyperlegible Next"',
           style: 'normal',
-          size: 21,
+          size: 18,
           color: 'black',
         },
         chord: {
           name: '"Atkinson Hyperlegible Next"',
           style: 'bold',
-          weight: 900,
+          weight: 500,
           size: 16,
-          color: 'black',
+          color: '#ed6e6e',
         },
         sectionLabel: {
           name: '"Atkinson Hyperlegible Next"',
@@ -80,8 +80,8 @@ export const measuredHtmlConfigs = [
         },
         sections: {
           global: {
-            paragraphSpacing: 15,
-            linePadding: 16,
+            paragraphSpacing: 25,
+            linePadding: 8,
             chordLyricSpacing: 2,
             chordSpacing: 2,
             columnCount: 1,

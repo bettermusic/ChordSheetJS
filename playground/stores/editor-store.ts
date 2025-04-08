@@ -6,7 +6,7 @@ import { json } from '@codemirror/lang-json';
 import { initStore, APP_EVENTS } from './init-store';
 import { chordproExamples } from '../fixtures/content/example-chordpro';
 
-// Example chord sheet content
+// Example chord sheet content - always use the first example
 const exampleChordPro = chordproExamples[0].content;
 
 // Define the editor store state interface
