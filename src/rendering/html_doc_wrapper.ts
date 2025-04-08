@@ -16,11 +16,11 @@ class HtmlDocWrapper {
 
   totalPages = 1;
 
-  pageSize: { width: number; height: number };
+  pageSize: { width: number; height: number|'auto' };
 
   measurer: DomMeasurer;
 
-  constructor(container: HTMLElement, pageSize: { width: number; height: number }) {
+  constructor(container: HTMLElement, pageSize: { width: number; height: number|'auto' }) {
     this.container = container;
     this.container.style.width = '100%';
     this.container.style.margin = '0 auto';
@@ -39,8 +39,8 @@ class HtmlDocWrapper {
     page.className = 'chord-sheet-page';
     page.style.position = 'relative';
     page.style.width = `${this.pageSize.width}px`;
-    page.style.height = `${this.pageSize.height}px`;
-    page.style.overflow = 'hidden';
+    page.style.height = this.pageSize.height === 'auto' ? '100%' : `${this.pageSize.height}px`;
+    page.style.overflow = this.pageSize.height === 'auto' ? 'scrollY' : 'hidden';
     page.style.marginBottom = '20px';
     page.style.border = '1px solid #ddd';
     page.style.boxSizing = 'border-box';

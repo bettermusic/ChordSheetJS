@@ -2,6 +2,7 @@ import { formatterState } from '../../stores/formatter-store';
 import { songState } from '../../stores/song-store';
 import { initStore, APP_EVENTS } from '../../stores/init-store';
 import { MeasuredHtmlFormatter, Song } from '../../../src';
+import { editorActions } from '../../stores/editor-store';
 
 /**
  * Web component for displaying formatted output
@@ -323,10 +324,10 @@ export class FormatterDisplay extends HTMLElement {
 
         // Measure the container's dimensions
         const width = this.contentContainer.clientWidth;
-        const height = this.contentContainer.clientHeight;
+        const height = 'auto';
 
         // Check if the container is visible
-        if (width === 0 || height === 0) {
+        if (width === 0) {
           // Delay update until the container is laid out
           setTimeout(() => this.updateDisplay(), 50);
           return;

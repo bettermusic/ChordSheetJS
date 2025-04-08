@@ -225,7 +225,7 @@ class PositionedHtmlRenderer extends Renderer {
   }
 
   protected getPageHeight(): number {
-    return this.doc.pageSize.height;
+    return this.doc.pageSize.height === 'auto' ? 1000000 : this.doc.pageSize.height;
   }
 
   protected getLeftMargin(): number {
