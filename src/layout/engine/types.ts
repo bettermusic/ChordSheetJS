@@ -41,19 +41,19 @@ export interface LineLayout {
 /**
  * Represents a paragraph in the layout
  */
-export interface ParagraphLayout {
-  paragraphIndex: number;
-  lines: LineLayout[];
-  totalHeight: number;
-}
+// export interface ParagraphLayout {
+//   paragraphIndex: number;
+//   lines: LineLayout[];
+//   totalHeight: number;
+// }
 
 /**
  * Complete layout for a song
  */
-export interface SongLayout {
-  paragraphs: ParagraphLayout[];
-  totalHeight: number;
-}
+// export interface SongLayout {
+//   paragraphs: ParagraphLayout[];
+//   totalHeight: number;
+// }
 
 /**
  * Configuration for the layout engine
@@ -86,7 +86,7 @@ export interface LayoutConfig {
 export interface ParagraphLayoutResult {
   units: LineLayout[][];
   addSpacing: boolean;
-  sectionType?: string;
+  sectionType: string;
 }
 
 /**

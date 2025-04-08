@@ -11,6 +11,7 @@ import { isColumnBreak, isComment, renderChord } from '../template_helpers';
 export interface ParagraphLayout {
   units: LineLayout[][];
   addSpacing: boolean;
+  sectionType: string;
 }
 
 /**

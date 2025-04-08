@@ -12,8 +12,8 @@ export {
   BreakPoint,
   MeasuredItem,
   LineLayout,
-  ParagraphLayout,
-  SongLayout,
+  // ParagraphLayout,
+  // SongLayout,
   LayoutConfig,
   ParagraphLayoutResult,
 } from './types';

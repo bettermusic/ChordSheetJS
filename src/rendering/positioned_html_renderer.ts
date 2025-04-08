@@ -1,4 +1,4 @@
-import Renderer, { PositionedElement } from './renderer';
+import Renderer, { ParagraphLayout, PositionedElement } from './renderer';
 import Song from '../chord_sheet/song';
 import { FontConfiguration } from '../formatter/configuration';
 import { LineLayout, MeasuredItem } from '../layout/engine';
@@ -19,8 +19,11 @@ import {
 import Condition from '../layout/engine/condition';
 import { MeasuredHtmlFormatterConfiguration } from '../formatter/configuration/measured_html_configuration';
 import HtmlDocWrapper from './html_doc_wrapper';
-import { isColumnBreak } from '../template_helpers';
+import { isColumnBreak, isComment } from '../template_helpers';
 import Tag from '../chord_sheet/tag';
+import SoftLineBreak from '../chord_sheet/soft_line_break';
+import Line from '../chord_sheet/line';
+import ChordLyricsPair from '../chord_sheet/chord_lyrics_pair';
 
 declare const document: any;
 declare type HTMLElement = any;
@@ -169,6 +172,175 @@ class PositionedHtmlRenderer extends Renderer {
         this.renderLayout(this.configuration.layout.footer, 'footer');
       });
     }
+  }
+
+  protected renderParagraphs(paragraphLayouts: ParagraphLayout[]): void {
+    paragraphLayouts.forEach((layout, index) => {
+      const prefix = this.configuration.cssClassPrefix || 'chord-sheet-';
+      const paragraphElements: PositionedElement[] = [];
+      const originalElements = this.elements;
+      this.elements = paragraphElements;
+
+      // Render all lines for the paragraph
+      layout.units.forEach((lines) => {
+        this.renderLines(lines);
+      });
+
+      // Group elements by page and column to handle splits
+      const groups: Record<string, PositionedElement[]> = {};
+      paragraphElements.forEach((el) => {
+        const key = `${el.page}-${el.column}`;
+        if (!groups[key]) groups[key] = [];
+        groups[key].push(el);
+      });
+
+      // Render each group as a separate paragraph div
+      let divCount = 0;
+      Object.values(groups).forEach((group) => {
+        // Set the correct page for this group
+        const { page } = group[0];
+        this.doc.setPage(page);
+
+        const paragraphDiv = document.createElement('div');
+        paragraphDiv.className = `${prefix}paragraph paragraph-${index}-${divCount} ${prefix}${layout.sectionType}`;
+        divCount += 1;
+
+        // Calculate bounds of this group
+        let minX = Number.MAX_VALUE;
+        let minY = Number.MAX_VALUE;
+        let maxX = Number.MIN_VALUE;
+        let maxY = Number.MIN_VALUE;
+
+        group.forEach((element) => {
+          minX = Math.min(minX, element.x);
+          minY = Math.min(minY, element.y);
+          maxX = Math.max(maxX, element.x + element.width);
+          maxY = Math.max(maxY, element.y + element.height);
+        });
+
+        const width = maxX - minX;
+        const height = maxY - minY;
+
+        // Style the paragraph div
+        Object.assign(paragraphDiv.style, {
+          position: 'absolute',
+          left: `${minX}px`,
+          top: `${minY}px`,
+          width: `${width}px`,
+          height: `${height}px`,
+        });
+
+        // Add child elements
+        group.forEach((element) => {
+          const htmlElement = document.createElement('div');
+          htmlElement.className = `${prefix}element ${prefix}${element.type}`;
+          if (this.configuration.cssClasses?.[element.type]) {
+            htmlElement.classList.add(this.configuration.cssClasses[element.type]);
+          }
+          htmlElement.textContent = element.content;
+          if (element.style) this.applyElementStyle(htmlElement, element);
+          Object.assign(htmlElement.style, {
+            position: 'absolute',
+            left: `${element.x - minX}px`,
+            top: `${element.y - minY}px`,
+          });
+          paragraphDiv.appendChild(htmlElement);
+        });
+
+        // Add the div to the correct page
+        this.doc.addElement(paragraphDiv, minX, minY);
+        // Do NOT update this.y here; let renderLines manage it
+      });
+
+      // Add spacing only after the entire paragraph (all groups)
+      if (layout.addSpacing && index < paragraphLayouts.length - 1) {
+        this.y += this.getParagraphSpacing();
+      }
+
+      // Move to next column/page if necessary
+      if (this.y > this.getColumnBottomY()) {
+        this.moveToNextColumn();
+      }
+
+      this.x = this.getColumnStartX();
+      this.elements = originalElements;
+    });
+  }
+
+  /**
+   * Render lines of content with chords, lyrics, and other elements
+   */
+  protected renderLines(lines: LineLayout[]): void {
+    let { currentColumn } = this;
+    let { currentPage } = this;
+
+    lines.forEach((lineLayout) => {
+      const { items, lineHeight, line } = lineLayout;
+
+      const hasColumnBreak = items.length === 1 && items[0].item instanceof Tag && isColumnBreak(items[0].item);
+      if (hasColumnBreak) {
+        this.moveToNextColumn();
+        currentColumn = this.currentColumn;
+        currentPage = this.currentPage;
+        return;
+      }
+
+      if (this.y + lineHeight > this.getColumnBottomY()) {
+        this.moveToNextColumn();
+        currentColumn = this.currentColumn;
+        currentPage = this.currentPage;
+      }
+
+      const yOffset = this.y;
+      const { chordsYOffset, lyricsYOffset } = this.calculateChordLyricYOffsets(items, yOffset);
+
+      let currentX = this.x;
+
+      items.forEach((measuredItem) => {
+        const { item, width } = measuredItem;
+
+        if (item instanceof ChordLyricsPair) {
+          let { chords } = item;
+          const { lyrics } = item;
+
+          if (chords) {
+            chords = this.processChords(chords, line as Line);
+          }
+
+          if (!this.isLyricsOnly() && chords) {
+            const chordBaseline = this.calculateChordBaseline(chordsYOffset, items, chords);
+            this.addTextElement(chords, currentX, chordBaseline, 'chord');
+            this.elements[this.elements.length - 1].column = currentColumn;
+            this.elements[this.elements.length - 1].page = currentPage;
+          }
+
+          if (lyrics && lyrics.trim() !== '') {
+            this.addTextElement(lyrics, currentX, lyricsYOffset, 'lyrics');
+            this.elements[this.elements.length - 1].column = currentColumn;
+            this.elements[this.elements.length - 1].page = currentPage;
+          }
+        } else if (item instanceof Tag) {
+          if (item.isSectionDelimiter()) {
+            this.addSectionLabel(item.label, currentX, yOffset);
+            this.elements[this.elements.length - 1].column = currentColumn;
+            this.elements[this.elements.length - 1].page = currentPage;
+          } else if (isComment(item)) {
+            this.addComment(item.value, currentX, yOffset);
+            this.elements[this.elements.length - 1].column = currentColumn;
+            this.elements[this.elements.length - 1].page = currentPage;
+          }
+        } else if (item instanceof SoftLineBreak) {
+          this.addTextElement(item.content, currentX, lyricsYOffset, 'lyrics');
+          this.elements[this.elements.length - 1].column = currentColumn;
+          this.elements[this.elements.length - 1].page = currentPage;
+        }
+
+        currentX += width;
+      });
+
+      this.y += lineHeight;
+      this.x = this.getColumnStartX();
+    });
   }
 
   /**
