@@ -32,6 +32,7 @@ interface KeyProperties {
   minor?: boolean;
   modifier?: Modifier | null;
   referenceKeyGrade?: number | null;
+  referenceKeyMode?: string | null;
   preferredModifier?: Modifier | null,
 }
 
@@ -70,6 +71,8 @@ class Key implements KeyProperties {
   minor = false;
 
   referenceKeyGrade: number | null = null;
+
+  referenceKeyMode: string | null = null;
 
   originalKeyString: string | null = null;
 
@@ -254,6 +257,7 @@ class Key implements KeyProperties {
       type,
       modifier,
       referenceKeyGrade = null,
+      referenceKeyMode = null,
       originalKeyString = null,
       preferredModifier = null,
     }: {
@@ -263,6 +267,7 @@ class Key implements KeyProperties {
       type: ChordType,
       modifier: Modifier | null,
       referenceKeyGrade?: number | null,
+      referenceKeyMode?: string | null,
       originalKeyString?: string | null,
       preferredModifier: Modifier | null,
     },
@@ -274,6 +279,7 @@ class Key implements KeyProperties {
     this.modifier = modifier;
     this.preferredModifier = preferredModifier;
     this.referenceKeyGrade = referenceKeyGrade;
+    this.referenceKeyMode = referenceKeyMode;
     this.originalKeyString = originalKeyString;
   }
 
@@ -439,6 +445,7 @@ class Key implements KeyProperties {
 
     const referenceKey = Key.wrapOrFail(key);
     const referenceKeyGrade = referenceKey.effectiveGrade;
+    const referenceKeyMode = referenceKey.minor ? MINOR : MAJOR;
 
     return this.set({
       type: NUMERIC,
@@ -446,6 +453,7 @@ class Key implements KeyProperties {
       referenceKeyGrade: 0,
       modifier: null,
       preferredModifier: referenceKey.modifier,
+      referenceKeyMode,
     });
   }
 
@@ -464,12 +472,15 @@ class Key implements KeyProperties {
 
     const referenceKey = Key.wrapOrFail(key);
     const referenceKeyGrade = referenceKey.effectiveGrade;
+    const referenceKeyMode = referenceKey.minor ? MINOR : MAJOR;
+
     return this.set({
       type: NUMERAL,
       grade: Key.shiftGrade(this.effectiveGrade - referenceKeyGrade),
       referenceKeyGrade: 0,
       modifier: null,
       preferredModifier: referenceKey.modifier || this.modifier,
+      referenceKeyMode,
     });
   }
 
@@ -496,12 +507,18 @@ class Key implements KeyProperties {
       throw new Error('Not possible, reference key grade is null');
     }
 
+    let { minor } = this;
+
+    if (this.referenceKeyMode) {
+      minor = this.referenceKeyMode === MINOR;
+    }
+
     return gradeToKey({
       type: this.type,
       modifier: this.modifier,
       preferredModifier: this.preferredModifier,
       grade: this.effectiveGrade,
-      minor: this.minor,
+      minor,
     });
   }
 

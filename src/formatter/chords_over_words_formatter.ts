@@ -33,7 +33,7 @@ class ChordsOverWordsFormatter extends Formatter {
 
   formatHeader(): string {
     const metadata = Object.keys(this.song.metadata.metadata)
-      .map((key) => `${key}: ${this.song.metadata[key]}`)
+      .map((key) => `${key}: ${this.song.metadata[key] ?? this.song.metadata.metadata[key]}`)
       .join('\n');
 
     return metadata ? `${metadata}\n\n` : '';

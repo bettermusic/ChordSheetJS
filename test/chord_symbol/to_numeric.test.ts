@@ -13,6 +13,10 @@ describe('Chord', () => {
         expect(Chord.parse('Dsus/F#')?.toNumeric('Ab').toString()).toEqual('b5sus/b7');
       });
 
+      it('properly transposes the 6m', () => {
+        expect(Chord.parse('Bm')?.toNumeric('D').toString()).toEqual('6m');
+      });
+
       it.skip('supports a minor chord', () => {
         expect(Chord.parse('Gm')?.toNumeric('Bb')?.toString()).toEqual('6');
       });

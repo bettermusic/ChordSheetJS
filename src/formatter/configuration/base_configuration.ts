@@ -77,3 +77,5 @@ export const defaultBaseConfiguration: BaseFormatterConfiguration = {
   useUnicodeModifiers: false,
   user: null,
 };
+
+export default BaseFormatterConfiguration;

@@ -36,4 +36,30 @@ describe('chordpro to chords over words', () => {
 
     expect(actualChordsOverWords).toEqual(expectedChordOverWords);
   });
+
+  it('correctly respects the chord_style directive', () => {
+    const chordpro = heredoc`{title: Honey In The Rock}
+{key: D}
+{chord_style: number}
+
+{comment: Verse 1}
+[D] Praying[Dsus] for a miracle,[D] thirsty[Dsus]
+For the Living [Bm]Well, [A]only You can satisfy[G]`;
+
+    const expectedChordOverWords = heredoc`title: Honey In The Rock
+key: D
+chord_style: number
+
+Verse 1
+1        1sus               1        1sus
+  Praying     for a miracle,  thirsty
+               6m    5                   4
+For the Living Well, only You can satisfy
+`;
+
+    const song = new ChordProParser().parse(chordpro);
+    const actualChordsOverWords = new ChordsOverWordsFormatter().format(song);
+
+    expect(actualChordsOverWords).toEqual(expectedChordOverWords);
+  });
 });

@@ -22,7 +22,7 @@ describe('ChordsOverWordsFormatter', () => {
       title: Let it be
       subtitle: ChordSheetJS example version
       key: C
-      x_some_setting: undefined
+      x_some_setting: 
       composer: John Lennon,Paul McCartney
 
       Written by: John Lennon,Paul McCartney
@@ -76,7 +76,7 @@ describe('ChordsOverWordsFormatter', () => {
 title: Let it be
 subtitle: ChordSheetJS example version
 key: Do
-x_some_setting: undefined
+x_some_setting: 
 composer: John Lennon,Paul McCartney
 
 Written by: John Lennon,Paul McCartney
