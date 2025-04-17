@@ -248,51 +248,6 @@ const majorExamples = {
 
 const minorExamples = {
   'Am': {
-    'i': 'Am',
-    'bii': 'Bbm',
-    'ii': 'Bm',
-    'iii': 'Cm',
-    'biv': 'Dbm',
-    'iv': 'Dm',
-    'bv': 'Ebm',
-    'v': 'Em',
-    'vi': 'Fm',
-    '#vi': 'Gbm',
-    'bvii': 'Gbm',
-    'vii': 'Gm',
-  },
-
-  'Bbm': {
-    'i': 'Bbm',
-    'bii': 'Bm',
-    'ii': 'Cm',
-    'iii': 'Dbm',
-    'biv': 'Dm',
-    'iv': 'Ebm',
-    'bv': 'Em',
-    'v': 'Fm',
-    'vi': 'F#m',
-    '#vi': 'Gm',
-    'bvii': 'Gm',
-    'vii': 'Abm',
-  },
-
-  'Bm': {
-    'i': 'Bm',
-    'bii': 'Cm',
-    'ii': 'C#m',
-    'iii': 'Dm',
-    'biv': 'Ebm',
-    'iv': 'Em',
-    'bv': 'Fm',
-    'v': 'F#m',
-    'vi': 'Gm',
-    '#vi': 'G#m',
-    'bvii': 'Abm',
-    'vii': 'Am',
-  },
-
-  'Cm': {
     'i': 'Cm',
     'bii': 'Dbm',
     'ii': 'Dm',
@@ -307,22 +262,22 @@ const minorExamples = {
     'vii': 'Bbm',
   },
 
-  'C#m': {
-    'i': 'C#m',
+  'Bbm': {
+    'i': 'Dbm',
     'bii': 'Dm',
     'ii': 'Ebm',
     'iii': 'Em',
     'biv': 'Fm',
     'iv': 'F#m',
     'bv': 'Gm',
-    'v': 'G#m',
+    'v': 'Abm',
     'vi': 'Am',
-    '#vi': 'Bbm',
+    '#vi': 'A#m',
     'bvii': 'Bbm',
     'vii': 'Bm',
   },
 
-  'Dm': {
+  'Bm': {
     'i': 'Dm',
     'bii': 'Ebm',
     'ii': 'Em',
@@ -337,7 +292,7 @@ const minorExamples = {
     'vii': 'Cm',
   },
 
-  'Ebm': {
+  'Cm': {
     'i': 'Ebm',
     'bii': 'Em',
     'ii': 'Fm',
@@ -352,7 +307,7 @@ const minorExamples = {
     'vii': 'Dbm',
   },
 
-  'Em': {
+  'C#m': {
     'i': 'Em',
     'bii': 'Fm',
     'ii': 'F#m',
@@ -362,12 +317,12 @@ const minorExamples = {
     'bv': 'Bbm',
     'v': 'Bm',
     'vi': 'Cm',
-    '#vi': 'Dbm',
+    '#vi': 'C#m',
     'bvii': 'Dbm',
     'vii': 'Dm',
   },
 
-  'Fm': {
+  'Dm': {
     'i': 'Fm',
     'bii': 'Gbm',
     'ii': 'Gm',
@@ -382,22 +337,22 @@ const minorExamples = {
     'vii': 'Ebm',
   },
 
-  'F#m': {
-    'i': 'F#m',
+  'Ebm': {
+    'i': 'Gbm',
     'bii': 'Gm',
-    'ii': 'G#m',
+    'ii': 'Abm',
     'iii': 'Am',
     'biv': 'Bbm',
     'iv': 'Bm',
     'bv': 'Cm',
-    'v': 'C#m',
+    'v': 'Dbm',
     'vi': 'Dm',
-    '#vi': 'Ebm',
+    '#vi': 'D#m',
     'bvii': 'Ebm',
     'vii': 'Em',
   },
 
-  'Gm': {
+  'Em': {
     'i': 'Gm',
     'bii': 'Abm',
     'ii': 'Am',
@@ -412,19 +367,64 @@ const minorExamples = {
     'vii': 'Fm',
   },
 
-  'G#m': {
-    'i': 'G#m',
+  'Fm': {
+    'i': 'Abm',
     'bii': 'Am',
-    'ii': 'A#m',
+    'ii': 'Bbm',
     'iii': 'Bm',
     'biv': 'Cm',
-    'iv': 'C#m',
+    'iv': 'Dbm',
     'bv': 'Dm',
-    'v': 'D#m',
+    'v': 'Ebm',
     'vi': 'Em',
     '#vi': 'Fm',
     'bvii': 'Fm',
-    'vii': 'F#m',
+    'vii': 'Gbm',
+  },
+
+  'F#m': {
+    'i': 'Am',
+    'bii': 'Bbm',
+    'ii': 'Bm',
+    'iii': 'Cm',
+    'biv': 'C#m',
+    'iv': 'Dm',
+    'bv': 'Ebm',
+    'v': 'Em',
+    'vi': 'Fm',
+    '#vi': 'F#m',
+    'bvii': 'F#m',
+    'vii': 'Gm',
+  },
+
+  'Gm': {
+    'i': 'Bbm',
+    'bii': 'Bm',
+    'ii': 'Cm',
+    'iii': 'Dbm',
+    'biv': 'Dm',
+    'iv': 'Ebm',
+    'bv': 'Em',
+    'v': 'Fm',
+    'vi': 'Gbm',
+    '#vi': 'Gm',
+    'bvii': 'Gm',
+    'vii': 'Abm',
+  },
+
+  'G#m': {
+    'i': 'Bm',
+    'bii': 'Cm',
+    'ii': 'C#m',
+    'iii': 'Dm',
+    'biv': 'D#m',
+    'iv': 'Em',
+    'bv': 'Fm',
+    'v': 'F#m',
+    'vi': 'Gm',
+    '#vi': 'G#m',
+    'bvii': 'Abm',
+    'vii': 'Am',
   },
 };
 

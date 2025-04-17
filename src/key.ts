@@ -345,7 +345,7 @@ class Key implements KeyProperties {
     this.number = null;
   }
 
-  toChordSymbol(key: Key | string): Key {
+  toChordSymbol(key: Key | string | null): Key {
     if (this.isChordSymbol()) return this.clone();
 
     const { modifier } = this;
@@ -365,7 +365,7 @@ class Key implements KeyProperties {
     return modifier ? normalized.set({ preferredModifier: modifier, modifier: null }) : normalized;
   }
 
-  toChordSolfege(key: Key | string): Key {
+  toChordSolfege(key: Key | string | null): Key {
     if (this.isChordSolfege()) return this.clone();
 
     const { modifier } = this;

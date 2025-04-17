@@ -74,7 +74,11 @@ class Chord implements ChordProperties {
       return this.clone();
     }
 
-    const keyObj = Key.wrapOrFail(referenceKey);
+    let keyObj: Key | null = Key.wrap(referenceKey);
+
+    if (keyObj && keyObj.isMinor()) {
+      keyObj = keyObj.relativeMajor;
+    }
 
     let chordSymbolChord = new Chord({
       suffix: this.suffix ? normalizeChordSuffix(this.suffix) : null,
@@ -124,7 +128,11 @@ class Chord implements ChordProperties {
       return this.clone();
     }
 
-    const keyObj = Key.wrapOrFail(referenceKey);
+    let keyObj = Key.wrap(referenceKey);
+
+    if (keyObj && keyObj.isMinor()) {
+      keyObj = keyObj.relativeMajor;
+    }
 
     let chordSolfegeChord = new Chord({
       suffix: this.suffix ? normalizeChordSuffix(this.suffix) : null,
@@ -176,7 +184,11 @@ class Chord implements ChordProperties {
       return this.transform((key) => key.toNumeric());
     }
 
-    const keyObj: Key | null = Key.wrap(referenceKey);
+    let keyObj: Key | null = Key.wrap(referenceKey);
+
+    if (keyObj && keyObj.isMinor()) {
+      keyObj = keyObj.relativeMajor;
+    }
 
     return new Chord({
       suffix: normalizeChordSuffix(this.suffix),
@@ -200,7 +212,11 @@ class Chord implements ChordProperties {
       return this.transform((key) => key.toNumeral());
     }
 
-    const keyObj = Key.wrapOrFail(referenceKey);
+    let keyObj: Key | null = Key.wrap(referenceKey);
+
+    if (keyObj && keyObj.isMinor()) {
+      keyObj = keyObj.relativeMajor;
+    }
 
     return new Chord({
       suffix: normalizeChordSuffix(this.suffix),

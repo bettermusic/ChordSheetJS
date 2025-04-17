@@ -20,6 +20,14 @@ describe('Chord', () => {
       it.skip('supports a minor chord', () => {
         expect(Chord.parse('Gm')?.toNumeric('Bb')?.toString()).toEqual('6');
       });
+
+      it('renders minor key in the numbers of relative major', () => {
+        expect(Chord.parse('Em')?.toNumeric('Em').toString()).toEqual('6m');
+      });
+
+      it('sees numbers with minor refefence key in relative major', () => {
+        expect(Chord.parse('6m')?.toNumeric('Em').toString()).toEqual('6m');
+      });
     });
   });
 });
