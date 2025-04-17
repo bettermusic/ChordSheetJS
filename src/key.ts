@@ -42,6 +42,7 @@ const NO_FLAT_GRADES = [4, 11];
 const NO_FLAT_NUMBERS = [1, 4];
 const NO_SHARP_GRADES = [5, 0];
 const NO_SHARP_NUMBERS = [3, 7];
+const PREFERS_FLAT_NUMBERS = [10];
 
 /**
  * Represents a key, such as Eb (symbol), #3 (numeric) or VII (numeral).
@@ -345,14 +346,28 @@ class Key implements KeyProperties {
     this.number = null;
   }
 
-  toChordSymbol(key: Key | string | null): Key {
+  toChordSymbol(key: Key | string | null, referenceKeyWasMinor = false): Key {
     if (this.isChordSymbol()) return this.clone();
 
     const { modifier } = this;
-
     this.ensureGrade();
 
     const keyObj = Key.wrapOrFail(key);
+
+    if ((this.isNumeral() || this.isNumeric()) && referenceKeyWasMinor) {
+      // In minor keys, degree 6 with 'm' quality maps to the tonic (i)
+      // 8th semitone is the 6th degree of the relative minor
+      if (this.grade === 8) {
+        return keyObj.relativeMinor;
+      }
+      if (this.grade === 7) {
+        return keyObj.relativeMinor.changeGrade(-1);
+      }
+      if (this.grade === 9) {
+        return keyObj.relativeMinor.changeGrade(+1);
+      }
+    }
+
     const chordSymbol = this.set({
       referenceKeyGrade: Key.shiftGrade(this.effectiveGrade + keyObj.effectiveGrade),
       grade: 0,
@@ -365,7 +380,7 @@ class Key implements KeyProperties {
     return modifier ? normalized.set({ preferredModifier: modifier, modifier: null }) : normalized;
   }
 
-  toChordSolfege(key: Key | string | null): Key {
+  toChordSolfege(key: Key | string | null, referenceKeyWasMinor = false): Key {
     if (this.isChordSolfege()) return this.clone();
 
     const { modifier } = this;
@@ -373,6 +388,21 @@ class Key implements KeyProperties {
     this.ensureGrade();
 
     const keyObj = Key.wrapOrFail(key);
+
+    if ((this.isNumeral() || this.isNumeric()) && referenceKeyWasMinor) {
+      // In minor keys, degree 6 with 'm' quality maps to the tonic (i)
+      // 8th semitone is the 6th degree of the relative minor
+      if (this.grade === 8) {
+        return keyObj.relativeMinor;
+      }
+      if (this.grade === 7) {
+        return keyObj.relativeMinor.transposeDown();
+      }
+      if (this.grade === 9) {
+        return keyObj.relativeMinor.transposeUp();
+      }
+    }
+
     const chordSolfege = this.set({
       referenceKeyGrade: Key.shiftGrade(this.effectiveGrade + keyObj.effectiveGrade),
       grade: 0,
@@ -446,13 +476,19 @@ class Key implements KeyProperties {
     const referenceKey = Key.wrapOrFail(key);
     const referenceKeyGrade = referenceKey.effectiveGrade;
     const referenceKeyMode = referenceKey.minor ? MINOR : MAJOR;
+    const grade = Key.shiftGrade(this.effectiveGrade - referenceKeyGrade);
+    let preferredModifier = referenceKey.modifier;
+
+    if (PREFERS_FLAT_NUMBERS.includes(grade)) {
+      preferredModifier = FLAT;
+    }
 
     return this.set({
       type: NUMERIC,
       grade: Key.shiftGrade(this.effectiveGrade - referenceKeyGrade),
       referenceKeyGrade: 0,
       modifier: null,
-      preferredModifier: referenceKey.modifier,
+      preferredModifier,
       referenceKeyMode,
     });
   }
@@ -473,13 +509,19 @@ class Key implements KeyProperties {
     const referenceKey = Key.wrapOrFail(key);
     const referenceKeyGrade = referenceKey.effectiveGrade;
     const referenceKeyMode = referenceKey.minor ? MINOR : MAJOR;
+    const grade = Key.shiftGrade(this.effectiveGrade - referenceKeyGrade);
+    let preferredModifier = referenceKey.modifier;
+
+    if (PREFERS_FLAT_NUMBERS.includes(grade)) {
+      preferredModifier = FLAT;
+    }
 
     return this.set({
       type: NUMERAL,
       grade: Key.shiftGrade(this.effectiveGrade - referenceKeyGrade),
       referenceKeyGrade: 0,
       modifier: null,
-      preferredModifier: referenceKey.modifier || this.modifier,
+      preferredModifier,
       referenceKeyMode,
     });
   }

@@ -5,9 +5,13 @@ import { Chord } from '../../src';
 const majorExamples = {
   'Ab': {
     '1': 'Ab',
+
     'b2': 'A',
+
     '2': 'Bb',
+
     'b3': 'Cb',
+
     '3': 'C',
     '4': 'Db',
     'b5': 'D',
@@ -255,11 +259,12 @@ const minorExamples = {
     'b4m': 'Em',
     '4m': 'Fm',
     'b5m': 'Gbm',
-    '5m': 'Gm',
-    '6m': 'Abm',
-    '#6m': 'Am',
-    'b7m': 'Am',
-    '7m': 'Bbm',
+    '5m': 'Abm',
+    '6m': 'Am',
+    '#6m': 'Bbm',
+    'b7m': 'Bbm',
+    '7m': 'Bbm'
+    ,
   },
 
   'Bbm': {
@@ -268,13 +273,14 @@ const minorExamples = {
     '2m': 'Ebm',
     '3m': 'Em',
     'b4m': 'Fm',
-    '4m': 'F#m',
+    '4m': 'Gbm',
     'b5m': 'Gm',
-    '5m': 'Abm',
-    '6m': 'Am',
-    '#6m': 'A#m',
-    'b7m': 'Bbm',
+    '5m': 'Am',
+    '6m': 'Bbm',
+    '#6m': 'Bm',
+    'b7m': 'Bm',
     '7m': 'Bm',
+
   },
 
   'Bm': {
@@ -282,29 +288,31 @@ const minorExamples = {
     'b2m': 'Ebm',
     '2m': 'Em',
     '3m': 'Fm',
-    'b4m': 'Gbm',
+    'b4m': 'F#m',
     '4m': 'Gm',
     'b5m': 'Abm',
-    '5m': 'Am',
-    '6m': 'Bbm',
-    '#6m': 'Bm',
-    'b7m': 'Bm',
-    '7m': 'Cm',
-  },
-
-  'Cm': {
-    '1m': 'Ebm',
-    'b2m': 'Em',
-    '2m': 'Fm',
-    '3m': 'Gbm',
-    'b4m': 'Gm',
-    '4m': 'Abm',
-    'b5m': 'Am',
     '5m': 'Bbm',
     '6m': 'Bm',
     '#6m': 'Cm',
     'b7m': 'Cm',
-    '7m': 'Dbm',
+    '7m': 'Cm',
+
+  },
+
+  'Cm': {
+    '1m': 'D#m',
+    'b2m': 'Em',
+    '2m': 'Fm',
+    '3m': 'F#m',
+    'b4m': 'Gm',
+    '4m': 'G#m',
+    'b5m': 'Am',
+    '5m': 'Bm',
+    '6m': 'Cm',
+    '#6m': 'C#m',
+    'b7m': 'C#m',
+    '7m': 'C#m'
+    ,
   },
 
   'C#m': {
@@ -312,14 +320,15 @@ const minorExamples = {
     'b2m': 'Fm',
     '2m': 'F#m',
     '3m': 'Gm',
-    'b4m': 'Abm',
+    'b4m': 'G#m',
     '4m': 'Am',
     'b5m': 'Bbm',
-    '5m': 'Bm',
-    '6m': 'Cm',
-    '#6m': 'C#m',
-    'b7m': 'Dbm',
+    '5m': 'Cm',
+    '6m': 'C#m',
+    '#6m': 'Dm',
+    'b7m': 'Dm',
     '7m': 'Dm',
+
   },
 
   'Dm': {
@@ -330,11 +339,12 @@ const minorExamples = {
     'b4m': 'Am',
     '4m': 'Bbm',
     'b5m': 'Bm',
-    '5m': 'Cm',
-    '6m': 'Dbm',
-    '#6m': 'Dm',
-    'b7m': 'Dm',
-    '7m': 'Ebm',
+    '5m': 'C#m',
+    '6m': 'Dm',
+    '#6m': 'Ebm',
+    'b7m': 'Ebm',
+    '7m': 'Ebm'
+    ,
   },
 
   'Ebm': {
@@ -343,13 +353,14 @@ const minorExamples = {
     '2m': 'Abm',
     '3m': 'Am',
     'b4m': 'Bbm',
-    '4m': 'Bm',
+    '4m': 'Cbm',
     'b5m': 'Cm',
-    '5m': 'Dbm',
-    '6m': 'Dm',
-    '#6m': 'D#m',
-    'b7m': 'Ebm',
-    '7m': 'Em',
+    '5m': 'Dm',
+    '6m': 'Ebm',
+    '#6m': 'Fbm',
+    'b7m': 'Fbm',
+    '7m': 'Fbm'
+    ,
   },
 
   'Em': {
@@ -360,26 +371,28 @@ const minorExamples = {
     'b4m': 'Bm',
     '4m': 'Cm',
     'b5m': 'Dbm',
-    '5m': 'Dm',
-    '6m': 'Ebm',
-    '#6m': 'Em',
-    'b7m': 'Em',
-    '7m': 'Fm',
-  },
-
-  'Fm': {
-    '1m': 'Abm',
-    'b2m': 'Am',
-    '2m': 'Bbm',
-    '3m': 'Bm',
-    'b4m': 'Cm',
-    '4m': 'Dbm',
-    'b5m': 'Dm',
     '5m': 'Ebm',
     '6m': 'Em',
     '#6m': 'Fm',
     'b7m': 'Fm',
-    '7m': 'Gbm',
+    '7m': 'Fm',
+
+  },
+
+  'Fm': {
+    '1m': 'G#m',
+    'b2m': 'Am',
+    '2m': 'Bbm',
+    '3m': 'Bm',
+    'b4m': 'Cm',
+    '4m': 'C#m',
+    'b5m': 'Dm',
+    '5m': 'Em',
+    '6m': 'Fm',
+    '#6m': 'F#m',
+    'b7m': 'F#m',
+    '7m': 'F#m'
+    ,
   },
 
   'F#m': {
@@ -387,29 +400,31 @@ const minorExamples = {
     'b2m': 'Bbm',
     '2m': 'Bm',
     '3m': 'Cm',
-    'b4m': 'C#m',
+    'b4m': 'Dbm',
     '4m': 'Dm',
     'b5m': 'Ebm',
-    '5m': 'Em',
-    '6m': 'Fm',
-    '#6m': 'F#m',
-    'b7m': 'F#m',
+    '5m': 'Fm',
+    '6m': 'F#m',
+    '#6m': 'Gm',
+    'b7m': 'Gm',
     '7m': 'Gm',
+
   },
 
   'Gm': {
-    '1m': 'Bbm',
+    '1m': 'A#m',
     'b2m': 'Bm',
     '2m': 'Cm',
-    '3m': 'Dbm',
+    '3m': 'C#m',
     'b4m': 'Dm',
-    '4m': 'Ebm',
+    '4m': 'D#m',
     'b5m': 'Em',
-    '5m': 'Fm',
-    '6m': 'Gbm',
-    '#6m': 'Gm',
-    'b7m': 'Gm',
-    '7m': 'Abm',
+    '5m': 'F#m',
+    '6m': 'Gm',
+    '#6m': 'G#m',
+    'b7m': 'G#m',
+    '7m': 'G#m'
+    ,
   },
 
   'G#m': {
@@ -420,10 +435,10 @@ const minorExamples = {
     'b4m': 'D#m',
     '4m': 'Em',
     'b5m': 'Fm',
-    '5m': 'F#m',
-    '6m': 'Gm',
-    '#6m': 'G#m',
-    'b7m': 'Abm',
+    '5m': 'Gm',
+    '6m': 'G#m',
+    '#6m': 'Am',
+    'b7m': 'Am',
     '7m': 'Am',
   },
 };

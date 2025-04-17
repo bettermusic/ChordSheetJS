@@ -75,6 +75,7 @@ class Chord implements ChordProperties {
     }
 
     let keyObj: Key | null = Key.wrap(referenceKey);
+    const referenceIsMinor = (keyObj && keyObj.isMinor()) || false;
 
     if (keyObj && keyObj.isMinor()) {
       keyObj = keyObj.relativeMajor;
@@ -82,15 +83,15 @@ class Chord implements ChordProperties {
 
     let chordSymbolChord = new Chord({
       suffix: this.suffix ? normalizeChordSuffix(this.suffix) : null,
-      root: this.root?.toChordSymbol(keyObj) || null,
-      bass: this.bass?.toChordSymbol(keyObj) || null,
+      root: this.root?.toChordSymbol(keyObj, referenceIsMinor) || null,
+      bass: this.bass?.toChordSymbol(keyObj, referenceIsMinor) || null,
     });
 
     if (this.root?.isMinor()) {
       chordSymbolChord = chordSymbolChord.makeMinor();
     }
 
-    chordSymbolChord = chordSymbolChord.normalize(referenceKey);
+    chordSymbolChord = chordSymbolChord.normalize(keyObj);
     return chordSymbolChord;
   }
 

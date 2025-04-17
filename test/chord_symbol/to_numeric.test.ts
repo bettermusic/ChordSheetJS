@@ -25,8 +25,23 @@ describe('Chord', () => {
         expect(Chord.parse('Em')?.toNumeric('Em').toString()).toEqual('6m');
       });
 
-      it('sees numbers with minor refefence key in relative major', () => {
+      it('properly handles 6m with minor key', () => {
+        expect(Chord.parse('Em')?.toNumeric('Em').toString()).toEqual('6m');
         expect(Chord.parse('6m')?.toNumeric('Em').toString()).toEqual('6m');
+        expect(Chord.parse('6m')?.toChordSymbol('Em').toString()).toEqual('Em');
+      });
+
+      it('properly handles #6m & b7m with minor key', () => {
+        expect(Chord.parse('Fm')?.toNumeric('Em').toString()).toEqual('b7m');
+        expect(Chord.parse('b7m')?.toNumeric('Em').toString()).toEqual('b7m');
+        expect(Chord.parse('b7m')?.toChordSymbol('Em').toString()).toEqual('Fm');
+        expect(Chord.parse('#6m')?.toChordSymbol('Em').toString()).toEqual('Fm');
+      });
+
+      it('properly handles 4 with minor key', () => {
+        expect(Chord.parse('C')?.toNumeric('Em').toString()).toEqual('4');
+        expect(Chord.parse('4')?.toNumeric('Em').toString()).toEqual('4');
+        expect(Chord.parse('4')?.toChordSymbol('Em').toString()).toEqual('C');
       });
     });
   });
