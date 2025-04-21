@@ -41,7 +41,7 @@
     "concat-md": "^0.5.1",
     "detect-newline": "^4.0.1",
     "esbuild": "^0.25.2",
-    "eslint": "^9.24.0",
+    "eslint": "^9.25.0",
     "eslint-config-airbnb": "^19.0.4",
     "eslint-plugin-jest": "^28.11.0",
     "globals": "^16.0.0",
