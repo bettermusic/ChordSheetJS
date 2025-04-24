@@ -3561,6 +3561,16 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@martijnversluis/unibuild@npm:^1.4.0":
+  version: 1.4.0
+  resolution: "@martijnversluis/unibuild@npm:1.4.0"
+  dependencies:
+    chalk: "npm:^5.3.0"
+    commander: "npm:^12.1.0"
+  checksum: 10c0/09c71d3d006fa311c83be1a70b784f843acaf735eeb5fa7d69af3541852c22aabc59c79192cfefb1f56abfc339233359652a4a6b0e41e0468ab781138f3cae1d
+  languageName: node
+  linkType: hard
+
 "@mischnic/json-sourcemap@npm:^0.1.0":
   version: 0.1.1
   resolution: "@mischnic/json-sourcemap@npm:0.1.1"
