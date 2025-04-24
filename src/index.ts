@@ -22,6 +22,7 @@ import Tag from './chord_sheet/tag';
 import Ternary from './chord_sheet/chord_pro/ternary';
 import TextFormatter from './formatter/text_formatter';
 import UltimateGuitarParser from './parser/ultimate_guitar_parser';
+import version from './version';
 
 import {
   each,
@@ -78,6 +79,7 @@ export { default as Ternary } from './chord_sheet/chord_pro/ternary';
 export { default as TextFormatter } from './formatter/text_formatter';
 export { default as UltimateGuitarParser } from './parser/ultimate_guitar_parser';
 export { default as templateHelpers } from './template_helpers';
+export { default as version } from './version';
 
 export {
   ABC,
@@ -125,6 +127,7 @@ export default {
   TextFormatter,
   UltimateGuitarParser,
   VERSE,
+  version,
   templateHelpers: {
     isEvaluatable,
     isChordLyricsPair,
