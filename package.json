@@ -47,7 +47,7 @@
     "globals": "^16.2.0",
     "jest": "^27.0.1",
     "js-levenshtein": "^1.1.6",
-    "parcel": "^2.15.1",
+    "parcel": "^2.15.2",
     "path-browserify": "^1.0.0",
     "peggy": "^5.0.2",
     "pegjs-backtrace": "^0.2.1",
