@@ -1,17 +1,17 @@
-import Literal from './chord_sheet/chord_pro/literal';
-import Song from './chord_sheet/song';
-import ChordDefinition from './chord_definition/chord_definition';
-import SongBuilder from './song_builder';
-import ChordLyricsPair from './chord_sheet/chord_lyrics_pair';
-import SoftLineBreak from './chord_sheet/soft_line_break';
-import Tag from './chord_sheet/tag';
-import Comment from './chord_sheet/comment';
-import Ternary from './chord_sheet/chord_pro/ternary';
-import Chord from './chord';
-import Line from './chord_sheet/line';
 import AstType from './chord_sheet/ast_type';
-import Item from './chord_sheet/item';
+import Chord from './chord';
+import ChordDefinition from './chord_definition/chord_definition';
+import ChordLyricsPair from './chord_sheet/chord_lyrics_pair';
+import Comment from './chord_sheet/comment';
 import Evaluatable from './chord_sheet/chord_pro/evaluatable';
+import Item from './chord_sheet/item';
+import Line from './chord_sheet/line';
+import Literal from './chord_sheet/chord_pro/literal';
+import SoftLineBreak from './chord_sheet/soft_line_break';
+import Song from './chord_sheet/song';
+import SongBuilder from './song_builder';
+import Tag from './chord_sheet/tag';
+import Ternary from './chord_sheet/chord_pro/ternary';
 
 import { warn } from './utilities';
 

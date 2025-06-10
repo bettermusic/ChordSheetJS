@@ -1,5 +1,5 @@
-import { breakChordLyricsPairOnSoftLineBreak } from '../../../src/parser/chord_pro/helpers';
 import { SerializedChordLyricsPair, SerializedSoftLineBreak } from '../../../src/serialized_types';
+import { breakChordLyricsPairOnSoftLineBreak, stringSplitReplace } from '../../../src/parser/chord_pro/helpers';
 
 describe('breakChordLyricsPairOnSoftLineBreak', () => {
   it('supports breaking a pair\'s lyrics on a soft line break', () => {

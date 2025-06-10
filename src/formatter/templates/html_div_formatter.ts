@@ -1,4 +1,5 @@
 import { HtmlTemplateArgs } from '../html_formatter';
+import { isPresent } from '../../utilities';
 import { renderChord } from '../../helpers';
 import { isPresent } from '../../utilities';
 
