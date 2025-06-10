@@ -222,6 +222,8 @@ class Metadata extends MetadataAccessors implements Iterable<[string, string | s
 
         if (value instanceof Array) {
           this.metadata[key] = [...value];
+        } else if (value === null) {
+          delete this.metadata[key];
         } else {
           this.metadata[key] = value.toString();
         }
