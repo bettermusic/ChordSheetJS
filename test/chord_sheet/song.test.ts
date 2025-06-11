@@ -1,18 +1,22 @@
+import Metadata from '../../src/chord_sheet/metadata';
+import Song from '../../src/chord_sheet/song';
+
+import { configure } from '../../src/formatter/configuration';
 import { ChordLyricsPair, ChordSheetSerializer, Tag } from '../../src';
+import { changedSongSolfege, changedSongSymbol } from '../fixtures/changed_song';
+import { exampleSongSolfege, exampleSongSymbol } from '../fixtures/song';
+import { serializedSongSolfege, serializedSongSymbol } from '../fixtures/serialized_song';
 
 import {
+  chordLyricsPair,
   createChordDefinition,
   createChordLyricsPair,
   createLine,
-  createSong, createTag,
+  createSong,
+  createSongFromAst,
+  createTag,
+  tag,
 } from '../utilities';
-
-import { exampleSongSolfege, exampleSongSymbol } from '../fixtures/song';
-import { serializedSongSolfege, serializedSongSymbol } from '../fixtures/serialized_song';
-import { changedSongSolfege, changedSongSymbol } from '../fixtures/changed_song';
-import Song from '../../src/chord_sheet/song';
-import { configure } from '../../src/formatter/configuration';
-import Metadata from '../../src/chord_sheet/metadata';
 
 const createLineStub = ({ renderable }) => (
   {
@@ -435,6 +439,76 @@ describe('Song', () => {
 
       expect(song.chordDefinitions.get('CM7')).toEqual(cm7);
       expect(song.chordDefinitions.get('Dm')).toEqual(dm);
+    });
+  });
+
+  describe('#normalizeChords', () => {
+    it('normalizes the chords in a song', () => {
+      const song = createSong([
+        createLine([
+          createChordLyricsPair('G/Cb', 'let it'),
+          createChordLyricsPair('E#/G', 'it'),
+        ]),
+      ]);
+
+      const normalizedSong = song.normalizeChords();
+
+      expect((normalizedSong.paragraphs[0].lines[0].items[0] as ChordLyricsPair).chords).toEqual('G/B');
+      expect((normalizedSong.paragraphs[0].lines[0].items[1] as ChordLyricsPair).chords).toEqual('F/G');
+    });
+
+    it('normalizes the chords in a song against a specific key', () => {
+      const song = createSong(
+        [
+          createLine([
+            createChordLyricsPair('Fb', 'let it'),
+          ]),
+        ],
+        { key: 'Gb' },
+      );
+
+      const normalizedSong = song.normalizeChords('F#');
+      expect((normalizedSong.paragraphs[0].lines[0].items[0] as ChordLyricsPair).chords).toEqual('E');
+    });
+
+    it('optionally normalizes the suffix', () => {
+      const song = createSong(
+        [
+          createLine([
+            createChordLyricsPair('Fbadd9', 'let it'),
+          ]),
+        ],
+        { key: 'Gb' },
+      );
+
+      const normalizedSong = song.normalizeChords('F#', { normalizeSuffix: true });
+      expect((normalizedSong.paragraphs[0].lines[0].items[0] as ChordLyricsPair).chords).toEqual('E(9)');
+    });
+  });
+
+  describe('#useModifier', () => {
+    it('changes the modifier of the chords in a song', () => {
+      const song = createSongFromAst([
+        [
+          chordLyricsPair('G#', 'let it'),
+          chordLyricsPair('F#', 'it'),
+        ],
+      ]);
+
+      const modifiedSong = song.useModifier('b');
+
+      expect((modifiedSong.paragraphs[0].lines[0].items[0] as ChordLyricsPair).chords).toEqual('Ab');
+      expect((modifiedSong.paragraphs[0].lines[0].items[1] as ChordLyricsPair).chords).toEqual('Gb');
+    });
+
+    it('updates the key of the song', () => {
+      const song = createSongFromAst([
+        [tag('key', 'F#')],
+      ]);
+
+      const modifiedSong = song.useModifier('b');
+
+      expect(modifiedSong.key).toEqual('Gb');
     });
   });
 });

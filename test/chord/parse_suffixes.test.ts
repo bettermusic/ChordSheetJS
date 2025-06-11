@@ -1,6 +1,6 @@
-import { Chord } from '../../src';
-import SUFFIX_MAPPING from '../../src/normalize_mappings/suffix-normalize-mapping';
+import Chord from '../../src/chord';
 import Key from '../../src/key';
+import SUFFIX_MAPPING from '../../src/normalize_mappings/suffix-normalize-mapping';
 
 const keys: Set<string> = new Set<string>();
 const baseKey = Key.parse('A')!;
