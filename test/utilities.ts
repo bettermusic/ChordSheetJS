@@ -1,17 +1,17 @@
 // eslint no-console: "off"
 
+import ChordDefinition from '../src/chord_definition/chord_definition';
+import ChordSheetSerializer from '../src/chord_sheet_serializer';
+import Item from '../src/chord_sheet/item';
+import Key from '../src/key';
+import Metadata from '../src/chord_sheet/metadata';
 import Tracer from 'pegjs-backtrace';
 import theredoc from 'theredoc';
-import { stripHTML } from '../src/template_helpers';
 
 import { LineType } from '../src/chord_sheet/line';
-import Metadata from '../src/chord_sheet/metadata';
 import { TernaryProperties } from '../src/chord_sheet/chord_pro/ternary';
-import Item from '../src/chord_sheet/item';
+import { stripHTML } from '../src/template_helpers';
 import { ChordType, Fret, Modifier } from '../src/constants';
-import Key from '../src/key';
-import ChordSheetSerializer from '../src/chord_sheet_serializer';
-import ChordDefinition from '../src/chord_definition/chord_definition';
 
 import {
   ContentType,

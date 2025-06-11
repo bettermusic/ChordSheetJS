@@ -1,10 +1,11 @@
 import '../matchers';
-import { exampleSongSolfege, exampleSongSymbol } from '../fixtures/song';
 
-import { stripHTML } from '../../src/template_helpers';
 import ChordSheetSerializer from '../../src/chord_sheet_serializer';
+
 import { ContentType } from '../../src/serialized_types';
 import { GRID } from '../../src/constants';
+import { stripHTML } from '../../src/template_helpers';
+import { exampleSongSolfege, exampleSongSymbol } from '../fixtures/song';
 
 import {
   ABC, HtmlDivFormatter, LILYPOND, TAB,
@@ -873,7 +874,7 @@ describe('HtmlDivFormatter', () => {
       </div>
     `);
 
-    expect(new HtmlDivFormatter().format(songWithCapo)).toEqual(expectedChordSheet);
+    expect(new HtmlDivFormatter({ decapo: false }).format(songWithCapo)).toEqual(expectedChordSheet);
   });
 
   it('can render in a different key (symbol chords)', () => {

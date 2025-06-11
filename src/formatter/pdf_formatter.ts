@@ -1,22 +1,27 @@
-import { Blob } from 'buffer';
+import ChordProParser from '../parser/chord_pro_parser';
+import Condition from './pdf_formatter/condition';
+import Dimensions from './pdf_formatter/dimensions';
+import DocWrapper from './pdf_formatter/doc_wrapper';
+import Formatter from './formatter';
+import Item from '../chord_sheet/item';
 import JsPDF from 'jspdf';
+import JsPDFRenderer from '../chord_diagram/js_pdf_renderer';
+import Line from '../chord_sheet/line';
+import Metadata from '../chord_sheet/metadata';
+import Paragraph from '../chord_sheet/paragraph';
+import Song from '../chord_sheet/song';
+import TextFormatter from './text_formatter';
+import defaultPDFConfiguration from './pdf_formatter/default_configuration';
+
+import { Blob } from 'buffer';
+import { Fret } from '../constants';
 import { Performance } from 'perf_hooks';
+import { getCapos } from '../helpers';
 
 import ChordDefinition, { isNonSoundingString, isOpenFret } from '../chord_definition/chord_definition';
 import ChordDiagram, { StringMarker, StringNumber } from '../chord_diagram/chord_diagram';
-import Configuration, { defaultConfiguration } from './configuration';
-import Dimensions from './pdf_formatter/dimensions';
-import Formatter from './formatter';
-import Item from '../chord_sheet/item';
-import JsPDFRenderer from '../chord_diagram/js_pdf_renderer';
-import Line from '../chord_sheet/line';
-import Paragraph from '../chord_sheet/paragraph';
-import Song from '../chord_sheet/song';
-import defaultPDFConfiguration from './pdf_formatter/default_configuration';
 import { ChordLyricsPair, SoftLineBreak, Tag } from '../index';
-import { Fret } from '../constants';
-import { getCapos } from '../helpers';
-import Condition from './pdf_formatter/condition';
+import Configuration, { defaultConfiguration } from './configuration';
 
 import {
   isChordLyricsPair,
@@ -43,10 +48,6 @@ import {
   PDFConfiguration,
   PdfConstructor,
 } from './pdf_formatter/types';
-import DocWrapper from './pdf_formatter/doc_wrapper';
-import ChordProParser from '../parser/chord_pro_parser';
-import TextFormatter from './text_formatter';
-import Metadata from '../chord_sheet/metadata';
 
 declare const performance: Performance;
 

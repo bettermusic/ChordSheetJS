@@ -1,12 +1,13 @@
 import '../matchers';
-import { exampleSongSolfege, exampleSongSymbol } from '../fixtures/song';
+
 import songWithIntro from '../fixtures/song_with_intro';
 
-import { GRID } from '../../src/constants';
 import { ContentType } from '../../src/serialized_types';
+import { GRID } from '../../src/constants';
+import { exampleSongSolfege, exampleSongSymbol } from '../fixtures/song';
 
 import {
-  ABC, LILYPOND, TAB, TextFormatter,
+  ABC, ChordProParser, LILYPOND, TAB, TextFormatter,
 } from '../../src';
 
 import {
@@ -235,6 +236,24 @@ Let it be, let it be, let it be, let it be`;
 
     const formatted = new TextFormatter({ normalizeChords: false }).format(songWithSus2);
     expect(formatted).toEqual('Asus2\nLet it be');
+  });
+
+  it('can use a custom metadata separator', () => {
+    const song = new ChordProParser().parse(heredoc`
+      {composer: John}
+      {composer: Jane}
+
+      Composers: %{composer}
+    `);
+
+    const rendered = new TextFormatter({
+      metadata: {
+        separator: ' and ',
+      },
+    })
+      .format(song);
+
+    expect(rendered).toEqual('Composers: John and Jane');
   });
 
   describe('delegates', () => {
