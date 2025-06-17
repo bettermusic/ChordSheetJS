@@ -26,6 +26,9 @@ export default tseslint.config(
   ...tseslint.configs.recommended,
   ...tseslint.configs.stylistic,
   {
+    ignores: [
+      'src/formatter/pdf_formatter/fonts/**/*',
+    ],
     languageOptions: {
       globals: {
         ...globals.node,

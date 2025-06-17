@@ -1,4 +1,4 @@
-/* eslint-disable max-len */
+/* eslint-disable max-len, max-lines */
 import defaultConfiguration from '../../../src/formatter/pdf_formatter/default_configuration';
 
 export const configExamples = [

@@ -5,6 +5,7 @@ import Item from './chord_sheet/item';
 import Line from './chord_sheet/line';
 import Metadata from './chord_sheet/metadata';
 import Paragraph from './chord_sheet/paragraph';
+import SoftLineBreak from './chord_sheet/soft_line_break';
 import Tag from './chord_sheet/tag';
 import When from './template_helpers/when';
 import WhenCallback from './template_helpers/when_callback';

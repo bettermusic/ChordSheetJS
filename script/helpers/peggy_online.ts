@@ -1,4 +1,5 @@
 import process from 'process';
+
 import puppeteer, { Browser, Page } from 'puppeteer';
 
 class PeggyOnline {
