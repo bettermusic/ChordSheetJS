@@ -1,3 +1,5 @@
+/* eslint-disable complexity, max-depth, max-lines, max-lines-per-function, max-statements */
+
 import { Blob } from 'buffer';
 import JsPDF from 'jspdf';
 import { Performance } from 'perf_hooks';

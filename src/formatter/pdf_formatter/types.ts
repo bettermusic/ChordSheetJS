@@ -1,9 +1,9 @@
 import {
   ImageCompression,
   ImageOptions,
-  jsPDFOptions,
   RGBAData,
   TextOptionsLight,
+  jsPDFOptions,
 } from 'jspdf';
 
 import {

@@ -1,4 +1,4 @@
-# ChordChartJS [![Code Climate](https://codeclimate.com/github/BetterMusic/ChordChartJS/badges/gpa.svg)](https://codeclimate.com/github/BetterMusic/ChordChartJS)
+# ChordSheetJS [![Code Climate](https://codeclimate.com/github/BetterMusic/ChordSheetJS/badges/gpa.svg)](https://codeclimate.com/github/BetterMusic/ChordSheetJS) [![CI](https://github.com/BetterMusic/ChordSheetJS/actions/workflows/ci.yml/badge.svg)](https://github.com/BetterMusic/ChordSheetJS/actions/workflows/ci.yml?query=branch%3Amaster) [![Release](https://github.com/BetterMusic/ChordSheetJS/actions/workflows/release.yml/badge.svg)](https://github.com/BetterMusic/ChordSheetJS/actions/workflows/release.yml)
 
 A JavaScript library for parsing and formatting chord sheets
 
@@ -6,9 +6,10 @@ A JavaScript library for parsing and formatting chord sheets
 
 - [Installation](#installation)
 - [How to ...?](#how-to-)
+- [Try it online](https://martijnversluis.github.io/ChordFiddle/)
 - [Supported ChordPro directives](#supported-chordpro-directives)
-- [Project board](https://github.com/orgs/bettermusic/projects/1/views/1)
-- [API docs](https://bettermusic.github.io/ChordSheetJS/)
+- [Project board](https://github.com/users/BetterMusic/projects/4/views/1)
+- [API docs](https://BetterMusic.github.io/ChordSheetJS/)
 - [Contributing](CONTRIBUTING.md)
 
 ## Installation
@@ -36,7 +37,7 @@ var ChordSheetJS = require('chordsheetjs').default;
 ### Standalone bundle file
 
 If you're not using a build tool, you can download and use the `bundle.js` from the
-[latest release](https://github.com/martijnversluis/ChordSheetJS/releases/latest):
+[latest release](https://github.com/BetterMusic/ChordSheetJS/releases/latest):
 
 ```html
 <script src="bundle.js"></script>
@@ -359,4 +360,4 @@ use those to change the generated output.
 
 ## API docs
 
-For more information, see the [API docs](https://bettermusic.github.io/ChordSheetJS/).
+For more information, see the [API docs](https://BetterMusic.github.io/ChordSheetJS/).

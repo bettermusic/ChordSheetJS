@@ -1,8 +1,8 @@
 /* eslint-disable no-promise-executor-return */
-/* eslint-disable no-dupe-class-members */
+
 /* eslint-disable no-undef */
 import JsPDF, {
-  ImageCompression, ImageFormat, ImageOptions, jsPDFOptions, RGBAData, TextOptionsLight,
+  ImageCompression, ImageFormat, ImageOptions, RGBAData, TextOptionsLight, jsPDFOptions,
 } from 'jspdf';
 
 type ColorString = string;
@@ -157,6 +157,7 @@ class StubbedPdfDoc {
 
   addImage(options: ImageOptions): StubbedPdfDoc;
 
+  // eslint-disable-next-line max-lines-per-function,max-statements
   addImage(
     imageDataOrOptions:
     | string
@@ -390,6 +391,7 @@ class StubbedPdfDoc {
     return this;
   }
 
+  // eslint-disable-next-line complexity
   #normalizeColor(ch1: string | number, ch2?: number, ch3?: number, ch4?: number): RenderColor {
     const oneArg = ch2 === undefined && ch3 === undefined && ch4 === undefined;
     const threeArgs = ch1 !== undefined && ch2 !== undefined && ch3 !== undefined && ch4 === undefined;

@@ -1,4 +1,4 @@
-import { ConditionalRule, ConditionRule, SingleCondition } from './types';
+import { ConditionRule, ConditionalRule, SingleCondition } from './types';
 
 function isNumber(value: any): boolean {
   return !Number.isNaN(parseInt(value, 10));
@@ -38,6 +38,7 @@ class Condition {
     return this.evaluateSingleCondition(value, field, rule);
   }
 
+  // eslint-disable-next-line max-lines-per-function,max-statements,complexity
   private evaluateSingleCondition(value: any, field: string, rule: ConditionRule): boolean {
     if ('all' in rule) {
       return this.all(value, rule.all);

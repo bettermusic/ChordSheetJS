@@ -1,14 +1,19 @@
-import Literal from './chord_sheet/chord_pro/literal';
-import Song from './chord_sheet/song';
-import ChordLyricsPair from './chord_sheet/chord_lyrics_pair';
-import Tag from './chord_sheet/tag';
-import Comment from './chord_sheet/comment';
-import Ternary from './chord_sheet/chord_pro/ternary';
-import Chord from './chord';
-import Line from './chord_sheet/line';
 import AstType from './chord_sheet/ast_type';
-import Item from './chord_sheet/item';
+import Chord from './chord';
+import ChordDefinition from './chord_definition/chord_definition';
+import ChordLyricsPair from './chord_sheet/chord_lyrics_pair';
+import Comment from './chord_sheet/comment';
 import Evaluatable from './chord_sheet/chord_pro/evaluatable';
+import Item from './chord_sheet/item';
+import Line from './chord_sheet/line';
+import Literal from './chord_sheet/chord_pro/literal';
+import SoftLineBreak from './chord_sheet/soft_line_break';
+import Song from './chord_sheet/song';
+import SongBuilder from './song_builder';
+import Tag from './chord_sheet/tag';
+import Ternary from './chord_sheet/chord_pro/ternary';
+
+import { warn } from './utilities';
 
 import {
   SerializedChordDefinition,
@@ -20,10 +25,6 @@ import {
   SerializedSong,
   SerializedTag, SerializedTernary,
 } from './serialized_types';
-import SoftLineBreak from './chord_sheet/soft_line_break';
-import { warn } from './utilities';
-import ChordDefinition from './chord_definition/chord_definition';
-import SongBuilder from './song_builder';
 
 const CHORD_LYRICS_PAIR = 'chordLyricsPair';
 const CHORD_SHEET = 'chordSheet';
@@ -61,31 +62,25 @@ class ChordSheetSerializer {
   }
 
   serializeItem(item: AstType): SerializedComponent {
-    if (item instanceof Tag) {
-      return this.serializeTag(item) as SerializedComponent;
+    type constructor = any;
+    type handler = any;
+
+    const serializers = new Map<constructor, handler>([
+      [Tag, this.serializeTag.bind(this)],
+      [ChordLyricsPair, this.serializeChordLyricsPair.bind(this)],
+      [Ternary, this.serializeTernary.bind(this)],
+      [Literal, this.serializeLiteral.bind(this)],
+      [Comment, this.serializeComment.bind(this)],
+      [SoftLineBreak, () => ({ type: SOFT_LINE_BREAK })],
+    ]);
+
+    const serializer = serializers.get(item.constructor);
+
+    if (!serializer) {
+      throw new Error(`Don't know how to serialize ${item.constructor.name}`);
     }
 
-    if (item instanceof ChordLyricsPair) {
-      return this.serializeChordLyricsPair(item) as SerializedComponent;
-    }
-
-    if (item instanceof Ternary) {
-      return this.serializeTernary(item) as SerializedComponent;
-    }
-
-    if (item instanceof Literal) {
-      return this.serializeLiteral(item);
-    }
-
-    if (item instanceof Comment) {
-      return this.serializeComment(item);
-    }
-
-    if (item instanceof SoftLineBreak) {
-      return { type: SOFT_LINE_BREAK };
-    }
-
-    throw new Error(`Don't know how to serialize ${item.constructor.name}`);
+    return serializer(item);
   }
 
   serializeChordDefinition(chordDefinition: ChordDefinition): SerializedChordDefinition {
@@ -112,7 +107,7 @@ class ChordSheetSerializer {
     return serializedTag;
   }
 
-  serializeChordLyricsPair(chordLyricsPair: ChordLyricsPair) {
+  serializeChordLyricsPair(chordLyricsPair: ChordLyricsPair): SerializedChordLyricsPair {
     return {
       type: CHORD_LYRICS_PAIR,
       chords: chordLyricsPair.chords,

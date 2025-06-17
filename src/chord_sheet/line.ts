@@ -1,8 +1,8 @@
 import ChordLyricsPair from './chord_lyrics_pair';
-import Tag from './tag';
 import Comment from './comment';
-import Item from './item';
 import Font from './font';
+import Item from './item';
+import Tag from './tag';
 import { ContentType, PartTypes } from '../serialized_types';
 
 import {
@@ -84,10 +84,6 @@ class Line {
    */
   isEmpty(): boolean {
     return this.items.length === 0;
-  }
-
-  isNotEmpty(): boolean {
-    return !this.isEmpty();
   }
 
   /**
