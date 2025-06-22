@@ -33,7 +33,7 @@ class Condition {
       return false;
     }
 
-    const value = this.metadata[field];
+    const value = this.getValue(field);
 
     return this.evaluateSingleCondition(value, field, rule);
   }
@@ -49,11 +49,11 @@ class Condition {
     }
 
     if ('equals' in rule) {
-      return value === rule.equals;
+      return value === rule.equals.toString();
     }
 
     if ('exists' in rule) {
-      return this.exists(value, rule.exists);
+      return this.exists(this.getRawValue(field), rule.exists);
     }
 
     if ('first' in rule) {
@@ -89,7 +89,7 @@ class Condition {
     }
 
     if ('not_equals' in rule) {
-      return value !== rule.not_equals;
+      return value !== rule.not_equals.toString();
     }
 
     if ('not_in' in rule) {
@@ -104,7 +104,25 @@ class Condition {
       throw new Error('First page condition must be on the page field');
     }
 
-    return !!rule.first && this.metadata.page === 1;
+    return !!rule.first && this.getValue('page') === '1';
+  }
+
+  private getValue(field: string): string | string[] {
+    const value = this.getRawValue(field);
+
+    if (Array.isArray(value)) {
+      return value.map((v) => v.toString());
+    }
+
+    if (value === undefined || value === null) {
+      return '';
+    }
+
+    return value.toString();
+  }
+
+  private getRawValue(field: string): any {
+    return this.metadata[field];
   }
 
   private lastPage(field: string, rule: ConditionRule) {
@@ -112,13 +130,17 @@ class Condition {
       throw new Error('Last page condition must be on the page field');
     }
 
-    return !!rule.last && this.metadata.page === this.metadata.pages;
+    return !!rule.last && this.getValue('page') === this.getValue('pages');
   }
 
-  private all(value: any, all?: any[]) {
-    return Array.isArray(value) &&
-      Array.isArray(all) &&
-      all.every((item: any) => value.includes(item));
+  private all(value: any[], all?: any[]) {
+    if (!Array.isArray(all)) {
+      return false;
+    }
+
+    const stringValues = all.map((v) => v.toString());
+
+    return Array.isArray(value) && stringValues.every((item: any) => value.includes(item));
   }
 
   private and(rule: SingleCondition[]) {
@@ -151,8 +173,13 @@ class Condition {
     return typeof greaterThanEqual === 'number' && toNumber(value) >= greaterThanEqual;
   }
 
-  private in(value: any, inArray?: any[]) {
-    return Array.isArray(inArray) && inArray.includes(value);
+  private in(value: any[], inArray?: any[]) {
+    if (!Array.isArray(inArray)) {
+      return false;
+    }
+
+    const stringValues = inArray.map((v) => v.toString());
+    return stringValues.includes(value);
   }
 
   private lessThan(value: any, lessThan?: number) {
@@ -177,8 +204,13 @@ class Condition {
       value.toLowerCase().includes(like.toLowerCase());
   }
 
-  private notIn(value: any, notIn?: any[]) {
-    return Array.isArray(notIn) && !notIn.includes(value);
+  private notIn(value: any[], notIn?: any[]) {
+    if (!Array.isArray(notIn)) {
+      return false;
+    }
+
+    const stringValues = notIn.map((v) => v.toString());
+    return !stringValues.includes(value);
   }
 
   private or(rule: ConditionalRule[]) {

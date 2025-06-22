@@ -4,8 +4,7 @@ import Song from '../src/chord_sheet/song';
 
 import { configure } from '../src/formatter/configuration';
 import { createLine } from './utilities';
-import { stringSplitReplace } from '../src/parser/chord_pro/helpers';
-import { renderChord, testSelector } from '../src/helpers';
+import { renderChord, stringSplitReplace, testSelector } from '../src/helpers';
 
 describe('renderChord', () => {
   it('correctly normalizes when a capo is set and decapo is enabled', () => {

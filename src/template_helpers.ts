@@ -3,6 +3,7 @@ import Evaluatable from './chord_sheet/chord_pro/evaluatable';
 import Font from './chord_sheet/font';
 import Item from './chord_sheet/item';
 import Line from './chord_sheet/line';
+import Literal from './chord_sheet/chord_pro/literal';
 import Metadata from './chord_sheet/metadata';
 import Paragraph from './chord_sheet/paragraph';
 import SoftLineBreak from './chord_sheet/soft_line_break';
@@ -15,7 +16,6 @@ import Configuration, { Delegate, defaultDelegate } from './formatter/configurat
 import { HtmlTemplateCssClasses } from './formatter/html_formatter';
 import { renderChord } from './helpers';
 import { INDETERMINATE, NONE } from './constants';
-import { Literal, SoftLineBreak } from './index';
 import { hasChordContents, isEmptyString, isEvaluatable } from './utilities';
 
 type EachCallback = (_item: any) => string;

@@ -85,10 +85,6 @@ Chorus 2
 Mim              Fa             Do Sol
 Whisper words of wisdom, let it be
 
-Chorus 2
-Mim              Fa             Do Sol
-Whisper words of wisdom, let it be
-
 Solo 1
 Sol
 Solo line 1
@@ -181,10 +177,6 @@ Let it be, let it be, let it be, let it be`;
 
       Breakdown
       Gm               Ab             Eb Bb
-      Whisper words of wisdom, let it be
-
-      Chorus 2
-      Bb               Ab             Eb Bb
       Whisper words of wisdom, let it be
 
       Chorus 2

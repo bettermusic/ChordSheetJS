@@ -51,6 +51,7 @@ export default tseslint.config(
       'max-lines': ['error', 700],
       'max-lines-per-function': ['error', { max: 25, skipBlankLines: true, skipComments: true }],
       'max-statements': ['error', 10],
+      'no-dupe-class-members': 'off',
       'no-underscore-dangle': 'off',
       'no-unused-vars': 'off',
       'object-curly-spacing': ['error', 'always'],
@@ -69,6 +70,7 @@ export default tseslint.config(
           ],
         }],
 
+      '@typescript-eslint/no-dupe-class-members': 'error',
       '@typescript-eslint/no-empty-function': 'off',
       '@typescript-eslint/no-explicit-any': 'off',
       '@typescript-eslint/no-unused-vars': [

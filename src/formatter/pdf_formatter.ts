@@ -4,21 +4,26 @@ import { Blob } from 'buffer';
 import JsPDF from 'jspdf';
 import { Performance } from 'perf_hooks';
 
-import ChordDefinition, { isNonSoundingString, isOpenFret } from '../chord_definition/chord_definition';
-import ChordDiagram, { StringMarker, StringNumber } from '../chord_diagram/chord_diagram';
-import Configuration, { defaultConfiguration } from './configuration';
+import ChordProParser from '../parser/chord_pro_parser';
+import Condition from './pdf_formatter/condition';
 import Dimensions from './pdf_formatter/dimensions';
+import DocWrapper from './pdf_formatter/doc_wrapper';
 import Formatter from './formatter';
 import Item from '../chord_sheet/item';
 import JsPDFRenderer from '../chord_diagram/js_pdf_renderer';
 import Line from '../chord_sheet/line';
+import Metadata from '../chord_sheet/metadata';
 import Paragraph from '../chord_sheet/paragraph';
 import Song from '../chord_sheet/song';
+import TextFormatter from './text_formatter';
 import defaultPDFConfiguration from './pdf_formatter/default_configuration';
-import { ChordLyricsPair, SoftLineBreak, Tag } from '../index';
+
 import { Fret } from '../constants';
 import { getCapos } from '../helpers';
-import Condition from './pdf_formatter/condition';
+import ChordDefinition, { isNonSoundingString, isOpenFret } from '../chord_definition/chord_definition';
+import ChordDiagram, { StringMarker, StringNumber } from '../chord_diagram/chord_diagram';
+import { ChordLyricsPair, SoftLineBreak, Tag } from '../index';
+import Configuration, { defaultConfiguration } from './configuration';
 
 import {
   isChordLyricsPair,
@@ -45,14 +50,10 @@ import {
   PDFConfiguration,
   PdfConstructor,
 } from './pdf_formatter/types';
-import DocWrapper from './pdf_formatter/doc_wrapper';
-import ChordProParser from '../parser/chord_pro_parser';
-import TextFormatter from './text_formatter';
-import Metadata from '../chord_sheet/metadata';
 
 declare const performance: Performance;
 
-type ExtendedMetadata = Record<string, number | string | string[]>;
+type ExtendedMetadata = Record<string, string | string[]>;
 
 class PdfFormatter extends Formatter {
   song: Song = new Song();
@@ -250,9 +251,9 @@ class PdfFormatter extends Formatter {
 
   private get extraMetadata(): ExtendedMetadata {
     let metadata: ExtendedMetadata = {
-      page: this.doc.currentPage,
-      pages: this.doc.totalPages,
-      renderTime: this.renderTime,
+      page: this.doc.currentPage.toString(),
+      pages: this.doc.totalPages.toString(),
+      renderTime: this.renderTime.toString(),
     };
 
     const capo = this.song.metadata.getSingle('capo');
