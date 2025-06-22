@@ -1,12 +1,14 @@
 import Note from '../../src/note';
 
+import { NUMERIC } from '../../src';
+
 describe('Note', () => {
   describe('#toNumeric', () => {
     it('converts from a numeral', () => {
       const numeral = Note.parse('VI');
       const numeric = numeral.toNumeric();
 
-      expect(numeric.isNumeric()).toBe(true);
+      expect(numeric.is(NUMERIC)).toBe(true);
       expect(numeric.note).toEqual(6);
     });
 

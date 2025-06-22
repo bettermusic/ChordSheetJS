@@ -1,20 +1,32 @@
-import { parse } from './parser/chord/peg_parser';
-import Key from './key';
-import { isMinor, normalizeChordSuffix } from './utilities';
 import ChordParsingError from './chord_parsing_error';
+import Key from './key';
+import { parse } from './parser/chord/peg_parser';
+import { isMinor, normalizeChordSuffix } from './utilities';
+
 import {
   ChordType,
   Modifier,
   NUMERAL,
   NUMERIC,
-  SYMBOL,
   SOLFEGE,
+  SYMBOL,
 } from './constants';
 
 interface ChordProperties {
   root?: Key | null;
   suffix?: string | null;
   bass?: Key | null;
+}
+
+export interface ChordConstructorOptions {
+  base?: string | number | null;
+  modifier?: Modifier | null;
+  suffix?: string | null;
+  bassBase?: string | number | null;
+  bassModifier?: Modifier | null;
+  root?: Key | null;
+  bass?: Key | null;
+  chordType?: ChordType | null;
 }
 
 /**
@@ -291,7 +303,7 @@ class Chord implements ChordProperties {
    * @param {boolean} [options.normalizeSuffix=true] whether to normalize the chord suffix after transposing
    * @returns {Chord} the normalized chord
    */
-  normalize(key: Key | string | null = null, { normalizeSuffix = true } = {}): Chord {
+  normalize(key: Key | string | null = null, { normalizeSuffix = true }: { normalizeSuffix?: boolean; } = {}): Chord {
     const suffix = normalizeSuffix ? normalizeChordSuffix(this.suffix) : this.suffix;
     let normalizedRoot = this.root;
 
@@ -351,16 +363,7 @@ class Chord implements ChordProperties {
       root = null,
       bass = null,
       chordType = null,
-    }: {
-      base?: string | number | null,
-      modifier?: Modifier | null,
-      suffix?: string | null,
-      bassBase?: string | number | null,
-      bassModifier?: Modifier | null,
-      root?: Key | null,
-      bass?: Key | null,
-      chordType?: ChordType | null,
-    },
+    }: ChordConstructorOptions,
   ) {
     this.suffix = suffix || null;
     this.root = Chord.determineRoot({

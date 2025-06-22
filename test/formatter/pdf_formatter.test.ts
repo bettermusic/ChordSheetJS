@@ -1,11 +1,13 @@
 import '../matchers';
-import { exampleSongSymbol } from '../fixtures/song';
+
 import PdfFormatter from '../../src/formatter/pdf_formatter';
-import defaultConfiguration from '../../src/formatter/pdf_formatter/default_configuration';
-import StubbedPdfDoc from './stubbed_pdf_doc';
-import { configure } from '../../src/formatter/configuration';
 import Song from '../../src/chord_sheet/song';
+import StubbedPdfDoc from './stubbed_pdf_doc';
+import defaultConfiguration from '../../src/formatter/pdf_formatter/default_configuration';
+
 import { PDFConfiguration } from '../../src/formatter/pdf_formatter/types';
+import { configure } from '../../src/formatter/configuration';
+import { exampleSongSymbol } from '../fixtures/song';
 
 describe('PdfFormatter', () => {
   it('correctly formats a basic song', () => {

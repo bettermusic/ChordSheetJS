@@ -1,12 +1,17 @@
-import Line from './chord_sheet/line';
 import ChordLyricsPair from './chord_sheet/chord_lyrics_pair';
 import Item from './chord_sheet/item';
-import { GRADE_TO_KEY } from './scales';
+import Line from './chord_sheet/line';
 import SUFFIX_MAPPING from './normalize_mappings/suffix-normalize-mapping';
+
+import { GRADE_TO_KEY } from './scales';
 
 import {
   ChordType, MAJOR, MINOR, Modifier, ModifierMaybe, NO_MODIFIER, NUMERAL, SHARP,
 } from './constants';
+
+export function callChain<T>(value: T, functions: ((_value: T) => T)[]): T {
+  return functions.reduce((acc, fn) => fn(acc), value);
+}
 
 export function hasChordContents(line: Line): boolean {
   return line.items.some((item) => (item instanceof ChordLyricsPair) && !!item.chords);
@@ -30,10 +35,6 @@ type ObjectWithLength = any[] | string | null;
 
 export function isPresent(object: ObjectWithLength): boolean {
   return !!object && object.length > 0;
-}
-
-export function isString(obj: any): boolean {
-  return typeof obj === 'string';
 }
 
 function dasherize(string: string): string {
@@ -148,33 +149,27 @@ function determineKey({
   return new GradeSet(grades).determineGrade(modifier, preferredModifier, grade);
 }
 
-export function gradeToKey({
-  type,
-  modifier,
-  preferredModifier,
-  grade,
-  minor,
-}: {
+export function gradeToKey(options: {
   type: ChordType,
   modifier: ModifierMaybe | null,
   preferredModifier: Modifier | null,
   grade: number,
   minor: boolean,
 }): string {
+  const {
+    type,
+    modifier,
+    preferredModifier,
+    grade,
+    minor,
+  } = options;
+
   let key = determineKey({
     type, modifier, preferredModifier, grade, minor,
   });
 
   if (!key) {
-    throw new Error(
-      `Could not resolve
-      type=${type}
-      modifier=${modifier}
-      grade=${grade}
-      preferredModifier=${preferredModifier}
-      minor=${minor}
-to a key`,
-    );
+    throw new Error(`Could not resolve ${options} to a key`);
   }
 
   if (minor && type === NUMERAL) {
@@ -196,6 +191,11 @@ export function normalizeChordSuffix(suffix: string | null): string | null {
   return SUFFIX_MAPPING[suffix] || suffix;
 }
 
-export function capitalize(string: string) {
-  return `${string.charAt(0).toUpperCase() + string.slice(1).toLowerCase()}`;
+export function filterObject<T>(
+  object: Record<string, T>,
+  predicate: (key: string, value: T) => boolean,
+): Record<string, T> {
+  return Object.fromEntries(
+    Object.entries(object).filter(([key, value]) => predicate(key, value)),
+  );
 }

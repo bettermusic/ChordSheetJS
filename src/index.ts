@@ -2,7 +2,6 @@ import Chord from './chord';
 import ChordDefinition from './chord_definition/chord_definition';
 import ChordLyricsPair from './chord_sheet/chord_lyrics_pair';
 import ChordProFormatter from './formatter/chord_pro_formatter';
-import PdfFormatter from './formatter/pdf_formatter';
 import ChordProParser from './parser/chord_pro_parser';
 import ChordSheetParser from './parser/chord_sheet_parser';
 import ChordSheetSerializer from './chord_sheet_serializer';
@@ -16,12 +15,14 @@ import Line from './chord_sheet/line';
 import Literal from './chord_sheet/chord_pro/literal';
 import Metadata from './chord_sheet/metadata';
 import Paragraph from './chord_sheet/paragraph';
+import PdfFormatter from './formatter/pdf_formatter';
 import SoftLineBreak from './chord_sheet/soft_line_break';
 import Song from './chord_sheet/song';
 import Tag from './chord_sheet/tag';
 import Ternary from './chord_sheet/chord_pro/ternary';
 import TextFormatter from './formatter/text_formatter';
 import UltimateGuitarParser from './parser/ultimate_guitar_parser';
+import version from './version';
 
 import {
   each,
@@ -45,9 +46,9 @@ import {
   CHORUS,
   INDETERMINATE,
   NONE,
+  PART,
   TAB,
   VERSE,
-  PART,
 } from './constants';
 
 export { default as Chord } from './chord';
@@ -78,6 +79,7 @@ export { default as Ternary } from './chord_sheet/chord_pro/ternary';
 export { default as TextFormatter } from './formatter/text_formatter';
 export { default as UltimateGuitarParser } from './parser/ultimate_guitar_parser';
 export { default as templateHelpers } from './template_helpers';
+export { default as version } from './version';
 
 export {
   ABC,
@@ -125,6 +127,7 @@ export default {
   TextFormatter,
   UltimateGuitarParser,
   VERSE,
+  version,
   templateHelpers: {
     isEvaluatable,
     isChordLyricsPair,

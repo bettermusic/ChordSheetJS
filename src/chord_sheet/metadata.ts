@@ -1,8 +1,7 @@
-import MetadataAccessors from './metadata_accessors';
-
-import { isReadonlyTag } from './tag';
 import Key from '../key';
-import { _KEY, CAPO, KEY } from './tags';
+import MetadataAccessors from './metadata_accessors';
+import { isReadonlyTag } from './tag';
+import { CAPO, KEY, _KEY } from './tags';
 
 function appendValue(array: string[], value: string): void {
   if (!array.includes(value)) {
@@ -18,18 +17,20 @@ function appendValue(array: string[], value: string): void {
  *
  * See {@link Metadata#get}
  */
-class Metadata extends MetadataAccessors implements Iterable<[string, string | string[]]> {
+class Metadata extends MetadataAccessors {
   metadata: Record<string, string | string[]> = {};
 
-  constructor(metadata: Record<string, string | string[]> = {}) {
+  constructor(metadata: Record<string, string | string[]> | Metadata = {}) {
     super();
 
-    if (metadata) {
+    if (metadata instanceof Metadata) {
+      this.assign(metadata.metadata);
+    } else {
       this.assign(metadata);
     }
   }
 
-  merge(metadata: Record<string, string | string[] | number>): Metadata {
+  merge(metadata: Record<string, string | string[]>): Metadata {
     const clone = this.clone();
     clone.assign(metadata);
     return clone;
@@ -49,6 +50,10 @@ class Metadata extends MetadataAccessors implements Iterable<[string, string | s
       return;
     }
 
+    this.appendValue(key, value);
+  }
+
+  appendValue(key: string, value: string): void {
     const currentValue = this.metadata[key];
 
     if (currentValue === value) {
@@ -207,7 +212,7 @@ class Metadata extends MetadataAccessors implements Iterable<[string, string | s
     return null;
   }
 
-  private assign(metadata: Record<string, string | string[] | number>): void {
+  assign(metadata: Record<string, string | string[] | null>): void {
     Object
       .keys(metadata)
       .filter((key) => !isReadonlyTag(key))
@@ -216,8 +221,10 @@ class Metadata extends MetadataAccessors implements Iterable<[string, string | s
 
         if (value instanceof Array) {
           this.metadata[key] = [...value];
+        } else if (value === null) {
+          delete this.metadata[key];
         } else {
-          this.metadata[key] = value.toString();
+          this.metadata[key] = value;
         }
       });
   }

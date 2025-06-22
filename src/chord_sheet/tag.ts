@@ -1,16 +1,17 @@
 import AstComponent from './ast_component';
-import TraceInfo from './trace_info';
 import ChordDefinition from '../chord_definition/chord_definition';
+import TagInterpreter from './tag_interpreter';
+import TraceInfo from './trace_info';
+
 import {
-  _KEY,
   ALBUM,
   ARRANGER,
   ARTIST,
   CAPO,
-  CHORD_STYLE,
   CHORDCOLOUR,
   CHORDFONT,
   CHORDSIZE,
+  CHORD_STYLE,
   CHORUS,
   COMMENT,
   COMPOSER,
@@ -23,8 +24,8 @@ import {
   END_OF_TAB,
   END_OF_VERSE,
   KEY,
-  LYRICIST, NEW_KEY,
-  SORTTITLE,
+  LYRICIST,
+  NEW_KEY, SORTTITLE,
   START_OF_ABC,
   START_OF_BRIDGE,
   START_OF_CHORUS,
@@ -41,9 +42,9 @@ import {
   TIME,
   TITLE,
   YEAR,
+  _KEY,
 } from './tags';
 
-import TagInterpreter from './tag_interpreter';
 import { END_TAG, START_TAG } from '../constants';
 
 const CHORDFONT_SHORT = 'cf';
@@ -108,9 +109,9 @@ const DIRECTIVES_WITH_RENDERABLE_LABEL = [
   START_OF_CHORUS,
   START_OF_GRID,
   START_OF_LY,
+  START_OF_PART,
   START_OF_TAB,
   START_OF_VERSE,
-  START_OF_PART,
 ];
 
 const ALIASES: Record<string, string> = {
@@ -195,6 +196,8 @@ class Tag extends AstComponent {
     super(traceInfo);
     this.parseNameValue(name, value);
     this.attributes = { ...attributes };
+    this.selector = selector;
+    this.isNegated = isNegated;
     this.selector = selector;
     this.isNegated = isNegated;
   }

@@ -1,28 +1,24 @@
-import Line from './line';
-import Paragraph from './paragraph';
-import Key from '../key';
-import ChordLyricsPair from './chord_lyrics_pair';
-import Metadata from './metadata';
-import ParserWarning from '../parser/parser_warning';
-import MetadataAccessors from './metadata_accessors';
-import Item from './item';
-import { CHORUS, Modifier } from '../constants';
-import SongBuilder from '../song_builder';
-import ChordDefinition from '../chord_definition/chord_definition';
 import Chord from '../chord';
-import FormattingContext from '../formatter/formatting_context';
-import { testSelector } from '../helpers';
+import ChordDefinition from '../chord_definition/chord_definition';
 import ChordDefinitionSet from '../chord_definition/chord_definition_set';
+import ChordLyricsPair from './chord_lyrics_pair';
+import FormattingContext from '../formatter/formatting_context';
+import Item from './item';
+import Key from '../key';
+import Line from './line';
+import LineExpander from './line_expander';
+import Metadata from './metadata';
+import MetadataAccessors from './metadata_accessors';
+import Paragraph from './paragraph';
+import ParserWarning from '../parser/parser_warning';
+import SongBuilder from '../song_builder';
 import Tag from './tag';
-import {
-  CAPO, END_OF_CHORUS, KEY, START_OF_CHORUS,
-} from './tags';
 
-type EachItemCallback = (_item: Item) => void;
-
-type MapItemsCallback = (_item: Item) => Item | null;
-
-type MapLinesCallback = (_line: Line) => Line | null;
+import { Modifier } from '../constants';
+import { filterObject } from '../utilities';
+import { testSelector } from '../helpers';
+import { CAPO, KEY } from './tags';
+import SongMapper, { MapItemsCallback } from './song_mapper';
 
 /**
  * Represents a song in a chord sheet. Currently a chord sheet can only have one song.
@@ -49,9 +45,9 @@ class Song extends MetadataAccessors {
 
   /**
    * Creates a new {Song} instance
-   * @param metadata {Object|Metadata} predefined metadata
+   * @param metadata {Record<string, string | string[]>|Metadata} predefined metadata
    */
-  constructor(metadata = {}) {
+  constructor(metadata: Record<string, string | string[]> | Metadata = {}) {
     super();
     this.metadata = new Metadata(metadata);
   }
@@ -93,54 +89,6 @@ class Song extends MetadataAccessors {
     return copy;
   }
 
-  private expandLine(line: Line): Line[] {
-    const expandedLines = line.items.flatMap((item: Item) => {
-      if (item instanceof Tag && item.name === CHORUS) {
-        return this.getLastChorusBefore(line.lineNumber);
-      }
-
-      return [];
-    });
-
-    return [line, ...expandedLines];
-  }
-
-  private getLastChorusBefore(lineNumber: number | null): Line[] {
-    const lines: Line[] = [];
-
-    if (!lineNumber) {
-      return lines;
-    }
-
-    for (let i = lineNumber - 1; i >= 0; i -= 1) {
-      const line = this.lines[i];
-
-      if (line.type === CHORUS) {
-        const filteredLine = this.filterChorusStartEndDirectives(line);
-
-        if (!(line.isNotEmpty() && filteredLine.isEmpty())) {
-          lines.unshift(line);
-        }
-      } else if (lines.length > 0) {
-        break;
-      }
-    }
-
-    return lines;
-  }
-
-  private filterChorusStartEndDirectives(line: Line) {
-    return line.mapItems((item: Item) => {
-      if (item instanceof Tag) {
-        if (item.name === START_OF_CHORUS || item.name === END_OF_CHORUS) {
-          return null;
-        }
-      }
-
-      return item;
-    });
-  }
-
   /**
    * The {@link Paragraph} items of which the song consists
    * @member {Paragraph[]}
@@ -156,12 +104,12 @@ class Song extends MetadataAccessors {
   get expandedBodyParagraphs(): Paragraph[] {
     return this.selectRenderableItems(
       this.linesToParagraphs(
-        this.lines.flatMap((line: Line) => this.expandLine(line)),
+        this.lines.flatMap((line: Line) => LineExpander.expand(line, this)),
       ),
     ) as Paragraph[];
   }
 
-  linesToParagraphs(lines: Line[]) {
+  linesToParagraphs(lines: Line[]): Paragraph[] {
     let currentParagraph = new Paragraph();
     const paragraphs = [currentParagraph];
 
@@ -184,11 +132,11 @@ class Song extends MetadataAccessors {
    * @returns {Song} The cloned song
    */
   clone(): Song {
-    return this.mapItems((item) => item);
-  }
-
-  setMetadata(name: string, value: string): void {
-    this.metadata.add(name, value);
+    const clone = new Song();
+    clone.metadata = this.metadata.clone();
+    clone.warnings = [...this.warnings];
+    clone.lines = this.lines.map((line) => line.clone());
+    return clone;
   }
 
   getMetadata(name: string): string | string[] | null {
@@ -227,16 +175,64 @@ class Song extends MetadataAccessors {
     return this.changeMetadata(CAPO, strCapo);
   }
 
-  private setDirective(name: string, value: string | null): Song {
-    if (value === null) {
-      return this.removeItem((item: Item) => item instanceof Tag && item.name === name);
-    }
+  private updateDirectives(metadata: Record<string, string | string[] | null>): Song {
+    const updates = { ...metadata };
 
-    return this.updateItem(
-      (item: Item) => item instanceof Tag && item.name === name,
-      (item: Item) => (('set' in item) ? item.set({ value }) : item),
-      (song: Song) => song.insertDirective(name, value),
-    );
+    const newMetadata: Record<string, string | string[] | null> =
+      filterObject<string | string[] | null>(updates, (key, value) => (
+        value !== null && !this.metadata.contains(key)
+      ));
+
+    const updatedSong = this.changeOrDeleteDirectives(updates);
+    updatedSong.insertDirectives(newMetadata);
+    return updatedSong;
+  }
+
+  private changeOrDeleteDirectives(updates: Record<string, string | string[] | null>) {
+    const pendingUpdates = { ...updates };
+
+    return this.mapItems((item: Item) => {
+      if (!(item instanceof Tag)) {
+        return item;
+      }
+
+      const tag = item as Tag;
+
+      if (!(tag.name in pendingUpdates && tag.isMetaTag())) {
+        return item;
+      }
+
+      const replacementValue = pendingUpdates[tag.name];
+
+      if (replacementValue === null) {
+        return null;
+      }
+
+      pendingUpdates[tag.name] = null;
+
+      return [replacementValue].flat().map((value) => new Tag(tag.name, value));
+    });
+  }
+
+  private insertDirectives(metadata: Record<string, string | string[] | null>, { after = null } = {}): void {
+    const insertIndex = this.lines.findIndex((line) => (
+      line.items.some((item) => (
+        !(item instanceof Tag) || (after && item.name === after)
+      ))
+    ));
+
+    const newLines = Object.keys(metadata).flatMap((name) => {
+      const values = [metadata[name]].flat();
+
+      return values.flatMap((value) => {
+        const line = new Line();
+        line.addTag(name, value);
+        return line;
+      });
+    });
+
+    const { lines } = this;
+    this.lines = [...lines.slice(0, insertIndex), ...newLines, ...lines.slice(insertIndex)];
   }
 
   /**
@@ -260,26 +256,47 @@ class Song extends MetadataAccessors {
     return song.mapItems((item) => {
       if (item instanceof Tag && item.name === KEY) {
         transposedKey = Key.wrapOrFail(item.value).transpose(delta);
-
-        if (modifier) {
-          transposedKey = transposedKey.useModifier(modifier);
-        }
-
+        if (modifier) transposedKey = transposedKey.useModifier(modifier);
         return item.set({ value: transposedKey.toString() });
       }
 
       if (item instanceof ChordLyricsPair) {
-        let chord = item.transpose(delta, transposedKey, { normalizeChordSuffix });
-
-        if (modifier) {
-          chord = chord.useModifier(modifier);
-        }
-
-        return chord;
+        return Song.transposeChordLyricsPair({
+          item,
+          delta,
+          transposedKey,
+          normalizeChordSuffix,
+          modifier: modifier || null,
+        });
       }
 
       return item;
     });
+  }
+
+  private static transposeChordLyricsPair(
+    {
+      item,
+      delta,
+      transposedKey,
+      normalizeChordSuffix,
+      modifier,
+    }:
+    {
+      item: ChordLyricsPair,
+      delta: number,
+      transposedKey: Key | null,
+      normalizeChordSuffix: boolean,
+      modifier: Modifier | null
+    },
+  ) {
+    let chord = item.transpose(delta, transposedKey, { normalizeChordSuffix });
+
+    if (modifier) {
+      chord = chord.useModifier(modifier);
+    }
+
+    return chord;
   }
 
   /**
@@ -291,7 +308,7 @@ class Song extends MetadataAccessors {
    * @param {boolean} [options.normalizeChordSuffix=false] whether to normalize the chord suffixes after transposing
    * @returns {Song} The transposed song
    */
-  transposeUp({ normalizeChordSuffix = false } = {}): Song {
+  transposeUp({ normalizeChordSuffix = false }: { normalizeChordSuffix?: boolean; } = {}): Song {
     return this.transpose(1, { normalizeChordSuffix });
   }
 
@@ -304,7 +321,7 @@ class Song extends MetadataAccessors {
    * @param {boolean} [options.normalizeChordSuffix=false] whether to normalize the chord suffixes after transposing
    * @returns {Song} The transposed song
    */
-  transposeDown({ normalizeChordSuffix = false } = {}): Song {
+  transposeDown({ normalizeChordSuffix = false }: { normalizeChordSuffix?: boolean; } = {}): Song {
     return this.transpose(-1, { normalizeChordSuffix });
   }
 
@@ -320,13 +337,7 @@ class Song extends MetadataAccessors {
     const currentKey = this.requireCurrentKey();
     const targetKey = Key.wrapOrFail(newKey);
     const delta = currentKey.distanceTo(targetKey);
-    const transposedSong = this.transpose(delta, { modifier: targetKey.modifier });
-
-    if (targetKey.modifier) {
-      return transposedSong.useModifier(targetKey.modifier);
-    }
-
-    return transposedSong;
+    return this.transpose(delta, { modifier: targetKey.modifier });
   }
 
   /**
@@ -342,20 +353,52 @@ class Song extends MetadataAccessors {
    * @param {Modifier} modifier the new modifier
    * @returns {Song} the changed song
    */
-  useModifier(modifier: Modifier) {
+  useModifier(modifier: Modifier): Song {
+    const { currentKey } = this;
+    let changedSong = this.mapChordLyricsPairs((pair) => pair.useModifier(modifier));
+
+    if (currentKey && currentKey.modifier !== modifier) {
+      changedSong = changedSong.changeKey(currentKey.useModifier(modifier));
+    }
+
+    return changedSong;
+  }
+
+  /**
+   * Returns a copy of the song with all chords normalized to the specified key. See {@link Chord#normalize}.
+   * @param key the key to normalize to
+   * @param options options
+   * @param options.normalizeSuffix whether to normalize the chord suffixes
+   */
+  normalizeChords(
+    key: Key | string | null = null,
+    { normalizeSuffix = true }: { normalizeSuffix?: boolean; } = {},
+  ): Song {
+    return this.changeChords((chord) => chord.normalize(key, { normalizeSuffix }));
+  }
+
+  mapChordLyricsPairs(func: (pair: ChordLyricsPair) => ChordLyricsPair): Song {
     return this.mapItems((item) => {
       if (item instanceof ChordLyricsPair) {
-        return (item as ChordLyricsPair).useModifier(modifier);
+        return func(item);
       }
 
       return item;
     });
   }
 
-  requireCurrentKey(): Key {
-    const wrappedKey = Key.wrap(this.key);
+  changeChords(func: (chord: Chord) => Chord): Song {
+    return this.mapChordLyricsPairs((pair) => pair.changeChord(func));
+  }
 
-    if (!wrappedKey) {
+  get currentKey(): Key | null {
+    return Key.wrap(this.key);
+  }
+
+  requireCurrentKey(): Key {
+    const { currentKey } = this;
+
+    if (!currentKey) {
       throw new Error(`
 Cannot change song key, the original key is unknown.
 
@@ -366,7 +409,7 @@ Or set the song key before changing key:
   \`song.setKey('C');\``.substring(1));
     }
 
-    return wrappedKey;
+    return currentKey;
   }
 
   /**
@@ -374,30 +417,52 @@ Or set the song key before changing key:
    * - when there is a matching directive in the song, it will update the directive
    * - when there is no matching directive, it will be inserted
    * If `value` is `null` it will act as a delete, any directive matching `name` will be removed.
-   * @param {string} name The directive name
-   * @param {string | null} value The value to set, or `null` to remove the directive
+   *
+   * @example
+   * ```javascript
+   * song.changeMetadata('author', 'John');
+   * song.changeMetadata('composer', ['Jane', 'John']);
+   * song.changeMetadata('key', null); // Remove key directive
+   * ```
+   * @param name The directive name
+   * @param {string | string[] | null} value The value to set, or `null` to remove the directive
+   * @return {Song} The changed song
    */
-  changeMetadata(name: string, value: string | null): Song {
-    const updatedSong = this.setDirective(name, value);
-    updatedSong.metadata.set(name, value);
+  changeMetadata(name: string, value: string | string[] | null): Song;
+
+  /**
+   * Returns a copy of the song with the metadata changed. It will:
+   * - update the metadata
+   * - update any existing directive matching the metadata key
+   * - insert a new directive if it does not exist
+   * @example
+   * ```javascript
+   * song.changeMetadata({
+   *   author: 'John',
+   *   composer: ['Jane', 'John'],
+   *   key: null, // Remove key directive
+   * });
+   * ```
+   * @param {Record<string, string | string[] | null>} metadata The metadata to change
+   * @returns {Song} The changed song
+   */
+  changeMetadata(metadata: Record<string, string | string[] | null>): Song;
+
+  changeMetadata(
+    nameOrData: string | Record<string, string | string[] | null>,
+    value?: string | string[] | null,
+  ): Song {
+    if (typeof nameOrData === 'string') {
+      if (typeof value === 'undefined') {
+        throw new Error('Value is required when name is a string');
+      }
+
+      return this.changeMetadata({ [nameOrData]: value });
+    }
+
+    const updatedSong = this.updateDirectives(nameOrData);
+    updatedSong.metadata.assign(nameOrData);
     return updatedSong;
-  }
-
-  private insertDirective(name: string, value: string, { after = null } = {}): Song {
-    const insertIndex = this.lines.findIndex((line) => (
-      line.items.some((item) => (
-        !(item instanceof Tag) || (after && item.name === after)
-      ))
-    ));
-
-    const newLine = new Line();
-    newLine.addTag(name, value);
-
-    const clonedSong = this.clone();
-    const { lines } = clonedSong;
-    clonedSong.lines = [...lines.slice(0, insertIndex), newLine, ...lines.slice(insertIndex)];
-
-    return clonedSong;
   }
 
   addLine(line: Line) {
@@ -419,25 +484,10 @@ Or set the song key before changing key:
    * @returns {Song} the changed song
    */
   mapItems(func: MapItemsCallback): Song {
-    const clonedSong = new Song();
-    const builder = new SongBuilder(clonedSong);
-
-    this.lines.forEach((line) => {
-      builder.addLine();
-
-      line.items.forEach((item) => {
-        const changedItem = func(item);
-
-        if (changedItem) {
-          builder.addItem(changedItem);
-        }
-      });
-    });
-
-    return clonedSong;
+    return new SongMapper(this).mapItems(func);
   }
 
-  foreachItem(func: EachItemCallback): void {
+  foreachItem(func: (_item: Item) => void): void {
     this.lines.forEach((line) => {
       line.items.forEach(func);
     });
@@ -517,7 +567,7 @@ Or set the song key before changing key:
    * @param {MapLinesCallback} func the callback function
    * @returns {Song} the changed song
    */
-  mapLines(func: MapLinesCallback): Song {
+  mapLines(func: (_line: Line) => Line | null): Song {
     const clonedSong = new Song();
     const builder = new SongBuilder(clonedSong);
 
