@@ -489,7 +489,7 @@ __metadata:
     "@parcel/transformer-typescript-types": "npm:^2.15.2"
     "@types/jest": "npm:^30.0.0"
     "@types/js-levenshtein": "npm:^1"
-    "@types/node": "npm:^24.0.0"
+    "@types/node": "npm:^24.0.3"
     concat-md: "npm:^0.5.1"
     detect-newline: "npm:^4.0.1"
     esbuild: "npm:^0.25.0"
@@ -3088,12 +3088,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/node@npm:^24.0.0":
-  version: 24.0.0
-  resolution: "@types/node@npm:24.0.0"
+"@types/node@npm:^24.0.3":
+  version: 24.0.3
+  resolution: "@types/node@npm:24.0.3"
   dependencies:
     undici-types: "npm:~7.8.0"
-  checksum: 10c0/075f3129aa88932a0b4c3c9c28486f93a8d295151138b1fdd590cbbb59ec92d59b66201f99a0f061a7c8955a09d06ecc3fa070ed3c438a521a9890d1a3460958
+  checksum: 10c0/9c3c4e87600d1cf11e291c2fd4bfd806a615455463c30a0ef6dc9c801b3423344d9b82b8084e3ccabce485a7421ebb61a66e9676181bd7d9aea4759998a120d5
   languageName: node
   linkType: hard
 
