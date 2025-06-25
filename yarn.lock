@@ -483,7 +483,7 @@ __metadata:
   resolution: "@bettermusic/chordsheetjs@workspace:."
   dependencies:
     "@eslint/core": "npm:^0.15.0"
-    "@eslint/js": "npm:^9.11.0"
+    "@eslint/js": "npm:^9.29.0"
     "@martijnversluis/unibuild": "npm:^1.4.0"
     "@parcel/packager-ts": "npm:^2.15.2"
     "@parcel/transformer-typescript-types": "npm:^2.15.2"
@@ -812,10 +812,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@eslint/js@npm:^9.11.0":
-  version: 9.16.0
-  resolution: "@eslint/js@npm:9.16.0"
-  checksum: 10c0/a55846a4ddade720662d36682f3eaaf38eac06eeee12c83bb837bba2b7d550dadcb3445b104219f0bc1da2e09b4fe5fb5ba123b8338c8c787bcfbd540878df75
+"@eslint/js@npm:^9.29.0":
+  version: 9.29.0
+  resolution: "@eslint/js@npm:9.29.0"
+  checksum: 10c0/d0ccf37063fa27a3fae9347cb044f84ca10b5a2fa19ffb2b3fedf3b96843ac1ff359ea9f0ab0e80f2f16fda4cb0dc61ea0fed0375090f050fe0a029e7d6de3a3
   languageName: node
   linkType: hard
 
