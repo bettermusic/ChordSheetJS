@@ -46,7 +46,7 @@
     "jest": "^30.0.2",
     "js-levenshtein": "^1.1.6",
     "parcel": "^2.15.2",
-    "peggy": "^5.0.2",
+    "peggy": "^5.0.4",
     "pegjs-backtrace": "^0.2.1",
     "print": "^1.2.0",
     "process": "^0.11.10",
