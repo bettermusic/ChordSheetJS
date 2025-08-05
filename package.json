@@ -35,7 +35,7 @@
     "@parcel/transformer-typescript-types": "^2.15.4",
     "@types/jest": "^30.0.0",
     "@types/js-levenshtein": "^1",
-    "@types/node": "^24.1.0",
+    "@types/node": "^24.2.0",
     "concat-md": "^0.5.1",
     "detect-newline": "^4.0.1",
     "esbuild": "^0.25.8",
