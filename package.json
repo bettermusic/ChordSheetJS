@@ -50,7 +50,7 @@
     "pegjs-backtrace": "^0.2.1",
     "print": "^1.2.0",
     "process": "^0.11.10",
-    "puppeteer": "^24.15.0",
+    "puppeteer": "^24.16.0",
     "shx": "^0.4.0",
     "theredoc": "^1.0.0",
     "ts-jest": "^29.4.1",
