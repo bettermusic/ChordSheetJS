@@ -28,7 +28,7 @@
     "node": ">=16"
   },
   "devDependencies": {
-    "@eslint/core": "^0.15.1",
+    "@eslint/core": "^0.15.2",
     "@eslint/js": "^9.32.0",
     "@martijnversluis/unibuild": "^1.4.0",
     "@parcel/packager-ts": "^2.15.4",
