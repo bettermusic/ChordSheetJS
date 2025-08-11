@@ -16,7 +16,7 @@ jobs:
         node-version: [ 18.x, 20.x, 22.x ]
     name: Ubuntu NodeJS ${{ matrix.node-version }} sample
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Use Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@v4
         with:
@@ -32,7 +32,7 @@ jobs:
     runs-on: ubuntu-latest
     name: Check trailing whitespace
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Enable Corepack
         run: corepack enable
       - name: Install node modules
@@ -44,7 +44,7 @@ jobs:
     runs-on: ubuntu-latest
     name: Check deprecated packages
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Enable Corepack
         run: corepack enable
       - name: Check deprecated packages
@@ -58,7 +58,7 @@ jobs:
         node-version: [ 22.x ]
     name: Windows NodeJS ${{ matrix.node-version }} sample
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Use Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@v4
         with:
@@ -77,7 +77,7 @@ jobs:
         node-version: [ 22.x ]
     name: Generate typedoc
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Use Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@v4
         with:
