@@ -484,7 +484,7 @@ __metadata:
   dependencies:
     "@eslint/core": "npm:^0.15.2"
     "@eslint/js": "npm:^9.33.0"
-    "@martijnversluis/unibuild": "npm:^1.4.0"
+    "@martijnversluis/unibuild": "npm:^2.0.3"
     "@parcel/packager-ts": "npm:^2.15.4"
     "@parcel/transformer-typescript-types": "npm:^2.15.4"
     "@types/jest": "npm:^30.0.0"
@@ -959,7 +959,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@eslint/core@npm:^0.15.2":
+"@eslint/core@npm:^0.15.0, @eslint/core@npm:^0.15.2":
   version: 0.15.2
   resolution: "@eslint/core@npm:0.15.2"
   dependencies:
@@ -985,7 +985,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@eslint/js@npm:9.33.0, @eslint/js@npm:^9.33.0":
+"@eslint/js@npm:9.33.0, @eslint/js@npm:^9.11.0, @eslint/js@npm:^9.33.0":
   version: 9.33.0
   resolution: "@eslint/js@npm:9.33.0"
   checksum: 10c0/4c42c9abde76a183b8e47205fd6c3116b058f82f07b6ad4de40de56cdb30a36e9ecd40efbea1b63a84d08c206aadbb0aa39a890197e1ad6455a8e542df98f186
@@ -1527,13 +1527,23 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@martijnversluis/unibuild@npm:^1.4.0":
-  version: 1.4.0
-  resolution: "@martijnversluis/unibuild@npm:1.4.0"
+"@martijnversluis/unibuild@npm:^2.0.3":
+  version: 2.0.3
+  resolution: "@martijnversluis/unibuild@npm:2.0.3"
   dependencies:
+    "@eslint/core": "npm:^0.15.0"
+    "@eslint/js": "npm:^9.11.0"
     chalk: "npm:^5.3.0"
     commander: "npm:^12.1.0"
-  checksum: 10c0/09c71d3d006fa311c83be1a70b784f843acaf735eeb5fa7d69af3541852c22aabc59c79192cfefb1f56abfc339233359652a4a6b0e41e0468ab781138f3cae1d
+    eslint: "npm:^9.11.0"
+    eslint-config-airbnb: "npm:^19.0.4"
+    eslint-plugin-jest: "npm:^29.0.0"
+    tsx: "npm:^4.10.5"
+    typescript: "npm:^5.7.3"
+    typescript-eslint: "npm:^8.6.0"
+  bin:
+    unibuild: ./bin/unibuild.js
+  checksum: 10c0/1ef9458ee68bc0edee78333539d70aa46893690bc508599c5c546f2bd470db69461e60d9333893960c8271fd519ca2e8ef9a2f225e3796dbb855ddb2e72b3f9d
   languageName: node
   linkType: hard
 
@@ -5302,7 +5312,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"eslint-plugin-jest@npm:^29.0.1":
+"eslint-plugin-jest@npm:^29.0.0, eslint-plugin-jest@npm:^29.0.1":
   version: 29.0.1
   resolution: "eslint-plugin-jest@npm:29.0.1"
   dependencies:
@@ -5351,7 +5361,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"eslint@npm:^9.33.0":
+"eslint@npm:^9.11.0, eslint@npm:^9.33.0":
   version: 9.33.0
   resolution: "eslint@npm:9.33.0"
   dependencies:
@@ -10302,7 +10312,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"tsx@npm:^4.20.4":
+"tsx@npm:^4.10.5, tsx@npm:^4.20.4":
   version: 4.20.4
   resolution: "tsx@npm:4.20.4"
   dependencies:
@@ -10508,7 +10518,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"typescript-eslint@npm:^8.40.0":
+"typescript-eslint@npm:^8.40.0, typescript-eslint@npm:^8.6.0":
   version: 8.40.0
   resolution: "typescript-eslint@npm:8.40.0"
   dependencies:
@@ -10523,7 +10533,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"typescript@npm:^5.9.2":
+"typescript@npm:^5.7.3, typescript@npm:^5.9.2":
   version: 5.9.2
   resolution: "typescript@npm:5.9.2"
   bin:
@@ -10533,7 +10543,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"typescript@patch:typescript@npm%3A^5.9.2#optional!builtin<compat/typescript>":
+"typescript@patch:typescript@npm%3A^5.7.3#optional!builtin<compat/typescript>, typescript@patch:typescript@npm%3A^5.9.2#optional!builtin<compat/typescript>":
   version: 5.9.2
   resolution: "typescript@patch:typescript@npm%3A5.9.2#optional!builtin<compat/typescript>::version=5.9.2&hash=b45daf"
   bin:

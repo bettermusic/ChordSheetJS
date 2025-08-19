@@ -32,7 +32,7 @@ function peggyGenerate(grammar: string, release: boolean): string {
   );
 }
 
-unibuild((u: Builder) => {
+export default unibuild((u: Builder) => {
   const suffixNormalizeMapping = u.asset('suffixNormalizeMapping', {
     input: 'src/normalize_mappings/suffix-mapping.txt',
     outfile: 'src/normalize_mappings/suffix-normalize-mapping.ts',
