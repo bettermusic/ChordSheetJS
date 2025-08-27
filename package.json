@@ -80,7 +80,7 @@
     "test": "yarn unibuild lint && yarn unibuild test"
   },
   "dependencies": {
-    "jspdf": "^3.0.1"
+    "jspdf": "^3.0.2"
   },
   "packageManager": "yarn@4.2.2"
 }
