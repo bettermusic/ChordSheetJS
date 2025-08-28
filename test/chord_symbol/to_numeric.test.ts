@@ -43,6 +43,10 @@ describe('Chord', () => {
         expect(Chord.parse('4')?.toNumeric('Em').toString()).toEqual('4');
         expect(Chord.parse('4')?.toChordSymbol('Em').toString()).toEqual('C');
       });
+
+      it('properly handles b3 with minor key', () => {
+        expect(Chord.parse('Bb')?.toNumeric('G').toString()).toEqual('b3');
+      });
     });
   });
 });

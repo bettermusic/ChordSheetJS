@@ -15,6 +15,7 @@ interface ChordProperties {
   root?: Key | null;
   suffix?: string | null;
   bass?: Key | null;
+  optional?: boolean;
 }
 
 /**
@@ -26,6 +27,8 @@ class Chord implements ChordProperties {
   root: Key | null;
 
   suffix: string | null;
+
+  optional: boolean;
 
   /**
    * Tries to parse a chord string into a chord
@@ -85,6 +88,7 @@ class Chord implements ChordProperties {
       suffix: this.suffix ? normalizeChordSuffix(this.suffix) : null,
       root: this.root?.toChordSymbol(keyObj, referenceIsMinor) || null,
       bass: this.bass?.toChordSymbol(keyObj, referenceIsMinor) || null,
+      ...(this.optional ? { optional: true } : {}),
     });
 
     if (this.root?.isMinor()) {
@@ -139,6 +143,7 @@ class Chord implements ChordProperties {
       suffix: this.suffix ? normalizeChordSuffix(this.suffix) : null,
       root: this.root?.toChordSolfege(keyObj) || null,
       bass: this.bass?.toChordSolfege(keyObj) || null,
+      ...(this.optional ? { optional: true } : {}),
     });
 
     if (this.root?.isMinor()) {
@@ -195,6 +200,7 @@ class Chord implements ChordProperties {
       suffix: normalizeChordSuffix(this.suffix),
       root: this.root?.toNumeric(keyObj) || null,
       bass: this.bass?.toNumeric(keyObj) || null,
+      ...(this.optional ? { optional: true } : {}),
     });
   }
 
@@ -223,6 +229,7 @@ class Chord implements ChordProperties {
       suffix: normalizeChordSuffix(this.suffix),
       root: (keyObj && this.root) ? this.root.toNumeral(keyObj) : null,
       bass: this.bass?.toNumeral(keyObj) || null,
+      ...(this.optional ? { optional: true } : {}),
     });
   }
 
@@ -273,11 +280,33 @@ class Chord implements ChordProperties {
    */
   toString({ useUnicodeModifier = false } = {}): string {
     let chordString = '';
-    const suffix = this.suffix || '';
+    let suffix = this.suffix || '';
     const showMinor = suffix[0] !== 'm';
 
+    // if the chord is numeric and this.root is 2,3,6 remove the m from the suffix
+    // only if it's a standalone minor indicator (just "m", not "m7", "ma", etc.)
+    if (this.isNumeric()) {
+      switch (this.root?.toString()) {
+        case '2':
+        case '3':
+        case '6':
+          // Only remove 'm' if it's exactly 'm' (standalone minor)
+          if (suffix === 'm') {
+            suffix = '';
+          }
+          break;
+        default:
+          break;
+      }
+    }
+
     if (this.root) chordString = this.root.toString({ showMinor, useUnicodeModifier }) + suffix;
-    if (this.bass) return `${chordString}/${this.bass.toString({ useUnicodeModifier })}`;
+    if (this.bass) chordString = `${chordString}/${this.bass.toString({ useUnicodeModifier })}`;
+
+    // Wrap in parentheses if optional
+    if (this.optional) {
+      chordString = `(${chordString})`;
+    }
 
     return chordString;
   }
@@ -368,6 +397,7 @@ class Chord implements ChordProperties {
       root = null,
       bass = null,
       chordType = null,
+      optional = false,
     }: {
       base?: string | number | null,
       modifier?: Modifier | null,
@@ -377,9 +407,11 @@ class Chord implements ChordProperties {
       root?: Key | null,
       bass?: Key | null,
       chordType?: ChordType | null,
+      optional?: boolean,
     },
   ) {
     this.suffix = suffix || null;
+    this.optional = optional;
     this.root = Chord.determineRoot({
       root, base, modifier, suffix, chordType,
     });
@@ -390,6 +422,7 @@ class Chord implements ChordProperties {
 
   equals(otherChord: Chord): boolean {
     return this.suffix === otherChord.suffix &&
+      this.optional === otherChord.optional &&
       Key.equals(this.root, otherChord.root) &&
       Key.equals(this.bass, otherChord.bass);
   }
@@ -462,6 +495,7 @@ class Chord implements ChordProperties {
         root: this.root?.clone() || null,
         suffix: this.suffix,
         bass: this.bass?.clone() || null,
+        ...(this.optional ? { optional: true } : {}),
         ...properties,
       },
     );

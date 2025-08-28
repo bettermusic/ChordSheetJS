@@ -120,6 +120,7 @@ export const pdfSpecificDefaults: Partial<PDFFormatterConfiguration> = {
       base: {
         display: {
           lyricsOnly: false,
+          repeatedSections: 'title_only',
         },
       },
     },

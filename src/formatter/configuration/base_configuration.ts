@@ -1,11 +1,20 @@
+import { META_TAGS } from '../../chord_sheet/tag';
 import Key from '../../key';
 import { ContentType } from '../../serialized_types';
 
 export type Delegate = (_string: string) => string;
 export const defaultDelegate: Delegate = (string: string) => string;
 
+export interface MetadataRule {
+  match: string | string[] | RegExp | ((key: string) => boolean);
+  visible?: boolean;
+  sortMethod?: 'preserve' | 'alphabetical' | 'custom';
+  customSort?: (a: string, b: string) => number;
+}
+
 export interface MetadataConfiguration {
   separator: string;
+  order: (string | MetadataRule)[];
 }
 
 export interface InstrumentConfiguration {
@@ -20,6 +29,11 @@ export interface UserConfigurationProperties {
 
 export const defaultMetadataConfiguration: MetadataConfiguration = {
   separator: ',',
+  order: [
+    ...META_TAGS,
+    // x_ metadata - alphabetical
+    { match: /^x_/, sortMethod: 'alphabetical' },
+  ],
 };
 
 export interface DelegatesConfiguration {

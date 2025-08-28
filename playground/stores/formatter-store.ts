@@ -74,12 +74,6 @@ function formatSong(formatter: any, options?: any): string {
     
     const currentFormatter = formatterStore.getState().currentFormatter;
     const config = { ...(formatterStore.getState().formatterConfigs[currentFormatter] || {}), ...options };
-
-    const metadata = config.metadata || {};
-    for (const key in metadata) {
-      console.log(`Setting metadata for key: ${key}, value: ${metadata[key]}`);
-      song = song.changeMetadata(key, metadata[key]);
-    }
     
     console.log(`Formatting song with key: ${song.key}, config:`, config);
     return formatter.configure(config).format(song);

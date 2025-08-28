@@ -257,11 +257,6 @@ class PositionedHtmlRenderer extends Renderer {
         this.y += this.getParagraphSpacing();
       }
 
-      // Move to next column/page if necessary
-      if (this.y > this.getColumnBottomY()) {
-        this.moveToNextColumn();
-      }
-
       this.x = this.getColumnStartX();
       this.elements = originalElements;
     });
@@ -427,7 +422,7 @@ class PositionedHtmlRenderer extends Renderer {
   }
 
   protected getColumnCount(): number {
-    return this.configuration.layout.sections.global.columnCount;
+    return this.dimensions.effectiveColumnCount;
   }
 
   protected getColumnSpacing(): number {
@@ -534,17 +529,24 @@ class PositionedHtmlRenderer extends Renderer {
       ...(style.style && { fontStyle: style.style }),
       ...(style.color && { color: style.color }),
       ...(style.underline && { textDecoration: 'underline' }),
+      ...(style.textTransform && { textTransform: style.textTransform }),
+      ...(style.textDecoration && { textDecoration: style.textDecoration }),
+      ...(style.letterSpacing && { letterSpacing: style.letterSpacing }),
     };
 
     // Element-specific styling based on type
     let typeSpecificStyles = {};
 
     switch (element.type) {
-      case 'chord':
+      case 'chord': {
+        const contentIsRhythm = element.content === '|' || element.content === '/';
         typeSpecificStyles = {
           color: style.color || '#0066cc',
+          ...(
+            contentIsRhythm && style.weight && style.weight > 500 && { fontWeight: 500 }),
         };
         break;
+      }
       case 'sectionLabel':
         typeSpecificStyles = {
           fontWeight: style.weight || 'bold',
@@ -809,9 +811,19 @@ class PositionedHtmlRenderer extends Renderer {
    */
   private buildDimensions(): Dimensions {
     const { width, height } = this.doc.pageSize;
-    const { columnCount, columnSpacing } = this.configuration.layout.sections.global;
+    const {
+      columnCount,
+      columnSpacing,
+      minColumnWidth,
+      maxColumnWidth,
+    } = this.configuration.layout.sections.global;
 
-    return new Dimensions(width, height, this.configuration.layout, { columnCount, columnSpacing });
+    return new Dimensions(width, height, this.configuration.layout, {
+      columnCount,
+      columnSpacing,
+      minColumnWidth,
+      maxColumnWidth,
+    });
   }
 
   /**
@@ -832,6 +844,8 @@ class PositionedHtmlRenderer extends Renderer {
       layout.header?.height || 0,
       global.columnCount,
       global.columnSpacing,
+      global.minColumnWidth || 0,
+      global.maxColumnWidth || 0,
     ].join('-');
   }
 

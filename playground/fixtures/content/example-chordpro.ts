@@ -1,17 +1,17 @@
 export const chordproExamples = [
-//   {
-//     name: 'Goodness of God',
-//     content: `{t:Test}
-// {artist: Cody Carnes}
-// {author: Cody Carnes, Austin Davis, Chandler Moore}
-// {key:Bb}
-// {tempo:150}
-// {time:6/8}
-// {copyright: @2021 Writers Roof Publishing, TBCO Publishing, A.L.K.D. Music, Capitol CMG Paragon  (Admin by Capitol CMG Publishing) For Humans, Maverick City Publishing (Admin by Essential Music Publishing)}
+  {
+    name: 'Goodness of God',
+    content: `{t:Test}
+{artist: Cody Carnes}
+{author: Cody Carnes, Austin Davis, Chandler Moore}
+{key:A}
+{tempo:150}
+{time:6/8}
+{copyright: @2021 Writers Roof Publishing, TBCO Publishing, A.L.K.D. Music, Capitol CMG Paragon  (Admin by Capitol CMG Publishing) For Humans, Maverick City Publishing (Admin by Essential Music Publishing)}
 
-// {c:Intro}
-// [Bb][/][|][/][/][|][Bbsus][/][|][/]`,
-//   },
+{c:Intro}
+[A]A - [E/A]men, [A]a - [E/A]men, [Bm7]a [/]-[A/C#] [C#m7][D] [/]- [E]men`,
+  },
   {
     name: 'Kingdom',
     content: `{title: Kingdom}

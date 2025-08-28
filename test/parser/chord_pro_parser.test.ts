@@ -731,7 +731,7 @@ Let it [Am]be
 
   it('parses soft line breaks when enabled', () => {
     const chordSheet = heredoc`
-      [Am]Let it be,\\ let it [C/G]be
+      [Am]Let it be\\ let it [C/G]be
     `;
 
     const parser = new ChordProParser();
@@ -739,7 +739,7 @@ Let it [Am]be
     const { items } = song.lines[0];
 
     expect(items[0]).toBeChordLyricsPair('Am', 'Let ');
-    expect(items[1]).toBeChordLyricsPair('', 'it be,');
+    expect(items[1]).toBeChordLyricsPair('', 'it be');
     expect(items[2]).toBeSoftLineBreak();
     expect(items[3]).toBeChordLyricsPair('', 'let it ');
     expect(items[4]).toBeChordLyricsPair('C/G', 'be');

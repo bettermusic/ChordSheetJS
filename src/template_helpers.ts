@@ -15,6 +15,7 @@ import { renderChord } from './helpers';
 import When from './template_helpers/when';
 import { Literal, SoftLineBreak } from './index';
 import WhenCallback from './template_helpers/when_callback';
+import { MetadataRule, MetadataConfiguration } from './formatter/configuration/base_configuration';
 
 type EachCallback = (_item: any) => string;
 
@@ -117,7 +118,100 @@ export function fontStyleTag(font: Font): string {
   return '';
 }
 
+function findMatchingKeys(
+  metadata: Record<string, string | string[]>,
+  rule: MetadataRule,
+): string[] {
+  const keys = Object.keys(metadata);
+
+  if (typeof rule.match === 'string') {
+    return keys.filter((key) => key === rule.match);
+  }
+
+  if (Array.isArray(rule.match)) {
+    return keys.filter((key) => (rule.match as string[]).includes(key));
+  }
+
+  if (rule.match instanceof RegExp) {
+    return keys.filter((key) => (rule.match as RegExp).test(key));
+  }
+
+  if (typeof rule.match === 'function') {
+    return keys.filter((k) => (rule.match as (key: string) => boolean)(k));
+  }
+
+  return [];
+}
+
+function sortKeys(
+  keys: string[],
+  rule: MetadataRule,
+): string[] {
+  switch (rule.sortMethod) {
+    case 'alphabetical':
+      return [...keys].sort();
+
+    case 'custom':
+      if (rule.customSort) {
+        return [...keys].sort(rule.customSort);
+      }
+      return keys;
+
+    case 'preserve':
+    default:
+      // If match is an array, preserve its order for matching keys
+      if (Array.isArray(rule.match)) {
+        const orderMap = new Map(rule.match.map((key, index) => [key, index]));
+        return [...keys].sort((a, b) => {
+          const aIndex = orderMap.get(a) ?? Infinity;
+          const bIndex = orderMap.get(b) ?? Infinity;
+          return aIndex - bIndex;
+        });
+      }
+      return keys;
+  }
+}
+
+export function processMetadata(
+  metadata: Record<string, string | string[]>,
+  config: MetadataConfiguration,
+): [string, string | string[]][] {
+  const processedKeys = new Set<string>();
+  const result: [string, string | string[]][] = [];
+
+  // Process the order array sequentially
+  config.order.forEach((orderItem) => {
+    if (typeof orderItem === 'string') {
+      // Simple string - look for exact match
+      if (metadata[orderItem] !== undefined && !processedKeys.has(orderItem)) {
+        result.push([orderItem, metadata[orderItem]]);
+        processedKeys.add(orderItem);
+      }
+    } else {
+      // Rule - find all matching keys
+      const matchingKeys = findMatchingKeys(metadata, orderItem);
+      const visibleKeys = matchingKeys.filter((key) => {
+        if (orderItem.visible === false) return false;
+        return !processedKeys.has(key);
+      });
+
+      // Sort the matching keys according to the rule
+      const sortedKeys = sortKeys(visibleKeys, orderItem);
+
+      // Add to result
+      sortedKeys.forEach((key) => {
+        result.push([key, metadata[key]]);
+        processedKeys.add(key);
+      });
+    }
+  });
+
+  return result;
+}
+
 export default {
+  isLiteral,
+  isSoftLineBreak,
   isEvaluatable,
   isChordLyricsPair,
   lineHasContents,
@@ -134,4 +228,5 @@ export default {
   fontStyleTag,
   renderChord,
   hasChordContents,
+  processMetadata,
 };

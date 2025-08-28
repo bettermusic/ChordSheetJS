@@ -41,10 +41,8 @@ class HtmlDocWrapper {
     page.style.width = `${this.pageSize.width}px`;
     page.style.height = `${this.pageSize.height}px`;
     page.style.overflow = 'hidden';
-    page.style.marginBottom = '20px';
-    page.style.border = '1px solid #ddd';
     page.style.boxSizing = 'border-box';
-    page.style.backgroundColor = 'white';
+    page.style.backgroundColor = 'var(--studio-diplay-background-color)';
 
     this.container.appendChild(page);
     this.pages.push(page);

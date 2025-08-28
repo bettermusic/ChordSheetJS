@@ -29,9 +29,16 @@ export class CanvasMeasurer extends BaseMeasurer {
    */
   private setFont(fontConfig: FontConfiguration): void {
     const {
-      name, size, weight = 'normal', style = 'normal',
+      name, size, weight = 'normal', style = 'normal', letterSpacing,
     } = fontConfig;
+
+    // Set basic font properties
     this.context.font = `${style} ${weight} ${size}px ${name}`;
+
+    // Set additional text properties if supported
+    if (letterSpacing !== undefined) {
+      this.context.letterSpacing = letterSpacing;
+    }
   }
 
   measureText(text: string, fontConfig: FontConfiguration): TextDimensions {

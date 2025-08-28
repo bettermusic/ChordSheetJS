@@ -138,13 +138,15 @@ export const measuredHtmlSpecificDefaults: Partial<MeasuredHtmlFormatterConfigur
         linePadding: 4,
         chordLyricSpacing: 2,
         chordSpacing: 2,
-        columnCount: 2,
         columnWidth: 0,
         columnSpacing: 25,
+        minColumnWidth: 0,
+        maxColumnWidth: 0,
       },
       base: {
         display: {
           lyricsOnly: false,
+          repeatedSections: 'full',
         },
       },
     },

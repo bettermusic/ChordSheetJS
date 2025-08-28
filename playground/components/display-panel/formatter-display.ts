@@ -54,7 +54,7 @@ export class FormatterDisplay extends HTMLElement {
         :host {
           display: block;
           height: 100%;
-          width: 100%;
+          width: 300px;
           overflow: auto;
           padding: 16px;
           box-sizing: border-box;

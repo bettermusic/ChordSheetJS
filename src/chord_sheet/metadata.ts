@@ -214,6 +214,10 @@ class Metadata extends MetadataAccessors implements Iterable<[string, string | s
       .forEach((key) => {
         const value = metadata[key];
 
+        if (value === null || value === undefined) {
+          return;
+        }
+
         if (value instanceof Array) {
           this.metadata[key] = [...value];
         } else {

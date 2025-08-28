@@ -11,6 +11,7 @@ import Evaluatable from '../chord_sheet/chord_pro/evaluatable';
 import Comment from '../chord_sheet/comment';
 import SoftLineBreak from '../chord_sheet/soft_line_break';
 import Chord from '../chord';
+import { processMetadata } from '../template_helpers';
 
 /**
  * Formats a song into a ChordPro chord sheet
@@ -24,9 +25,51 @@ class ChordProFormatter extends Formatter {
   format(song: Song): string {
     const { lines, metadata } = song;
 
-    return lines
+    // Separate metadata lines from content lines
+    const metadataLines: Line[] = [];
+    const contentLines: Line[] = [];
+
+    lines.forEach((line) => {
+      const isMetadataLine = line.items.length === 1 &&
+        line.items[0] instanceof Tag &&
+        (line.items[0] as Tag).isMetaTag();
+
+      if (isMetadataLine) {
+        metadataLines.push(line);
+      } else {
+        contentLines.push(line);
+      }
+    });
+
+    // Process and reorder metadata according to configuration
+    const orderedMetadata = processMetadata(metadata.all(), this.configuration.metadata);
+
+    // Format metadata tags in the specified order
+    const formattedMetadataLines = orderedMetadata.map(([key, value]) => {
+      if (Array.isArray(value)) {
+        return value.map((v) => `{${key}: ${v}}`).join('\n');
+      }
+      return `{${key}: ${value}}`;
+    });
+
+    // Format content lines
+    const formattedContentLines = contentLines
       .map((line) => this.formatLine(line, metadata))
       .join('\n');
+
+    // Combine ordered metadata and content
+    if (formattedMetadataLines.length > 0) {
+      if (formattedContentLines.trim().length > 0) {
+        // Check if the first content line is empty to avoid double newlines
+        const firstContentLine = contentLines[0];
+        const shouldAddExtraNewline = !(firstContentLine && firstContentLine.isEmpty());
+        const separator = shouldAddExtraNewline ? '\n\n' : '\n';
+        return `${formattedMetadataLines.join('\n')}${separator}${formattedContentLines}`;
+      }
+      return formattedMetadataLines.join('\n');
+    }
+
+    return formattedContentLines;
   }
 
   formatLine(line: Line, metadata: Metadata): string {

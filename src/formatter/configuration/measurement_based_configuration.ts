@@ -86,6 +86,9 @@ export interface FontConfiguration {
   color: string | number;
   underline?: boolean;
   inherit?: string;
+  textTransform?: string;
+  textDecoration?: string;
+  letterSpacing?: string;
 }
 
 export type FontConfigurations = Record<FontSection, FontConfiguration>;
@@ -149,6 +152,7 @@ export interface SectionDisplay {
   lyricsOnly?: boolean;
   indent?: number;
   compact?: boolean;
+  repeatedSections?: 'hide' | 'title_only' | 'lyrics_only' | 'full';
 }
 
 export interface SectionTypeConfig {
@@ -162,8 +166,10 @@ export interface SectionTypeConfig {
 
 // Column configuration
 export interface ColumnConfig {
-  columnCount: number;
+  columnCount?: number;
   columnSpacing: number;
+  minColumnWidth?: number;
+  maxColumnWidth?: number;
 }
 
 // Sections configuration

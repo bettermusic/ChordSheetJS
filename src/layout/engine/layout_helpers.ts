@@ -44,7 +44,7 @@ export function updatePosition(
 ): { newY: number; newColumn: number } {
   if (isColumnBreakLayout(layout)) {
     // Column break
-    const newColumn = currentColumn + 1 > config.columnCount ? 1 : currentColumn + 1;
+    const newColumn = currentColumn + 1 > (config.columnCount || 1) ? 1 : currentColumn + 1;
     return {
       newY: config.minY,
       newColumn,

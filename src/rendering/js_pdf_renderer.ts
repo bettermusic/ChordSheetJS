@@ -313,7 +313,7 @@ class JsPdfRenderer extends Renderer {
   }
 
   protected getColumnCount(): number {
-    return this.configuration.layout.sections.global.columnCount;
+    return this.dimensions.effectiveColumnCount;
   }
 
   protected getColumnSpacing(): number {
@@ -368,7 +368,7 @@ class JsPdfRenderer extends Renderer {
         this.doc.text(element.content, element.x, element.y);
 
         // Add underline if specified in the style (especially for section labels)
-        if (element.style?.underline) {
+        if (element.style?.underline && element.content !== '>') {
           const { w: textWidth } = this.doc.getTextDimensions(element.content);
           this.doc.setDrawColor(0);
           this.doc.setLineWidth(1.25);
@@ -697,9 +697,19 @@ class JsPdfRenderer extends Renderer {
 
   private buildDimensions(): Dimensions {
     const { width, height } = this.doc.pageSize;
-    const { columnCount, columnSpacing } = this.configuration.layout.sections.global;
+    const {
+      columnCount,
+      columnSpacing,
+      minColumnWidth,
+      maxColumnWidth,
+    } = this.configuration.layout.sections.global;
 
-    return new Dimensions(width, height, this.configuration.layout, { columnCount, columnSpacing });
+    return new Dimensions(width, height, this.configuration.layout, {
+      columnCount,
+      columnSpacing,
+      minColumnWidth,
+      maxColumnWidth,
+    });
   }
 
   private generateDimensionCacheKey(): string {
@@ -717,6 +727,8 @@ class JsPdfRenderer extends Renderer {
       layout.header.height,
       global.columnCount,
       global.columnSpacing,
+      global.minColumnWidth || 0,
+      global.maxColumnWidth || 0,
     ].join('-');
   }
 }

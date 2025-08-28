@@ -42,7 +42,7 @@ const NO_FLAT_GRADES = [4, 11];
 const NO_FLAT_NUMBERS = [1, 4];
 const NO_SHARP_GRADES = [5, 0];
 const NO_SHARP_NUMBERS = [3, 7];
-const PREFERS_FLAT_NUMBERS = [10];
+const PREFERS_FLAT_NUMBERS = [2, 3, 10];
 
 /**
  * Represents a key, such as Eb (symbol), #3 (numeric) or VII (numeral).

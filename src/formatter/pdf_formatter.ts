@@ -85,13 +85,19 @@ class PdfFormatter extends MeasurementBasedFormatter<PDFFormatterConfiguration> 
       // Column and page layout information
       minY: dimensions.minY,
       columnWidth: dimensions.columnWidth,
-      columnCount: this.configuration.layout.sections.global.columnCount,
       columnSpacing: this.configuration.layout.sections.global.columnSpacing,
+      minColumnWidth: this.configuration.layout.sections.global.minColumnWidth,
+      maxColumnWidth: this.configuration.layout.sections.global.maxColumnWidth,
       paragraphSpacing: this.configuration.layout.sections.global.paragraphSpacing || 0,
       columnBottomY: this.renderer.getContentBottomY(),
       displayLyricsOnly: !!this.configuration.layout.sections?.base?.display?.lyricsOnly,
       decapo: this.configuration.decapo,
+      repeatedSections: this.configuration.layout.sections?.base?.display?.repeatedSections,
     };
+
+    if (this.configuration.layout.sections.global.columnCount) {
+      layoutConfig.columnCount = this.configuration.layout.sections.global.columnCount;
+    }
 
     // Return the layout engine
     return new LayoutEngine(

@@ -75,12 +75,15 @@ export interface LayoutConfig {
   // Add column and page layout information
   minY: number;
   columnWidth: number;
-  columnCount: number;
+  columnCount?: number;
   columnSpacing: number;
+  minColumnWidth?: number;
+  maxColumnWidth?: number;
   paragraphSpacing: number;
   columnBottomY: number;
   displayLyricsOnly?: boolean;
   decapo: boolean;
+  repeatedSections?: 'hide' | 'title_only' | 'lyrics_only' | 'full';
 }
 
 export interface ParagraphLayoutResult {

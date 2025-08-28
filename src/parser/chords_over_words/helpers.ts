@@ -47,10 +47,11 @@ function combineChordSheetLines(
 }
 
 function applySoftLineBreaks(line: string): (SerializedSoftLineBreak | SerializedChordLyricsPair | null)[] {
+  // Split on backslash and handle the space separately to preserve trailing space
   return line
     .split(/\\\s+/)
     .flatMap((lyric, index) => ([
-      index === 0 ? null : { type: 'softLineBreak' },
+      index === 0 ? null : { type: 'softLineBreak', content: ' ' },
       lyric.length === 0 ? null : { type: 'chordLyricsPair', chords: '', lyrics: lyric },
     ]));
 }
@@ -75,6 +76,24 @@ function constructChordLyricsPairs(
     const pairLyrics = lyrics.substring(start, end);
     const [firstWord, rest] = chopFirstWord ? chopFirstWordFunc(pairLyrics) : [pairLyrics, null];
     const chordData = (chord.type === 'chord') ? { chord: chordProperties(chord) } : { chords: chord.value };
+
+    // Check if firstWord contains a soft line break pattern
+    const hasSoftLineBreakInFirst = firstWord && /\\\s*$/.test(firstWord);
+
+    if (hasSoftLineBreakInFirst) {
+      // Remove the backslash and any trailing whitespace from firstWord
+      const cleanFirstWord = firstWord.replace(/\\\s*$/, '');
+      const result: (SerializedChordLyricsPair | SerializedSoftLineBreak)[] = [
+        { ...chordData, type: 'chordLyricsPair', lyrics: cleanFirstWord } as SerializedChordLyricsPair,
+        { type: 'softLineBreak', content: ' ' } as SerializedSoftLineBreak,
+      ];
+
+      if (rest) {
+        result.push(...applySoftLineBreaks(rest).filter((x) => x !== null));
+      }
+
+      return result;
+    }
 
     if (rest) {
       return [
