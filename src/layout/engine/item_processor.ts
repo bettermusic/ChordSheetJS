@@ -83,7 +83,7 @@ export class ItemProcessor {
     }
 
     // Split the chord-lyrics pair (e.g., on commas)
-    const splitItems = this.splitChordLyricsPair(pair);
+    const splitItems = this.splitChordLyricsPair(pair, lyricsOnly);
 
     splitItems.forEach((splitItem) => {
       if (splitItem instanceof ChordLyricsPair) {
@@ -218,7 +218,7 @@ export class ItemProcessor {
   /**
    * Split a chord-lyrics pair at natural break points (commas)
    */
-  splitChordLyricsPair(pair: ChordLyricsPair): (ChordLyricsPair | SoftLineBreak)[] {
+  splitChordLyricsPair(pair: ChordLyricsPair, lyricsOnly = false): (ChordLyricsPair | SoftLineBreak)[] {
     const { chords, lyrics, annotation } = pair;
 
     if (!lyrics || lyrics.trim() === '') {
@@ -232,7 +232,9 @@ export class ItemProcessor {
       if (index > 0 && index !== 0) {
         items.push(new SoftLineBreak(' '));
         if (fragment.trim() !== '') {
-          items.push(new ChordLyricsPair('', fragment, ''));
+          // In lyricsOnly mode, remove leading space from fragments after line breaks
+          const adjustedFragment = lyricsOnly ? fragment.trimStart() : fragment;
+          items.push(new ChordLyricsPair('', adjustedFragment, ''));
         }
       }
 
