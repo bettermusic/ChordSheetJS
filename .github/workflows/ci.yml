@@ -17,12 +17,12 @@ jobs:
     name: Ubuntu NodeJS ${{ matrix.node-version }} sample
     steps:
       - uses: actions/checkout@v5
-      - name: Use Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@v4
-        with:
-          node-version: ${{ matrix.node-version }}
       - name: Enable Corepack
         run: corepack enable
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v5
+        with:
+          node-version: ${{ matrix.node-version }}
       - name: Install node modules
         run: yarn install
       - name: Run tests
@@ -59,12 +59,18 @@ jobs:
     name: Windows NodeJS ${{ matrix.node-version }} sample
     steps:
       - uses: actions/checkout@v5
-      - name: Use Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@v4
+      - uses: actions/setup-node@v5
         with:
           node-version: ${{ matrix.node-version }}
-      - name: Enable Corepack
-        run: corepack enable
+          cache: npm
+
+      - run: corepack enable
+      - run: corepack prepare $(cat package.json | jq ".packageManager") --activate
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: yarn
       - name: Install node modules
         run: yarn install
       - name: Run tests
@@ -78,12 +84,12 @@ jobs:
     name: Generate typedoc
     steps:
       - uses: actions/checkout@v5
-      - name: Use Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@v4
-        with:
-          node-version: ${{ matrix.node-version }}
       - name: Enable Corepack
         run: corepack enable
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v5
+        with:
+          node-version: ${{ matrix.node-version }}
       - name: Install node modules
         run: yarn install
       - name: Build
@@ -104,10 +110,10 @@ jobs:
     name: Verify NodeJS installation
     steps:
       - name: Use Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v5
         with:
           node-version: ${{ matrix.node-version }}
       - name: Enable Corepack
         run: corepack enable
       - name: Verify install
-        run: YARN_ENABLE_IMMUTABLE_INSTALLS=false npm install "$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/tree/$GITHUB_SHA"
+        run: YARN_ENABLE_IMMUTABLE_INSTALLS=false npm install "https://github.com/$GITHUB_REPOSITORY/tree/$GITHUB_SHA"
