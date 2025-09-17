@@ -22,15 +22,15 @@ describe('ChordsOverWordsFormatter', () => {
     const expectedChordSheet = heredoc`
       title: Let it be
       subtitle: ChordSheetJS example version
-      key: C
-      x_some_setting: undefined
       composer: John Lennon,Paul McCartney
+      key: C
+      x_some_setting: 
 
       Written by: John Lennon,Paul McCartney
 
       Verse 1
-             Am         C/G        F          C
-      Let it be, let it be, let it be, let it be
+             Am           C/G        F          C
+      Let it be, \\ let it be, let it be, let it be
       D       strong   G  A           G  D/F# Em D
       Whisper words of wisdom, let it be
 
@@ -76,9 +76,9 @@ describe('ChordsOverWordsFormatter', () => {
     const expectedChordSheet = heredoc`
 title: Let it be
 subtitle: ChordSheetJS example version
-key: Do
-x_some_setting: undefined
 composer: John Lennon,Paul McCartney
+key: Do
+x_some_setting: 
 
 Written by: John Lennon,Paul McCartney
 

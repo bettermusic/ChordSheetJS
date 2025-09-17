@@ -2,6 +2,7 @@ node_modules
 .idea
 .yarn
 lib
+dist
 src/formatter/templates/*.js
 src/parser/*/peg_parser.ts
 .tool-versions

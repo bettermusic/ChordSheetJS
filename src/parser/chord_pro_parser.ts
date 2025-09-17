@@ -1,4 +1,5 @@
 import ChordSheetSerializer from '../chord_sheet_serializer';
+import { SerializedSong } from '../serialized_types';
 import NullTracer from './null_tracer';
 import ParserWarning from './parser_warning';
 import Song from '../chord_sheet/song';
@@ -41,7 +42,7 @@ class ChordProParser {
     const ast = parse(
       normalizeLineEndings(chordSheet),
       { tracer: new NullTracer(), ...options },
-    );
+    ) as SerializedSong;
 
     this.song = new ChordSheetSerializer().deserialize(ast);
     return this.song;

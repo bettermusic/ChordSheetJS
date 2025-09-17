@@ -37,6 +37,8 @@ class Song extends MetadataAccessors {
 
   _bodyParagraphs: Paragraph[] | null = null;
 
+  _renderParagraphs: Paragraph[] | null = null;
+
   warnings: ParserWarning[] = [];
 
   _metadata: Metadata | null = null;
@@ -78,6 +80,17 @@ class Song extends MetadataAccessors {
     }
 
     return this._bodyParagraphs;
+  }
+
+  get renderParagraphs(): Paragraph[] {
+    if (!this._renderParagraphs) {
+      return this.bodyParagraphs;
+    }
+    return this._renderParagraphs;
+  }
+
+  set renderParagraphs(paragraphs: Paragraph[]) {
+    this._renderParagraphs = paragraphs;
   }
 
   selectRenderableItems(items: (Line | Paragraph)[]): (Line | Paragraph)[] {
@@ -217,9 +230,26 @@ class Song extends MetadataAccessors {
   private insertDirectives(metadata: Record<string, string | string[] | null>, { after = null } = {}): void {
     const insertIndex = this.lines.findIndex((line) => (
       line.items.some((item) => (
-        !(item instanceof Tag) || (after && item.name === after)
+        !(item instanceof Tag) ||
+        (after && item.name === after) ||
+        (item instanceof Tag && item.isComment()) ||
+        (item instanceof Tag && item.isSectionDelimiter())
       ))
     ));
+
+    // Go back from insertIndex to find the last non-empty line, then insert after it
+    let finalInsertIndex = insertIndex;
+    if (insertIndex > 0) {
+      for (let i = insertIndex - 1; i >= 0; i -= 1) {
+        if (!this.lines[i].isEmpty()) {
+          finalInsertIndex = i + 1;
+          break;
+        }
+        if (i === 0) {
+          finalInsertIndex = 0;
+        }
+      }
+    }
 
     const newLines = Object.keys(metadata).flatMap((name) => {
       const values = [metadata[name]].flat();
@@ -231,8 +261,17 @@ class Song extends MetadataAccessors {
       });
     });
 
+    // Check if we need to add an empty line
+    const linesToInsert = [...newLines];
+    const hasEmptyLineBetween = insertIndex > finalInsertIndex &&
+      this.lines.slice(finalInsertIndex, insertIndex).some((line) => line.isEmpty());
+
+    if (!hasEmptyLineBetween && newLines.length > 0) {
+      linesToInsert.push(new Line()); // Add empty line after the directives
+    }
+
     const { lines } = this;
-    this.lines = [...lines.slice(0, insertIndex), ...newLines, ...lines.slice(insertIndex)];
+    this.lines = [...lines.slice(0, finalInsertIndex), ...linesToInsert, ...lines.slice(finalInsertIndex)];
   }
 
   /**
@@ -255,7 +294,7 @@ class Song extends MetadataAccessors {
 
     return song.mapItems((item) => {
       if (item instanceof Tag && item.name === KEY) {
-        transposedKey = Key.wrapOrFail(item.value).transpose(delta);
+        transposedKey = Key.wrapOrFail(item.value).transpose(delta).normalize();
         if (modifier) transposedKey = transposedKey.useModifier(modifier);
         return item.set({ value: transposedKey.toString() });
       }
@@ -413,7 +452,7 @@ Or set the song key before changing key:
   }
 
   /**
-   * Returns a copy of the song with the directive value set to the specified value.
+   * Returns a copy of the song with the directive value(s) set to the specified value(s).
    * - when there is a matching directive in the song, it will update the directive
    * - when there is no matching directive, it will be inserted
    * If `value` is `null` it will act as a delete, any directive matching `name` will be removed.
@@ -444,7 +483,6 @@ Or set the song key before changing key:
    * });
    * ```
    * @param {Record<string, string | string[] | null>} metadata The metadata to change
-   * @returns {Song} The changed song
    */
   changeMetadata(metadata: Record<string, string | string[] | null>): Song;
 

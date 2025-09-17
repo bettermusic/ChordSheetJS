@@ -1,5 +1,4 @@
 import '../matchers';
-
 import ChordSheetSerializer from '../../src/chord_sheet_serializer';
 
 import { ContentType } from '../../src/serialized_types';
