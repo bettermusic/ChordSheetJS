@@ -1,4 +1,4 @@
-import { ConditionalRule, ConditionRule, SingleCondition } from '../../formatter/configuration';
+import { ConditionRule, ConditionalRule, SingleCondition } from '../../formatter/configuration';
 
 function isNumber(value: any): boolean {
   return !Number.isNaN(parseInt(value, 10));
@@ -48,7 +48,7 @@ class Condition {
     }
 
     if ('equals' in rule) {
-      return value === rule.equals;
+      return value == rule.equals;
     }
 
     if ('exists' in rule) {
@@ -88,7 +88,7 @@ class Condition {
     }
 
     if ('not_equals' in rule) {
-      return value !== rule.not_equals;
+      return value != rule.not_equals;
     }
 
     if ('not_in' in rule) {

@@ -1,18 +1,18 @@
 import { normalize } from 'path';
-import { 
-  ChordProParser, 
-  PdfFormatter, 
-  HtmlDivFormatter, 
-  HtmlTableFormatter, 
-  TextFormatter, 
-  ChordProFormatter, 
+import {
+  ChordProFormatter,
+  ChordProParser,
   ChordsOverWordsFormatter,
+  HtmlDivFormatter,
+  HtmlTableFormatter,
   MeasuredHtmlFormatter,
+  PdfFormatter,
+  TextFormatter,
 } from '../../../src';
-import { getKeys, getCapos } from '../../../src/helpers';
+import { getCapos, getKeys } from '../../../src/helpers';
 import { chordproExamples } from './chordpro-examples';
 import { configExamples } from './config-examples';
-import { exampleSongSymbol, exampleSongSolfege } from '../../fixtures/song';
+import { exampleSongSolfege, exampleSongSymbol } from '../../fixtures/song';
 
 // Initialize CodeMirror instances
 const editor = CodeMirror(document.getElementById('editor'), {
@@ -72,7 +72,7 @@ populateSelect(configSelect, configExamples);
 function initializeKeyAndCapoSelectors(songKey) {
   const keys = getKeys(songKey);
   keySelect.innerHTML = '';
-  keys.forEach(key => {
+  keys.forEach((key) => {
     const option = document.createElement('option');
     option.value = key;
     option.textContent = key;
@@ -149,12 +149,12 @@ const updateOutput = async (key, capo) => {
     }
 
     // Create a configuration object
-    let configuration = {
+    const configuration = {
       key: initialKey,
       normalizeChords: true,
       useUnicodeModifiers: false,
       decapo: true,
-      ...configJson
+      ...configJson,
     };
 
     // Handle MeasuredHtmlFormatter specially
@@ -165,22 +165,22 @@ const updateOutput = async (key, capo) => {
         setTimeout(() => updateOutput(key, capo), 50);
         return;
       }
-      
+
       // Get accurate dimensions now that we're sure container is in DOM and visible
       const width = textViewer.clientWidth;
       const height = textViewer.clientHeight;
-      
+
       console.log('Measured container dimensions:', width, height);
-      
+
       // Create a fresh formatter instance with the current container
       formatters.MeasuredHtmlFormatter = new MeasuredHtmlFormatter(textViewer);
-      
+
       // Set page size with proper dimensions
       configuration.pageSize = {
-        width: width,
-        height: height,
+        width,
+        height,
       };
-      
+
       // Format and update
       formatters.MeasuredHtmlFormatter.configure(configuration)
         .format(song);
@@ -246,12 +246,12 @@ formatterSelect.addEventListener('change', () => {
   const needsConfig = ['PdfFormatter', 'MeasuredHtmlFormatter'].includes(formatterSelect.value);
   configSelect.disabled = !needsConfig;
   configEditor.setOption('readOnly', !needsConfig);
-  
+
   if (!needsConfig) {
     configEditor.setValue('// Configs only apply to PdfFormatter and LayoutHtmlFormatter');
   } else if (formatterSelect.value === 'LayoutHtmlFormatter') {
     // Find the Layout HTML Config index
-    const layoutConfigIndex = configExamples.findIndex(config => config.name === 'Layout HTML Config');
+    const layoutConfigIndex = configExamples.findIndex((config) => config.name === 'Layout HTML Config');
     if (layoutConfigIndex >= 0) {
       configSelect.value = layoutConfigIndex;
       loadConfigExample(layoutConfigIndex);
@@ -277,24 +277,22 @@ function initialize() {
   layoutOption.value = 'LayoutHtmlFormatter';
   layoutOption.text = 'Layout HTML';
   formatterSelect.add(layoutOption);
-  
+
   chordproSelect.value = 0;
   configSelect.value = 0;
   loadExample(chordproSelect.value);
   loadConfigExample(configSelect.value);
 }
 
-
 // Add a debounce function at the top of your file
 function debounce(func, wait) {
   let timeout;
-  return function(...args) {
+  return function (...args) {
     const context = this;
     clearTimeout(timeout);
     timeout = setTimeout(() => func.apply(context, args), wait);
   };
 }
-
 
 // Initialize on load
 document.addEventListener('DOMContentLoaded', initialize);

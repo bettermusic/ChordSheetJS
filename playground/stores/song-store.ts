@@ -1,6 +1,6 @@
 import { createStore } from './store';
 import { ChordProParser, ChordsOverWordsParser } from '../../src/index';
-import { initStore, APP_EVENTS } from './init-store';
+import { APP_EVENTS, initStore } from './init-store';
 import { getCapos, getKeys } from '../../src/helpers.js';
 
 // Interfaces for Song and Parser (simplified - would use actual types from your library)
@@ -32,7 +32,7 @@ interface SongStoreState {
     softLineBreaks: boolean;
   };
   originalKey: string; // Key from the song file
-  currentKey: string;  // Currently selected key (could be different from original)
+  currentKey: string; // Currently selected key (could be different from original)
   capo: number;
   keys: string[]; // Available keys
   capos: Record<string, string>; // Available capos
@@ -46,14 +46,14 @@ const songStore = createStore<SongStoreState>({
   parser: new ChordProParser(), // Initialize with ChordPro parser
   metadata: {
     title: 'Untitled',
-    softLineBreaks: true
+    softLineBreaks: true,
   },
   originalKey: 'C', // Default key
   currentKey: 'C', // Default key
   capo: 0, // Default capo
   keys: getKeys('C'), // Will be populated
   capos: getCapos('C'), // Will be populated
-  isProcessing: false // Initialization flag
+  isProcessing: false, // Initialization flag
 });
 
 // Song actions
@@ -71,33 +71,33 @@ const songActions = {
     }
     return false;
   },
-  
+
   // Set key and update parsing
   setKey(key: string) {
     const state = songStore.getState();
-    
+
     // Check if already processing
     if (state.isProcessing) return;
-    
+
     // Only update if key is different
     if (state.currentKey !== key) {
       // Set processing flag
       songStore.setState({ isProcessing: true });
-      
+
       try {
         console.log(`Setting key from ${state.currentKey} to ${key}`);
-        
+
         // Update key
-        songStore.setState({ 
+        songStore.setState({
           currentKey: key,
           capo: 0, // Reset capo when key changes
           capos: getCapos(key),
-          keys: getKeys(key)
+          keys: getKeys(key),
         });
-        
+
         // Dispatch key change event so UI can update
         document.dispatchEvent(new CustomEvent(APP_EVENTS.SONG_KEY_CHANGED));
-        
+
         // Update the parsed song with the new key if we have a song
         if (state.song) {
           this.updateParsedSong();
@@ -110,93 +110,93 @@ const songActions = {
       }
     }
   },
-  
+
   // Set capo and update parsing
   setCapo(capo: number) {
     const state = songStore.getState();
-    
+
     // Check if already processing
     if (state.isProcessing) return;
-    
+
     // Only update if capo is different
     if (state.capo !== capo) {
       // Set processing flag
       songStore.setState({ isProcessing: true });
-      
+
       // Update capo
       songStore.setState({ capo });
 
       console.log(`Setting capo from ${state.capo} to ${capo}`);
-      
+
       // Update the parsed song with the new capo
       if (state.song) {
         this.updateParsedSong();
       }
-      
+
       // Dispatch capo change event
       document.dispatchEvent(new CustomEvent(APP_EVENTS.SONG_CAPO_CHANGED));
-      
+
       // Reset processing flag
       setTimeout(() => {
         songStore.setState({ isProcessing: false });
       }, 10);
     }
   },
-  
+
   // Parse song content and update the store
   parseSongContent(content: string) {
-    console.log('Parsing song content:', content && content.substring(0, 30) + '...');
+    console.log('Parsing song content:', content && `${content.substring(0, 30)}...`);
     const state = songStore.getState();
-    
+
     // Check if already processing
     if (state.isProcessing) return null;
-    
+
     // Check if app is ready before proceeding
     if (!initStore.isReady) {
       console.log('App not ready, skipping song parsing');
       return null;
     }
-    
+
     // Set processing flag
     songStore.setState({ isProcessing: true });
-    
+
     if (!state.parser) {
       console.error('Parser not initialized');
       songStore.setState({ isProcessing: false });
       return null;
     }
-    
+
     try {
       // Normalize content (example from your code)
       content = content.replace(/{k:/g, '{key:');
-      
+
       // Parse and set song in state
       const song = state.parser.parse(content, { softLineBreaks: true });
       const detectedKey = song.key || 'C'; // Use 'C' as fallback
-      
+
       // Update song and original key
-      songStore.setState({ 
+      songStore.setState({
         song,
-        originalKey: detectedKey
+        originalKey: detectedKey,
       });
-      
+
       // If current key isn't set yet, use the detected key
       if (!state.currentKey || state.currentKey === state.originalKey) {
-        songStore.setState({ 
+        songStore.setState({
           currentKey: detectedKey,
           keys: getKeys(detectedKey),
-          capos: getCapos(detectedKey)
+          capos: getCapos(detectedKey),
         });
       }
-      
+
       // Now update the parsed song version
       this.updateParsedSong();
-      
+
       // Reset processing flag
       setTimeout(() => {
         songStore.setState({ isProcessing: false });
       }, 10);
-      
+
       return state.parsedSong;
     } catch (error) {
       console.error('Error parsing song:', error);
@@ -205,17 +205,17 @@ const songActions = {
       return null;
     }
   },
-  
+
   // Create a parsed version of the song with current key and capo settings
   updateParsedSong() {
     const state = songStore.getState();
-    
+
     try {
       if (!state.song) {
         console.warn('No song to parse');
         return null;
       }
-      
+
       // Clone the song to avoid modifying the original
       let processedSong: Song;
       if (typeof state.song.clone === 'function') {
@@ -224,26 +224,26 @@ const songActions = {
         // Fallback if clone is not available
         processedSong = state.song;
       }
-      
+
       // Apply key and capo settings
       processedSong = processedSong.setKey(state.originalKey);
       processedSong = processedSong.changeKey(state.currentKey);
       processedSong = processedSong.setCapo(state.capo);
-      
+
       // Update the parsed song in state
       songStore.setState({ parsedSong: processedSong });
-      
+
       // Dispatch song parsed event
       setTimeout(() => {
         document.dispatchEvent(new CustomEvent(APP_EVENTS.SONG_PARSED));
       }, 0);
-      
+
       return processedSong;
     } catch (error) {
       console.error('Error updating parsed song:', error);
       return null;
     }
-  }
+  },
 };
 
 // Set up event listeners for content and mode changes
@@ -261,13 +261,13 @@ document.addEventListener(APP_EVENTS.EDITOR_MODE_CHANGED, (e: CustomEvent) => {
   // Check if app is ready
   if (e.detail && e.detail.mode && !songStore.getState().isProcessing && initStore.isReady) {
     let parserChanged = false;
-    
+
     if (e.detail.mode === 'chordpro') {
       parserChanged = songActions.setParser(new ChordProParser());
     } else if (e.detail.mode === 'chords_over_words') {
       parserChanged = songActions.setParser(new ChordsOverWordsParser());
     }
-    
+
     // Re-parse if the parser changed and we have content
     if (parserChanged) {
       const state = songStore.getState();
@@ -290,7 +290,7 @@ const songState = {
   get capo() { return songStore.getState().capo; },
   get keys() { return songStore.getState().keys; },
   get capos() { return songStore.getState().capos; },
-  get isProcessing() { return songStore.getState().isProcessing; }
+  get isProcessing() { return songStore.getState().isProcessing; },
 };
 
 // Export everything

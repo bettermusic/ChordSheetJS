@@ -1,4 +1,4 @@
-import { pdfSpecificDefaults } from "../../../src/formatter/configuration";
+import { pdfSpecificDefaults } from '../../../src/formatter/configuration';
 
 export const measuredHtmlConfigs = [
   {
@@ -148,7 +148,7 @@ export const measuredHtmlConfigs = [
         },
       },
     },
-  }
+  },
 ];
-  
+
 export default measuredHtmlConfigs;

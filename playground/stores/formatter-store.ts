@@ -1,17 +1,17 @@
 import { createStore } from './store';
-import { 
-  ChordProFormatter, 
-  ChordsOverWordsFormatter, 
+import {
+  ChordProFormatter,
+  ChordsOverWordsFormatter,
   HtmlDivFormatter,
   MeasuredHtmlFormatter,
-  PdfFormatter 
+  PdfFormatter,
 } from '../../src/index';
-import { initStore, APP_EVENTS } from './init-store';
+import { APP_EVENTS, initStore } from './init-store';
 import { formatterConfigExamples } from '../fixtures';
-import { 
-  getDefaultConfig, 
-  getHTMLDefaultConfig, 
-  getPDFDefaultConfig 
+import {
+  getDefaultConfig,
+  getHTMLDefaultConfig,
+  getPDFDefaultConfig,
 } from '../../src/formatter/configuration';
 import { songState } from './song-store';
 import { mergeConfigs } from '../../src/utilities';
@@ -37,7 +37,7 @@ const formatterConfigMap = {
   'ChordPro': 'base',
   'ChordsOverWords': 'base',
   'HTML': 'html',
-  'MeasuredHTML': 'measuredHtml'
+  'MeasuredHTML': 'measuredHtml',
 };
 
 // Get initial default configurations
@@ -46,35 +46,35 @@ const initialFormatterConfigs = {
   'ChordPro': getDefaultConfig('base'),
   'ChordsOverWords': getDefaultConfig('base'),
   'HTML': getHTMLDefaultConfig(),
-  'MeasuredHTML': getMeasuredHtmlDefaultConfig()
+  'MeasuredHTML': getMeasuredHtmlDefaultConfig(),
 };
 
 // Create the formatter store with configurations
 const formatterStore = createStore<FormatterStoreState>({
   formatters: ['PDF', 'ChordPro', 'ChordsOverWords', 'HTML', 'MeasuredHTML'],
   currentFormatter: 'MeasuredHTML',
-  currentConfig: formatterConfigExamples['MeasuredHTML'][0].content,
+  currentConfig: formatterConfigExamples.MeasuredHTML[0].content,
   formatterConfigs: initialFormatterConfigs,
   formatter_instances: {
     PDF: new PdfFormatter(),
     ChordPro: new ChordProFormatter(),
     ChordsOverWords: new ChordsOverWordsFormatter(),
     HTML: new HtmlDivFormatter(),
-    MeasuredHTML: null
+    MeasuredHTML: null,
   },
   isUpdatingFormatter: false,
-  formattedOutput: null
+  formattedOutput: null,
 });
 
 // Function to format a song using the selected formatter
 function formatSong(formatter: any, options?: any): string {
   try {
-    let song = songState.parsedSong;
+    const song = songState.parsedSong;
     if (!song || !formatter) return '';
-    
-    const currentFormatter = formatterStore.getState().currentFormatter;
+
+    const { currentFormatter } = formatterStore.getState();
     const config = { ...(formatterStore.getState().formatterConfigs[currentFormatter] || {}), ...options };
-    
+
     console.log(`Formatting song with key: ${song.key}, config:`, config);
     return formatter.configure(config).format(song);
   } catch (error) {
@@ -96,11 +96,11 @@ const formatterActions = {
     console.groupEnd();
     return state;
   },
-  
+
   // Load default configuration for a formatter
   loadDefaultConfig(formatter: FormatterType) {
     let defaultConfig;
-    
+
     switch (formatter) {
       case 'PDF':
         defaultConfig = getPDFDefaultConfig();
@@ -115,50 +115,50 @@ const formatterActions = {
         const configType = formatterConfigMap[formatter];
         defaultConfig = getDefaultConfig(configType);
     }
-  
+
     defaultConfig.key = songState.originalKey || songState.currentKey;
-    
+
     const currentConfigs = formatterStore.getState().formatterConfigs;
     formatterStore.setState({
       formatterConfigs: {
         ...currentConfigs,
-        [formatter]: defaultConfig
+        [formatter]: defaultConfig,
       },
-      currentConfig: defaultConfig
+      currentConfig: defaultConfig,
     });
-    
+
     console.log(`Loaded default config for ${formatter}`);
     return defaultConfig;
   },
-  
+
   // Change the current formatter
   setFormatter(formatter: FormatterType) {
     const state = formatterStore.getState();
-    
+
     // Check if already updating or formatter hasn't changed
     if (state.isUpdatingFormatter || state.currentFormatter === formatter) return;
-    
+
     // Set the flag to indicate we're updating
     formatterStore.setState({ isUpdatingFormatter: true });
-    
+
     try {
       console.log(`Changing formatter from ${state.currentFormatter} to ${formatter}`);
-      
+
       // Dispatch will-change event
       document.dispatchEvent(new CustomEvent(APP_EVENTS.FORMATTER_WILL_CHANGE));
-      
+
       // Set the formatter
       formatterStore.setState({ currentFormatter: formatter });
-      
+
       // Make sure we have the config loaded
       this.loadDefaultConfig(formatter);
-      
+
       // Dispatch config updated event
       document.dispatchEvent(new CustomEvent(APP_EVENTS.FORMATTER_CONFIG_UPDATED));
-      
+
       // Dispatch formatter changed event
       document.dispatchEvent(new CustomEvent(APP_EVENTS.FORMATTER_CHANGED));
-      
+
       // Format the song with the new formatter
       this.formatCurrentSong();
     } finally {
@@ -168,19 +168,18 @@ const formatterActions = {
       }, 0);
     }
   },
-  
+
   // Update formatter configuration
   updateFormatterConfig(formatter: FormatterType, config: any) {
     const currentConfigs = formatterStore.getState().formatterConfigs;
     const currentConfig = currentConfigs[formatter] || {};
     const key = songState.originalKey || songState.currentKey;
 
-    let newConfig = mergeConfigs(currentConfig, config);
+    const newConfig = mergeConfigs(currentConfig, config);
     newConfig.key = key;
 
+    formatterStore.setState({ currentConfig: newConfig });
 
-    formatterStore.setState({currentConfig: newConfig});
-    
     // Check if there are actual changes
     let hasChanges = false;
     for (const key in config) {
@@ -189,63 +188,63 @@ const formatterActions = {
         break;
       }
     }
-    
+
     if (hasChanges) {
       // Update the config
-      formatterStore.setState({ 
+      formatterStore.setState({
         formatterConfigs: {
           ...currentConfigs,
           [formatter]: {
             ...newConfig,
-          }
-        }
+          },
+        },
       });
-    } 
+    }
     console.log(`Updated config for ${formatter}`, config);
     // Dispatch config updated event
     document.dispatchEvent(new CustomEvent(APP_EVENTS.FORMATTER_CONFIG_UPDATED));
   },
-  
+
   // Format the current song
   formatCurrentSong() {
     if (!songState.parsedSong) {
       console.warn('No song available to format');
       return;
     }
-    
+
     const state = formatterStore.getState();
     const formatter = state.formatter_instances[state.currentFormatter];
-    
+
     if (!formatter) {
       console.error(`Formatter "${state.currentFormatter}" not available`);
       return;
     }
-    
+
     try {
       // Format the song
       const formattedContent = formatSong(formatter);
-      
+
       // Update the formatted output
       formatterStore.setState({ formattedOutput: formattedContent });
-      
+
       // Dispatch formatted content updated event
       document.dispatchEvent(new CustomEvent('formatter-output-updated', {
-        detail: { content: formattedContent }
+        detail: { content: formattedContent },
       }));
-      
+
       return formattedContent;
     } catch (error) {
       console.error('Error formatting song:', error);
       return null;
     }
   },
-  
+
   // Load a configuration preset
   loadConfigPreset(presetIndex: number) {
     const state = formatterStore.getState();
     const formatter = state.currentFormatter;
     const presets = formatterConfigExamples[formatter];
-    
+
     if (presets && presets[presetIndex]) {
       console.log(`Loading config preset ${presetIndex} for ${formatter}`);
       this.updateFormatterConfig(formatter, presets[presetIndex].content);
@@ -253,23 +252,21 @@ const formatterActions = {
       console.warn(`Preset ${presetIndex} not found for ${formatter}`);
     }
   },
-  
+
   // Get all configuration presets for a formatter
   getFormatterPresets(formatter: FormatterType) {
     const presets = formatterConfigExamples[formatter] || [];
-    
+
     if (presets.length === 0) {
       const defaultConfig = this.loadDefaultConfig(formatter);
-      return [{ 
-        name: 'Default Configuration', 
-        content: defaultConfig 
+      return [{
+        name: 'Default Configuration',
+        content: defaultConfig,
       }];
     }
-    
-    const hasDefaultPreset = presets.some(preset => 
-      preset.name.toLowerCase().includes('default')
-    );
-    
+
+    const hasDefaultPreset = presets.some((preset) => preset.name.toLowerCase().includes('default'));
+
     if (!hasDefaultPreset) {
       const defaultConfig = this.loadDefaultConfig(formatter);
       return [
@@ -277,9 +274,9 @@ const formatterActions = {
         { name: 'Default Configuration', content: defaultConfig },
       ];
     }
-    
+
     return presets;
-  }
+  },
 };
 
 // Listen for song parsed events to format the song
@@ -297,7 +294,7 @@ const formatterState = {
   get formatterConfigs() { return formatterStore.getState().formatterConfigs; },
   get formatter_instances() { return formatterStore.getState().formatter_instances; },
   get isUpdatingFormatter() { return formatterStore.getState().isUpdatingFormatter; },
-  get formattedOutput() { return formatterStore.getState().formattedOutput; }
+  get formattedOutput() { return formatterStore.getState().formattedOutput; },
 };
 
 export { formatterState, formatterActions };

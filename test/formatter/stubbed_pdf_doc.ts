@@ -1,8 +1,8 @@
 /* eslint-disable no-promise-executor-return */
-/* eslint-disable no-dupe-class-members */
+
 /* eslint-disable no-undef */
 import JsPDF, {
-  ImageCompression, ImageFormat, ImageOptions, jsPDFOptions, RGBAData, TextOptionsLight,
+  ImageCompression, ImageFormat, ImageOptions, RGBAData, TextOptionsLight, jsPDFOptions,
 } from 'jspdf';
 
 type ColorString = string;

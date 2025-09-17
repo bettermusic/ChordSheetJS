@@ -1,5 +1,5 @@
-import { ChordProFormatter, ChordProParser } from '../../src';
 import { heredoc } from '../utilities';
+import { ChordProFormatter, ChordProParser } from '../../src';
 
 describe('setting the key of an existing song', () => {
   it('updates the key directive', () => {
@@ -24,6 +24,7 @@ describe('setting the key of an existing song', () => {
 
     const changedSheet = heredoc`
       {key: D}
+
       Let it [Am]be, let it [C/G]be, let it [F]be, let it [C]be`;
 
     const song = new ChordProParser().parse(chordpro);

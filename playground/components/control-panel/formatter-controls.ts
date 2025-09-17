@@ -1,4 +1,4 @@
-import { formatterState, formatterActions, FormatterType } from '../../stores/formatter-store';
+import { FormatterType, formatterActions, formatterState } from '../../stores/formatter-store';
 import { APP_EVENTS } from '../../stores/init-store';
 
 /**
@@ -13,7 +13,7 @@ export class FormatterControls extends HTMLElement {
     super();
     this.attachShadow({ mode: 'open' });
   }
-  
+
   connectedCallback() {
     this.render();
     this.setupEventListeners();
@@ -23,10 +23,10 @@ export class FormatterControls extends HTMLElement {
     // Clean up event listeners when component is removed
     this.removeEventListeners();
   }
-  
+
   render() {
     if (!this.shadowRoot) return;
-    
+
     this.shadowRoot.innerHTML = `
       <style>
         :host {
@@ -67,9 +67,7 @@ export class FormatterControls extends HTMLElement {
         <div class="control-group">
           <label>Formatter:</label>
           <select id="formatter-selector">
-            ${formatterState.formatters.map(fmt => 
-              `<option value="${fmt}" ${fmt === formatterState.currentFormatter ? 'selected' : ''}>${fmt}</option>`
-            ).join('')}
+            ${formatterState.formatters.map((fmt) => `<option value="${fmt}" ${fmt === formatterState.currentFormatter ? 'selected' : ''}>${fmt}</option>`).join('')}
           </select>
         </div>
       </div>
@@ -85,13 +83,13 @@ export class FormatterControls extends HTMLElement {
       this.formatterSelector.value = formatterState.currentFormatter;
     }
   }
-  
+
   setupEventListeners() {
     if (!this.shadowRoot) return;
-    
+
     // Formatter selector
     this.formatterSelector?.addEventListener('change', this.handleFormatterChange);
-    
+
     // Listen for formatter changes from elsewhere
     document.addEventListener(APP_EVENTS.FORMATTER_CHANGED, this.handleFormatterStateChange);
   }

@@ -1,15 +1,16 @@
-import Formatter from './formatter';
 import ChordLyricsPair from '../chord_sheet/chord_lyrics_pair';
-import Tag from '../chord_sheet/tag';
-import { renderChord } from '../helpers';
-import { hasTextContents, renderSection, processMetadata } from '../template_helpers';
-import Song from '../chord_sheet/song';
-import { hasRemarkContents, isEmptyString, padLeft } from '../utilities';
-import Paragraph from '../chord_sheet/paragraph';
-import Metadata from '../chord_sheet/metadata';
-import Line from '../chord_sheet/line';
+import Formatter from './formatter';
 import Item from '../chord_sheet/item';
+import Line from '../chord_sheet/line';
+import Metadata from '../chord_sheet/metadata';
+import Paragraph from '../chord_sheet/paragraph';
+import Song from '../chord_sheet/song';
+import Tag from '../chord_sheet/tag';
+
+import { renderChord } from '../helpers';
 import { SoftLineBreak, Ternary } from '../index';
+import { hasRemarkContents, isEmptyString, padLeft } from '../utilities';
+import { hasTextContents, processMetadata, renderSection } from '../template_helpers';
 
 /**
  * Formats a song into a plain text chord sheet
@@ -52,7 +53,10 @@ class ChordsOverWordsFormatter extends Formatter {
     const metadata = orderedMetadata
       .map(([key, value]) => {
         if (Array.isArray(value)) {
-          return value.map((v) => `${key}: ${v}`).join('\n');
+          return `${key}: ${value.join(',')}`;
+        }
+        if (typeof value === 'undefined' || value === null) {
+          return `${key}:`;
         }
         return `${key}: ${value}`;
       })

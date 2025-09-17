@@ -1,9 +1,11 @@
 import { createStore } from './store';
-import { EditorView, highlightActiveLine, keymap, lineNumbers } from '@codemirror/view';
+import {
+  EditorView, highlightActiveLine, keymap, lineNumbers,
+} from '@codemirror/view';
 import { defaultKeymap, history } from '@codemirror/commands';
 import { lintGutter } from '@codemirror/lint';
 import { json } from '@codemirror/lang-json';
-import { initStore, APP_EVENTS } from './init-store';
+import { APP_EVENTS, initStore } from './init-store';
 import { chordproExamples } from '../fixtures/content/example-chordpro';
 
 // Example chord sheet content - always use the first example
@@ -11,7 +13,7 @@ const exampleChordPro = chordproExamples[0].content;
 
 // Define the editor store state interface
 interface EditorStoreState {
-  editorMode: "chordpro" | "chords_over_words";
+  editorMode: 'chordpro' | 'chords_over_words';
   editorView: EditorView | null;
   jsonView: EditorView | null;
   input: string;
@@ -26,10 +28,10 @@ const updateListener = EditorView.updateListener.of((v) => {
   if (v.docChanged) {
     const content = v.state.doc.toString();
     editorStore.setState({ input: content });
-    
+
     // Dispatch custom event for song content change
     document.dispatchEvent(new CustomEvent(APP_EVENTS.EDITOR_CONTENT_CHANGED, {
-      detail: { content }
+      detail: { content },
     }));
   }
 });
@@ -39,10 +41,10 @@ const configUpdateListener = EditorView.updateListener.of((v) => {
   if (v.docChanged) {
     const content = v.state.doc.toString();
     editorStore.setState({ configInput: content });
-    
+
     // Dispatch custom event for config change
     document.dispatchEvent(new CustomEvent(APP_EVENTS.CONFIG_CHANGED, {
-      detail: { config: content }
+      detail: { config: content },
     }));
   }
 });
@@ -58,21 +60,21 @@ const sharedExtensions = [
 
 // Create the editor store
 const editorStore = createStore<EditorStoreState>({
-  editorMode: "chordpro",
+  editorMode: 'chordpro',
   editorView: null,
   jsonView: null,
   input: exampleChordPro,
   configInput: '{}',
   editorExtensions: [
     ...sharedExtensions,
-    updateListener
+    updateListener,
   ],
   jsonEditorExtensions: [
     json(),
     ...sharedExtensions,
-    configUpdateListener
+    configUpdateListener,
   ],
-  isCreatingEditor: false // Initialize flag
+  isCreatingEditor: false, // Initialize flag
 });
 
 // Editor actions
@@ -80,27 +82,27 @@ const editorActions = {
   // Create and set up the CodeMirror editor or update existing one
   createEditorView(container: HTMLElement) {
     const state = editorStore.getState();
-    
+
     // Prevent multiple simultaneous editor operations
     if (state.isCreatingEditor) {
       console.log('Editor operation already in progress, skipping');
       return;
     }
-    
+
     // Set the flag to indicate editor operation in progress
     editorStore.setState({ isCreatingEditor: true });
-    
+
     try {
       // If editor already exists, no need to recreate it
       if (state.editorView) {
         console.log('Editor view already exists, no need to recreate');
-        
+
         // Instead of destroying, just make sure it's in the right container
         if (state.editorView.dom.parentElement !== container) {
           console.log('Moving editor to correct container');
           container.appendChild(state.editorView.dom);
         }
-        
+
         // Update content if needed
         this.updateEditorContent(state.input);
       } else {
@@ -109,14 +111,14 @@ const editorActions = {
         const editorView = new EditorView({
           doc: state.input,
           extensions: state.editorExtensions,
-          parent: container
+          parent: container,
         });
-        
+
         // Update the store with the new editor view
         editorStore.setState({ editorView });
         console.log('Editor view created successfully');
       }
-      
+
       // Signal that the editor is ready
       initStore.setComponentReady('chordEditor', true);
     } catch (error) {
@@ -130,22 +132,22 @@ const editorActions = {
   // Create and set up the configuration editor
   createConfigEditorView(container: HTMLElement) {
     const state = editorStore.getState();
-    
+
     try {
       // Clean up existing editor first if it exists
       if (state.jsonView) {
         state.jsonView.destroy();
       }
-      
+
       // Initialize config editor
       const jsonView = new EditorView({
         doc: state.configInput,
         extensions: state.jsonEditorExtensions,
-        parent: container
+        parent: container,
       });
-      
+
       editorStore.setState({ jsonView });
-      
+
       // Signal that the config editor is ready
       initStore.setComponentReady('configEditor', true);
     } catch (error) {
@@ -154,20 +156,20 @@ const editorActions = {
   },
 
   // Change editor mode
-  setEditorMode(mode: "chordpro" | "chords_over_words") {
+  setEditorMode(mode: 'chordpro' | 'chords_over_words') {
     const state = editorStore.getState();
     const currentMode = state.editorMode;
-    
+
     // Only change mode if it's different
     if (currentMode !== mode) {
       console.log(`Setting editor mode from ${currentMode} to ${mode}`);
-      
+
       // Update the state
       editorStore.setState({ editorMode: mode });
-      
+
       // Dispatch mode change event
       document.dispatchEvent(new CustomEvent(APP_EVENTS.EDITOR_MODE_CHANGED, {
-        detail: { mode }
+        detail: { mode },
       }));
     }
   },
@@ -177,12 +179,12 @@ const editorActions = {
     const state = editorStore.getState();
     if (state.editorView) {
       const currentContent = state.editorView.state.doc.toString();
-      
+
       // Only update if content is different
       if (currentContent !== content) {
         const docLength = state.editorView.state.doc.length;
         const transaction = state.editorView.state.update({
-          changes: { from: 0, to: docLength, insert: content }
+          changes: { from: 0, to: docLength, insert: content },
         });
         state.editorView.dispatch(transaction);
         editorStore.setState({ input: content });
@@ -199,12 +201,12 @@ const editorActions = {
     const state = editorStore.getState();
     if (state.jsonView) {
       const currentContent = state.jsonView.state.doc.toString();
-      
+
       // Only update if content is different
       if (currentContent !== content) {
         const docLength = state.jsonView.state.doc.length;
         const transaction = state.jsonView.state.update({
-          changes: { from: 0, to: docLength, insert: content }
+          changes: { from: 0, to: docLength, insert: content },
         });
         state.jsonView.dispatch(transaction);
         editorStore.setState({ configInput: content });
@@ -213,7 +215,7 @@ const editorActions = {
       // If JSON view doesn't exist yet, just update the config input
       editorStore.setState({ configInput: content });
     }
-  }
+  },
 };
 
 // Listen for app-ready event to trigger initial content dispatch
@@ -222,7 +224,7 @@ document.addEventListener(APP_EVENTS.APP_READY, () => {
   if (editorState.input) {
     console.log('App ready, dispatching initial content event');
     document.dispatchEvent(new CustomEvent(APP_EVENTS.EDITOR_CONTENT_CHANGED, {
-      detail: { content: editorState.input }
+      detail: { content: editorState.input },
     }));
   }
 });
@@ -234,7 +236,7 @@ const editorState = {
   get configInput() { return editorStore.getState().configInput; },
   get editorView() { return editorStore.getState().editorView; },
   get jsonView() { return editorStore.getState().jsonView; },
-  get isCreatingEditor() { return editorStore.getState().isCreatingEditor; }
+  get isCreatingEditor() { return editorStore.getState().isCreatingEditor; },
 };
 
 export { editorState, editorActions };

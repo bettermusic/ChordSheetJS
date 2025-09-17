@@ -1,3 +1,5 @@
+import ENHARMONIC_MAPPING from './normalize_mappings/enharmonic-normalize';
+
 import {
   ChordType,
   FLAT,
@@ -15,7 +17,6 @@ import {
 } from './constants';
 
 import { KEY_TO_GRADE } from './scales';
-import ENHARMONIC_MAPPING from './normalize_mappings/enharmonic-normalize';
 import { gradeToKey } from './utilities';
 
 const regexes: Record<ChordType, RegExp> = {
@@ -43,6 +44,18 @@ const NO_FLAT_NUMBERS = [1, 4];
 const NO_SHARP_GRADES = [5, 0];
 const NO_SHARP_NUMBERS = [3, 7];
 const PREFERS_FLAT_NUMBERS = [2, 3, 10];
+
+interface ConstructorOptions {
+  grade?: number | null;
+  number?: number | null;
+  minor: boolean;
+  type: ChordType;
+  modifier: Modifier | null;
+  referenceKeyGrade?: number | null;
+  referenceKeyMode?: string | null;
+  originalKeyString?: string | null;
+  preferredModifier: Modifier | null;
+}
 
 /**
  * Represents a key, such as Eb (symbol), #3 (numeric) or VII (numeral).
@@ -109,6 +122,7 @@ class Key implements KeyProperties {
     });
   }
 
+  /* eslint-disable-next-line max-lines-per-function */
   static resolve(
     {
       key,
@@ -261,17 +275,7 @@ class Key implements KeyProperties {
       referenceKeyMode = null,
       originalKeyString = null,
       preferredModifier = null,
-    }: {
-      grade?: number | null,
-      number?: number | null,
-      minor: boolean,
-      type: ChordType,
-      modifier: Modifier | null,
-      referenceKeyGrade?: number | null,
-      referenceKeyMode?: string | null,
-      originalKeyString?: string | null,
-      preferredModifier: Modifier | null,
-    },
+    }: ConstructorOptions,
   ) {
     this.grade = grade;
     this.number = number;

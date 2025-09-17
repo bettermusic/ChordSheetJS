@@ -1,6 +1,6 @@
 import {
-  MeasurementBasedFormatterConfiguration,
   MeasurementBasedConfigurationProperties,
+  MeasurementBasedFormatterConfiguration,
   MeasurementBasedLayoutConfig,
   SectionsConfig,
 } from './measurement_based_configuration';

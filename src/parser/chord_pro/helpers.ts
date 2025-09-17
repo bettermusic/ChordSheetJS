@@ -7,7 +7,6 @@ import {
 } from '../../serialized_types';
 
 import { FileRange } from './peg_parser';
-import { stringSplitReplace } from '../../helpers';
 
 function splitSectionContent(content: string): string[] {
   return content
@@ -45,6 +44,30 @@ export function buildTag(
     selector: selector?.value,
     isNegated: selector?.isNegated,
   };
+}
+
+export function stringSplitReplace(
+  string: string,
+  search: string,
+  replaceMatch: (subString: string) => any,
+  replaceRest: (subString: string) => any = (subString) => subString,
+): any[] {
+  const regExp = new RegExp(search, 'g');
+  const occurrences = Array.from(string.matchAll(regExp));
+  const result: string[] = [];
+  let index = 0;
+
+  occurrences.forEach((match) => {
+    const before = string.slice(index, match.index);
+    if (before !== '') result.push(replaceRest(before));
+    result.push(replaceMatch(match[0]));
+    index = match.index + match[0].length;
+  });
+
+  const rest = string.slice(index);
+  if (rest !== '') result.push(replaceRest(rest));
+
+  return result;
 }
 
 export function applySoftLineBreaks(lyrics: string): SerializedChordLyricsPair[] {
@@ -90,6 +113,13 @@ function combinableChordLyricsPairs(itemA: SerializedItem, itemB: SerializedItem
   );
 }
 
+function combineLyrics(pairA: SerializedChordLyricsPair, pairB: SerializedChordLyricsPair): SerializedChordLyricsPair {
+  return {
+    ...pairA,
+    lyrics: `${pairA.lyrics}${pairB.lyrics}`,
+  };
+}
+
 export function combineChordLyricsPairs(items: SerializedItem[], chopFirstWord?: boolean): SerializedItem[] {
   if (chopFirstWord !== false) {
     return items;
@@ -99,13 +129,12 @@ export function combineChordLyricsPairs(items: SerializedItem[], chopFirstWord?:
 
   for (let i = 0, { length } = items; i < length; i += 1) {
     if (combinableChordLyricsPairs(items[i], items[i + 1])) {
-      const item = items[i] as SerializedChordLyricsPair;
-      const nextItem = items[i + 1] as SerializedChordLyricsPair;
-
-      combinedItems.push({
-        ...item,
-        lyrics: `${item.lyrics}${nextItem.lyrics}`,
-      });
+      combinedItems.push(
+        combineLyrics(
+          items[i] as SerializedChordLyricsPair as SerializedChordLyricsPair,
+          items[i + 1] as SerializedChordLyricsPair as SerializedChordLyricsPair,
+        ),
+      );
 
       i += 1;
     } else {

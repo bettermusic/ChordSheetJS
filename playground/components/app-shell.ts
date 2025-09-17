@@ -11,7 +11,7 @@ import './control-panel/config-controls';
  */
 export class ChordPlaygroundApp extends HTMLElement {
   private initialized = false;
-  
+
   constructor() {
     super();
     this.attachShadow({ mode: 'open' });
@@ -26,7 +26,7 @@ export class ChordPlaygroundApp extends HTMLElement {
 
   createInitialStructure() {
     if (!this.shadowRoot) return;
-    
+
     this.shadowRoot.innerHTML = `
       <style>
         :host {

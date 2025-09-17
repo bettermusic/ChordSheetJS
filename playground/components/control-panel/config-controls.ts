@@ -1,5 +1,5 @@
-import { editorState, editorActions } from '../../stores/editor-store';
-import { formatterState, formatterActions } from '../../stores/formatter-store';
+import { editorActions, editorState } from '../../stores/editor-store';
+import { formatterActions, formatterState } from '../../stores/formatter-store';
 import { formatterConfigExamples } from '../../fixtures';
 import { APP_EVENTS } from '../../stores/init-store';
 
@@ -9,28 +9,30 @@ import { APP_EVENTS } from '../../stores/init-store';
  */
 export class ConfigControls extends HTMLElement {
   private presetSelector: HTMLSelectElement | null = null;
+
   private applyButton: HTMLButtonElement | null = null;
-  private isConfigValid: boolean = true;
-  
+
+  private isConfigValid = true;
+
   constructor() {
     super();
     this.attachShadow({ mode: 'open' });
   }
-  
+
   connectedCallback() {
     this.render();
     this.setupEventListeners();
     this.updatePresetSelector();
     this.validateConfig();
   }
-  
+
   disconnectedCallback() {
     this.removeEventListeners();
   }
-  
+
   render() {
     if (!this.shadowRoot) return;
-    
+
     this.shadowRoot.innerHTML = `
       <style>
         :host {
@@ -103,50 +105,50 @@ export class ConfigControls extends HTMLElement {
         <button id="apply-button" class="valid">Config Applied</button>
       </div>
     `;
-    
+
     // Get UI elements
     this.presetSelector = this.shadowRoot.getElementById('preset-selector') as HTMLSelectElement;
     this.applyButton = this.shadowRoot.getElementById('apply-button') as HTMLButtonElement;
   }
-  
+
   setupEventListeners() {
     // Setup preset selector change event
     if (this.presetSelector) {
       this.presetSelector.addEventListener('change', this.handlePresetChange);
     }
-    
+
     // Setup apply button click event
     if (this.applyButton) {
       this.applyButton.addEventListener('click', this.handleApplyConfig);
     }
-    
+
     // Listen for formatter changes to update presets
     document.addEventListener(APP_EVENTS.FORMATTER_CHANGED, this.handleFormatterChange);
-    
+
     // Listen for formatter pre-change
     document.addEventListener(APP_EVENTS.FORMATTER_WILL_CHANGE, this.handleFormatterWillChange);
 
     document.addEventListener(APP_EVENTS.CONFIG_CHANGED, this.handleApplyConfig);
-    
+
     // Listen for editor content changes to validate JSON
     document.addEventListener(APP_EVENTS.EDITOR_CONTENT_CHANGED, this.validateConfig);
   }
-  
+
   removeEventListeners() {
     if (this.presetSelector) {
       this.presetSelector.removeEventListener('change', this.handlePresetChange);
     }
-    
+
     if (this.applyButton) {
       this.applyButton.removeEventListener('click', this.handleApplyConfig);
     }
-    
+
     document.removeEventListener(APP_EVENTS.FORMATTER_CHANGED, this.handleFormatterChange);
     document.removeEventListener(APP_EVENTS.FORMATTER_WILL_CHANGE, this.handleFormatterWillChange);
     document.removeEventListener(APP_EVENTS.CONFIG_CHANGED, this.handleApplyConfig);
     document.removeEventListener(APP_EVENTS.EDITOR_CONTENT_CHANGED, this.validateConfig);
   }
-  
+
   // Validate JSON configuration
   validateConfig = () => {
     try {
@@ -157,11 +159,11 @@ export class ConfigControls extends HTMLElement {
       this.setConfigValidity(false);
     }
   };
-  
+
   // Update the UI to reflect config validity
   setConfigValidity(isValid: boolean) {
     this.isConfigValid = isValid;
-    
+
     if (this.applyButton) {
       if (isValid) {
         this.applyButton.classList.add('valid');
@@ -174,13 +176,13 @@ export class ConfigControls extends HTMLElement {
       }
     }
   }
-  
+
   // Event handler for formatter changes
   handleFormatterChange = () => {
     console.log('Formatter changed, updating preset selector');
     this.updatePresetSelector();
   };
-  
+
   // Event handler for formatter pre-change
   handleFormatterWillChange = () => {
     console.log('Formatter will change, resetting preset selector');
@@ -189,19 +191,19 @@ export class ConfigControls extends HTMLElement {
       this.presetSelector.selectedIndex = 0;
     }
   };
-  
+
   // Event handler for preset changes
   handlePresetChange = (e: Event) => {
     const select = e.target as HTMLSelectElement;
     const selectedValue = select.value;
-    
+
     // Parse the preset index
     const presetIndex = parseInt(selectedValue, 10);
     if (!isNaN(presetIndex)) {
       // Load the preset configuration
       const formatter = formatterState.currentFormatter;
       const presets = formatterConfigExamples[formatter];
-      
+
       if (presets && presets[presetIndex]) {
         // Update the editor with the preset config
         const presetConfig = JSON.stringify(presets[presetIndex].content, null, 2);
@@ -210,13 +212,13 @@ export class ConfigControls extends HTMLElement {
       }
     }
   };
-  
+
   // Event handler for apply button
   handleApplyConfig = () => {
     try {
       const configContent = editorState.configInput;
       const config = JSON.parse(configContent);
-      
+
       const formatter = formatterState.currentFormatter;
       if (formatter) {
         formatterActions.updateFormatterConfig(formatter, config);
@@ -228,19 +230,19 @@ export class ConfigControls extends HTMLElement {
       this.setConfigValidity(false);
     }
   };
-  
+
   updatePresetSelector() {
     if (!this.presetSelector) return;
-    
+
     // Clear existing options (except the first 'Current Configuration' option)
     while (this.presetSelector.options.length > 1) {
       this.presetSelector.remove(1);
     }
-    
+
     // Get presets for current formatter
     const formatter = formatterState.currentFormatter;
     const presets = formatterConfigExamples[formatter];
-    
+
     if (presets && presets.length > 0) {
       // Add preset options
       presets.forEach((preset, index) => {
@@ -249,7 +251,7 @@ export class ConfigControls extends HTMLElement {
         option.textContent = preset.name;
         this.presetSelector?.appendChild(option);
       });
-      
+
       console.log(`Added ${presets.length} presets for ${formatter}`);
     } else {
       console.log(`No presets available for ${formatter}`);

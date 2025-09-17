@@ -2,7 +2,7 @@ import { Measurer } from '../measurement/measurer';
 import Song from '../../chord_sheet/song';
 import Paragraph from '../../chord_sheet/paragraph';
 import {
-  LineLayout, LayoutConfig, ParagraphLayoutResult,
+  LayoutConfig, LineLayout, ParagraphLayoutResult,
 } from './types';
 import {
   calculateTotalHeight,

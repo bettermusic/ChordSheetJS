@@ -1,4 +1,4 @@
-import { MeasurementBasedLayoutConfig, ColumnConfig, Margins } from '../../formatter/configuration';
+import { ColumnConfig, Margins, MeasurementBasedLayoutConfig } from '../../formatter/configuration';
 
 class Dimensions {
   pageWidth: number;

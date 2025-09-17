@@ -1,17 +1,18 @@
+import os from 'os';
 import peggy from 'peggy';
 import process from 'process';
 import tspegjs from 'ts-pegjs';
 
-import unibuild, { Asset, Builder } from '@martijnversluis/unibuild';
 import packageJSON from './package.json';
+import unibuild, { Asset, Config } from '@martijnversluis/unibuild';
 
-import buildChordSuffixNormalizeMapping from './script/build_chord_suffix_normalize_mapping';
-import buildChordSuffixGrammar from './script/build_chord_suffix_grammar';
-import buildScales from './script/build_scales';
 import buildChordProSectionGrammar from './script/build_chord_pro_section_grammar';
+import buildChordSuffixGrammar from './script/build_chord_suffix_grammar';
+import buildChordSuffixNormalizeMapping from './script/build_chord_suffix_normalize_mapping';
+import buildScales from './script/build_scales';
 
 const {
-  main, types, bundle,
+  main, types, bundle, version,
 } = packageJSON;
 
 interface BuildOptions {
@@ -31,7 +32,7 @@ function peggyGenerate(grammar: string, release: boolean): string {
   );
 }
 
-unibuild((u: Builder) => {
+export default unibuild((u: Config) => {
   const suffixNormalizeMapping = u.asset('suffixNormalizeMapping', {
     input: 'src/normalize_mappings/suffix-mapping.txt',
     outfile: 'src/normalize_mappings/suffix-normalize-mapping.ts',
@@ -114,10 +115,16 @@ unibuild((u: Builder) => {
     chordDefinitionParser,
   ];
 
+  u.asset('versionFile', {
+    input: 'package.json',
+    outfile: 'src/version.ts',
+    build: () => `export default '${version}';${os.EOL}`,
+  });
+
   const jsBuild = u.asset('sources', {
     input: codeGeneratedAssets,
     outfile: main,
-    command: 'parcel build --no-cache',
+    command: 'rm -rf .parcel-cache && parcel build',
     releaseOnly: true,
   });
 
@@ -155,7 +162,4 @@ unibuild((u: Builder) => {
     requires: codeGeneratedAssets,
     command: 'yarn jest',
   });
-
-  // ci = install, build, lint, test, buildRelease
-  // release = build, lint, test, buildRelease, publish
 });

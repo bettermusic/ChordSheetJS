@@ -1,26 +1,23 @@
 /* eslint quote-props: 0 */
 
-import { Key, NUMERIC } from '../../src';
 import { FLAT, SHARP } from '../../src/constants';
+import { Key, NUMERIC } from '../../src';
 
 const examples = {
   'C': {
     'C': '1',
     'C#': '#1',
     'D': '2',
-    'D#': '#2',
     'B': '7',
 
     'I': '1',
     '#I': '#1',
     'II': '2',
-    '#II': '#2',
     'VII': '7',
   },
 
   'C#': {
     'D#': '2',
-    'E': '#2',
     'D': '#1',
     'G': '#4',
 

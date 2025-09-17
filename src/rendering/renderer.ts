@@ -1,6 +1,6 @@
 import Song from '../chord_sheet/song';
 import Line from '../chord_sheet/line';
-import { ChordLyricsPair, Tag, SoftLineBreak } from '../index';
+import { ChordLyricsPair, SoftLineBreak, Tag } from '../index';
 import { LineLayout, MeasuredItem } from '../layout/engine';
 import { FontConfiguration } from '../formatter/configuration';
 import { isColumnBreak, isComment, renderChord } from '../template_helpers';

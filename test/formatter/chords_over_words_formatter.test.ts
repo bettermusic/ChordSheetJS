@@ -1,9 +1,10 @@
 import '../matchers';
-import { exampleSongSolfege, exampleSongSymbol } from '../fixtures/song';
+
 import songWithIntro from '../fixtures/song_with_intro';
 
-import { GRID } from '../../src/constants';
 import { ContentType } from '../../src/serialized_types';
+import { GRID } from '../../src/constants';
+import { exampleSongSolfege, exampleSongSymbol } from '../fixtures/song';
 
 import {
   ABC, ChordsOverWordsFormatter, LILYPOND, TAB,
@@ -21,15 +22,15 @@ describe('ChordsOverWordsFormatter', () => {
     const expectedChordSheet = heredoc`
       title: Let it be
       subtitle: ChordSheetJS example version
+      composer: John Lennon,Paul McCartney
       key: C
       x_some_setting: 
-      composer: John Lennon,Paul McCartney
 
       Written by: John Lennon,Paul McCartney
 
       Verse 1
-             Am         C/G        F          C
-      Let it be, let it be, let it be, let it be
+             Am           C/G        F          C
+      Let it be, \\ let it be, let it be, let it be
       D       strong   G  A           G  D/F# Em D
       Whisper words of wisdom, let it be
 
@@ -75,9 +76,9 @@ describe('ChordsOverWordsFormatter', () => {
     const expectedChordSheet = heredoc`
 title: Let it be
 subtitle: ChordSheetJS example version
+composer: John Lennon,Paul McCartney
 key: Do
 x_some_setting: 
-composer: John Lennon,Paul McCartney
 
 Written by: John Lennon,Paul McCartney
 

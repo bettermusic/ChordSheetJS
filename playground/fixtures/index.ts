@@ -5,10 +5,10 @@ import { pdfFormatterConfigs } from './configs/pdf-formatter-configs';
 // import { htmlFormatterConfigs } from './configs/html-formatter-configs';
 
 // Import default configurations from the library
-import { 
-  getDefaultConfig, 
-  getHTMLDefaultConfig, 
-  getPDFDefaultConfig 
+import {
+  getDefaultConfig,
+  getHTMLDefaultConfig,
+  getPDFDefaultConfig,
 } from '../../src/formatter/configuration';
 import measuredHtmlConfigs from './configs/measured-html-formatter-configs';
 
@@ -20,7 +20,7 @@ const formatterDefaultConfigs = {
   'PDF': getPDFDefaultConfig(),
   'ChordPro': getDefaultConfig('base'),
   'ChordsOverWords': getDefaultConfig('base'),
-  'HTML': getHTMLDefaultConfig()
+  'HTML': getHTMLDefaultConfig(),
 };
 
 // Prepare array of config examples for each formatter
@@ -45,7 +45,7 @@ const formatterConfigExamples = {
   'MeasuredHTML': [
     ...measuredHtmlConfigs,
     { name: 'Default Configuration', content: baseConfig },
-  ]
+  ],
 };
 
 // Example song data for testing
@@ -80,12 +80,12 @@ With [Em]different [C]chords
 {sob: Bridge}
 [Am]This is a [D]bridge section
 With [Bm]even more [E]chord variety
-{eob}`
+{eob}`,
 };
 
 // Export everything
 export {
   formatterDefaultConfigs,
   formatterConfigExamples,
-  exampleSongs
+  exampleSongs,
 };

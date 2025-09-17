@@ -1,4 +1,4 @@
-import { LineLayout, MeasuredItem, LayoutConfig } from './types';
+import { LayoutConfig, LineLayout, MeasuredItem } from './types';
 import Line from '../../chord_sheet/line';
 import ChordLyricsPair from '../../chord_sheet/chord_lyrics_pair';
 import Tag from '../../chord_sheet/tag';

@@ -1,8 +1,8 @@
 import {
-  MeasurementBasedFormatterConfiguration,
-  MeasurementBasedConfigurationProperties,
-  MeasurementBasedLayoutConfig,
   ChordDiagramsConfig,
+  MeasurementBasedConfigurationProperties,
+  MeasurementBasedFormatterConfiguration,
+  MeasurementBasedLayoutConfig,
   SectionsConfig,
 } from './measurement_based_configuration';
 

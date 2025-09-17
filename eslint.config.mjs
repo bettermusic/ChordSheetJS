@@ -41,14 +41,30 @@ export default tseslint.config(
       ...variablesRules,
 
       'class-methods-use-this': 'off',
+      'complexity': ['error', 10],
       'linebreak-style': ['error', (process.platform === 'win32' ? 'windows' : 'unix')],
+      'max-depth': ['error', 2],
       'max-len': ['error', { code: 120, ignoreUrls: true }],
+      'max-lines': ['error', 700],
+      'max-lines-per-function': ['error', { max: 25, skipBlankLines: true, skipComments: true }],
+      'max-statements': ['error', 10],
       'no-underscore-dangle': 'off',
       'no-unused-vars': 'off',
       'object-curly-spacing': ['error', 'always'],
       'operator-linebreak': ['error', 'after'],
       'quotes': ['error', 'single'],
       'quote-props': ['error', 'consistent'],
+      'sort-imports': [
+        'error',
+        {
+          allowSeparatedGroups: true,
+          memberSyntaxSortOrder: [
+            'none',
+            'all',
+            'single',
+            'multiple',
+          ],
+        }],
 
       '@typescript-eslint/no-empty-function': 'off',
       '@typescript-eslint/no-explicit-any': 'off',
@@ -67,12 +83,14 @@ export default tseslint.config(
     files: ['src/formatter/templates/*.ts'],
     rules: {
       'indent': 'off',
+      'max-lines-per-function': 'off',
       'template-curly-spacing': ['error', 'always'],
     },
   },
   {
     files: ['script/**/*.ts'],
     rules: {
+      'max-lines-per-function': 'off',
       'no-console': 'off',
     },
   },
@@ -84,22 +102,32 @@ export default tseslint.config(
       'jest/no-disabled-tests': 'off',
       'jest/no-standalone-expect': 'off',
       'jest/prefer-expect-assertions': 'off',
+      'max-lines': 'off',
+      'max-lines-per-function': 'off',
+      'max-statements': 'off',
     },
   },
   {
-    files: ['test/utilities.ts'],
+    files: ['test/fixtures/**/*.ts'],
+    rules: {
+      'max-lines': 'off',
+      'max-lines-per-function': 'off',
+    },
+  },
+  {
+    files: ['test/matchers.ts', 'test/utilities.ts', 'unibuild.ts'],
     rules: {
       'jest/no-export': 'off',
+      'max-lines-per-function': 'off',
+      'max-statements': 'off',
     },
   },
   {
     ignores: [
-      'dist/**/*',
       'lib/**/*',
       'src/normalize_mappings/suffix-normalize-mapping.ts',
       'src/parser/*/peg_parser.ts',
-      'test/formatter/pdf/pdf-dev.js',
-      'playground/**/*',
+      'tmp/**/*',
     ],
   },
 );

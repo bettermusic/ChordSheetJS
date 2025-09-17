@@ -23,6 +23,7 @@ import Tag from './chord_sheet/tag';
 import Ternary from './chord_sheet/chord_pro/ternary';
 import TextFormatter from './formatter/text_formatter';
 import UltimateGuitarParser from './parser/ultimate_guitar_parser';
+import version from './version';
 
 import {
   each,
@@ -46,9 +47,9 @@ import {
   CHORUS,
   INDETERMINATE,
   NONE,
+  PART,
   TAB,
   VERSE,
-  PART,
 } from './constants';
 
 import { BaseMeasurer } from './layout/measurement/measurer';
@@ -86,6 +87,7 @@ export { default as Ternary } from './chord_sheet/chord_pro/ternary';
 export { default as TextFormatter } from './formatter/text_formatter';
 export { default as UltimateGuitarParser } from './parser/ultimate_guitar_parser';
 export { default as templateHelpers } from './template_helpers';
+export { default as version } from './version';
 
 export { BaseMeasurer } from './layout/measurement/measurer';
 export { JsPdfMeasurer } from './layout/measurement';
@@ -145,6 +147,7 @@ export default {
   CanvasMeasurer,
   JsPdfMeasurer,
   LayoutEngine,
+  version,
   templateHelpers: {
     isEvaluatable,
     isChordLyricsPair,

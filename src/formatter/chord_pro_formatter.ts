@@ -1,17 +1,16 @@
-import Formatter from './formatter';
-import Tag from '../chord_sheet/tag';
-import ChordLyricsPair from '../chord_sheet/chord_lyrics_pair';
-import Ternary from '../chord_sheet/chord_pro/ternary';
-import Literal from '../chord_sheet/chord_pro/literal';
-import Song from '../chord_sheet/song';
-import Line from '../chord_sheet/line';
-import Metadata from '../chord_sheet/metadata';
-import Item from '../chord_sheet/item';
-import Evaluatable from '../chord_sheet/chord_pro/evaluatable';
-import Comment from '../chord_sheet/comment';
-import SoftLineBreak from '../chord_sheet/soft_line_break';
 import Chord from '../chord';
-import { processMetadata } from '../template_helpers';
+import ChordLyricsPair from '../chord_sheet/chord_lyrics_pair';
+import Comment from '../chord_sheet/comment';
+import Evaluatable from '../chord_sheet/chord_pro/evaluatable';
+import Formatter from './formatter';
+import Item from '../chord_sheet/item';
+import Line from '../chord_sheet/line';
+import Literal from '../chord_sheet/chord_pro/literal';
+import Metadata from '../chord_sheet/metadata';
+import SoftLineBreak from '../chord_sheet/soft_line_break';
+import Song from '../chord_sheet/song';
+import Tag from '../chord_sheet/tag';
+import Ternary from '../chord_sheet/chord_pro/ternary';
 
 /**
  * Formats a song into a ChordPro chord sheet
@@ -24,47 +23,54 @@ class ChordProFormatter extends Formatter {
    */
   format(song: Song): string {
     const { lines, metadata } = song;
+    const { metadataLines, contentLines } = this.separateMetadataFromContent(lines);
+    const formattedMetadataLines = this.formatMetadataSection(metadataLines);
+    const formattedContentLines = this.formatContentSection(contentLines, metadata);
+    return this.combineMetadataAndContent(formattedMetadataLines, formattedContentLines);
+  }
 
-    // Separate metadata lines from content lines
+  private separateMetadataFromContent(lines: Line[]): { metadataLines: Line[], contentLines: Line[] } {
     const metadataLines: Line[] = [];
     const contentLines: Line[] = [];
+    let foundContentLine = false;
 
     lines.forEach((line) => {
       const isMetadataLine = line.items.length === 1 &&
         line.items[0] instanceof Tag &&
         (line.items[0] as Tag).isMetaTag();
 
-      if (isMetadataLine) {
+      // Only treat as metadata if it appears before any content line
+      // This preserves contextual directives like key changes within the song
+      if (isMetadataLine && !foundContentLine) {
         metadataLines.push(line);
       } else {
         contentLines.push(line);
+        if (line.hasRenderableItems()) {
+          foundContentLine = true;
+        }
       }
     });
 
-    // Process and reorder metadata according to configuration
-    const orderedMetadata = processMetadata(metadata.all(), this.configuration.metadata);
+    return { metadataLines, contentLines };
+  }
 
-    // Format metadata tags in the specified order
-    const formattedMetadataLines = orderedMetadata.map(([key, value]) => {
-      if (Array.isArray(value)) {
-        return value.map((v) => `{${key}: ${v}}`).join('\n');
-      }
-      return `{${key}: ${value}}`;
+  private formatMetadataSection(metadataLines: Line[]): string[] {
+    return metadataLines.map((line) => {
+      const tag = line.items[0] as Tag;
+      return this.formatTag(tag);
     });
+  }
 
-    // Format content lines
-    const formattedContentLines = contentLines
+  private formatContentSection(contentLines: Line[], metadata: Metadata): string {
+    return contentLines
       .map((line) => this.formatLine(line, metadata))
       .join('\n');
+  }
 
-    // Combine ordered metadata and content
+  private combineMetadataAndContent(formattedMetadataLines: string[], formattedContentLines: string): string {
     if (formattedMetadataLines.length > 0) {
       if (formattedContentLines.trim().length > 0) {
-        // Check if the first content line is empty to avoid double newlines
-        const firstContentLine = contentLines[0];
-        const shouldAddExtraNewline = !(firstContentLine && firstContentLine.isEmpty());
-        const separator = shouldAddExtraNewline ? '\n\n' : '\n';
-        return `${formattedMetadataLines.join('\n')}${separator}${formattedContentLines}`;
+        return `${formattedMetadataLines.join('\n')}\n${formattedContentLines}`;
       }
       return formattedMetadataLines.join('\n');
     }
@@ -79,20 +85,20 @@ class ChordProFormatter extends Formatter {
   }
 
   formatItem(item: Item, metadata: Metadata): string {
-    if (item instanceof Tag) {
-      return this.formatTag(item);
-    }
+    type constructor = any;
+    type handlerFunc = any;
 
-    if (item instanceof ChordLyricsPair) {
-      return this.formatChordLyricsPair(item);
-    }
+    const handlers = new Map<constructor, handlerFunc>([
+      [Tag, (i: Item) => this.formatTag(i as Tag)],
+      [ChordLyricsPair, (i: Item) => this.formatChordLyricsPair(i as ChordLyricsPair)],
+      [Comment, (i: Item) => this.formatComment(i as Comment)],
+      [SoftLineBreak, (_i: Item) => '\\ '],
+    ]);
 
-    if (item instanceof Comment) {
-      return this.formatComment(item);
-    }
+    const handler = handlers.get(item.constructor);
 
-    if (item instanceof SoftLineBreak) {
-      return '\\ ';
+    if (handler) {
+      return handler(item);
     }
 
     if ('evaluate' in item) {

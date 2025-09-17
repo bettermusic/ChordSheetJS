@@ -1,5 +1,5 @@
 import Formatter from './formatter';
-import { HTMLFormatterConfiguration } from './configuration';
+import { HTMLFormatterConfiguration, HtmlTemplateCssClasses } from './configuration';
 import Song from '../chord_sheet/song';
 import { scopeCss } from '../utilities';
 import Paragraph from '../chord_sheet/paragraph';
@@ -14,6 +14,25 @@ export interface HtmlTemplateArgs {
 
 export type Template = (_args: HtmlTemplateArgs) => string;
 export type CSS = Record<string, Record<string, string>>;
+
+export const defaultCssClasses: HtmlTemplateCssClasses = {
+  annotation: 'annotation',
+  chord: 'chord',
+  chordSheet: 'chord-sheet',
+  column: 'column',
+  comment: 'comment',
+  emptyLine: 'empty-line',
+  label: 'label',
+  labelWrapper: 'label-wrapper',
+  line: 'line',
+  literal: 'literal',
+  literalContents: 'contents',
+  lyrics: 'lyrics',
+  paragraph: 'paragraph',
+  row: 'row',
+  subtitle: 'subtitle',
+  title: 'title',
+};
 
 /**
  * Acts as a base class for HTML formatters

@@ -6,7 +6,7 @@ import {
   NimbusSansLRegItaItalic,
   NimbusSansLRegNormal,
 } from './fonts/NimbusSansLFonts.base64';
-import { LineStyle, defaultFontConfigurations, FontConfiguration } from '../configuration';
+import { FontConfiguration, LineStyle, defaultFontConfigurations } from '../configuration';
 
 const defaultOptions: jsPDFOptions = {
   orientation: 'p',

@@ -1,7 +1,12 @@
+import '../matchers';
+
+import { PART } from '../../src/constants';
+import { heredoc } from '../utilities';
+
 import {
   ABC,
-  ChordProParser,
   CHORUS,
+  ChordProParser,
   LILYPOND,
   NONE,
   TAB,
@@ -9,10 +14,6 @@ import {
   Ternary,
   VERSE,
 } from '../../src';
-import { PART } from '../../src/constants';
-
-import '../matchers';
-import { heredoc } from '../utilities';
 
 describe('ChordProParser', () => {
   it('parses a ChordPro chord sheet correctly', () => {
@@ -914,9 +915,10 @@ Let it [Am]be
         fingers: [],
       });
     });
+  });
 
-    it('adds uses label of part type section for line type', () => {
-      const markedChordSheet = heredoc`
+  it('adds uses label of part type section for line type', () => {
+    const markedChordSheet = heredoc`
       {start_of_verse}
       Let it [Am]be
       {end_of_verse}
@@ -924,16 +926,16 @@ Let it [Am]be
       Let it [Am]be
       {end_of_part}`;
 
-      const parser = new ChordProParser();
-      const song = parser.parse(markedChordSheet);
-      const lineTypes = song.lines.map((line) => line.type);
+    const parser = new ChordProParser();
+    const song = parser.parse(markedChordSheet);
+    const lineTypes = song.lines.map((line) => line.type);
 
-      expect(lineTypes).toEqual([VERSE, VERSE, VERSE, 'intro', 'intro', 'intro']);
-      expect(parser.warnings).toHaveLength(0);
-    });
+    expect(lineTypes).toEqual([VERSE, VERSE, VERSE, 'intro', 'intro', 'intro']);
+    expect(parser.warnings).toHaveLength(0);
+  });
 
-    it('part short form can make verse and chord paragraph types', () => {
-      const markedChordSheet = heredoc`
+  it('part short form can make verse and chord paragraph types', () => {
+    const markedChordSheet = heredoc`
       {p: Intro (2x)}
       [Gm][F]
       {ep}
@@ -944,12 +946,11 @@ Let it [Am]be
       [Gm] This is the [F]first chorus
       {ep}`;
 
-      const parser = new ChordProParser();
-      const song = parser.parse(markedChordSheet);
-      const lineTypes = song.lines.map((line) => line.type);
+    const parser = new ChordProParser();
+    const song = parser.parse(markedChordSheet);
+    const lineTypes = song.lines.map((line) => line.type);
 
-      expect(lineTypes).toEqual(['intro', 'intro', 'intro', VERSE, VERSE, VERSE, CHORUS, CHORUS, CHORUS]);
-      expect(parser.warnings).toHaveLength(0);
-    });
+    expect(lineTypes).toEqual(['intro', 'intro', 'intro', VERSE, VERSE, VERSE, CHORUS, CHORUS, CHORUS]);
+    expect(parser.warnings).toHaveLength(0);
   });
 });

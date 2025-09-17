@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import { TernaryProperties } from '../src/chord_sheet/chord_pro/ternary';
 import { ContentType } from '../src/serialized_types';
-import StubbedPdfDoc, { RenderedItem, RenderedLine, RenderedText } from './formatter/stubbed_pdf_doc';
+import { RenderedItem } from './formatter/stubbed_pdf_doc';
+import { TernaryProperties } from '../src/chord_sheet/chord_pro/ternary';
 
 declare global {
   namespace jest {

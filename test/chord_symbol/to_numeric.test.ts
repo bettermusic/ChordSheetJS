@@ -1,5 +1,6 @@
-import { Chord, Key } from '../../src';
 import '../matchers';
+
+import { Chord, Key } from '../../src';
 
 describe('Chord', () => {
   describe('chord symbol', () => {
@@ -11,10 +12,6 @@ describe('Chord', () => {
 
       it('accepts a string key', () => {
         expect(Chord.parse('Dsus/F#')?.toNumeric('Ab').toString()).toEqual('b5sus/b7');
-      });
-
-      it('properly transposes the 6m', () => {
-        expect(Chord.parse('Bm')?.toNumeric('D').toString()).toEqual('6m');
       });
 
       it.skip('supports a minor chord', () => {

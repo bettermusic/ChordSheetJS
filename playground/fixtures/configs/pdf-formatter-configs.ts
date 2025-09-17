@@ -1,4 +1,4 @@
-import { pdfSpecificDefaults } from "../../../src/formatter/configuration";
+import { pdfSpecificDefaults } from '../../../src/formatter/configuration';
 
 export const pdfFormatterConfigs = [
   {
@@ -990,5 +990,5 @@ export const pdfFormatterConfigs = [
     content: pdfSpecificDefaults,
   },
 ];
-  
+
 export default pdfFormatterConfigs;

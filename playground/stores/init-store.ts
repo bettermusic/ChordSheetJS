@@ -16,7 +16,7 @@ export const APP_EVENTS = {
   CONFIG_CHANGED: 'config-changed',
   CONFIG_TYPE_CHANGED: 'config-type-changed',
   CONFIG_RELOAD_REQUESTED: 'config-reload-requested',
-  FORMAT_CONVERSION_COMPLETE: 'format-conversion-complete' // Add this new event
+  FORMAT_CONVERSION_COMPLETE: 'format-conversion-complete', // Add this new event
 };
 
 interface InitStoreState {
@@ -31,14 +31,14 @@ const initStoreObj = createStore<InitStoreState>({
   chordEditorReady: false,
   configEditorReady: false,
   formatterDisplayReady: false,
-  isAppReady: false
+  isAppReady: false,
 });
 
 // Init store actions
 const initActions = {
-  setComponentReady(componentName: string, isReady: boolean = true) {
+  setComponentReady(componentName: string, isReady = true) {
     const state = initStoreObj.getState();
-    
+
     switch (componentName) {
       case 'chordEditor':
         initStoreObj.setState({ chordEditorReady: isReady });
@@ -50,28 +50,28 @@ const initActions = {
         initStoreObj.setState({ formatterDisplayReady: isReady });
         break;
     }
-    
+
     this.checkIfAppReady();
   },
-  
+
   checkIfAppReady() {
     const state = initStoreObj.getState();
     const wasReady = state.isAppReady;
-    
+
     // Check if all required components are ready
-    const isNowReady = state.chordEditorReady && 
-                        state.configEditorReady && 
+    const isNowReady = state.chordEditorReady &&
+                        state.configEditorReady &&
                         state.formatterDisplayReady;
-    
+
     // Only update and dispatch event if state actually changed
     if (!wasReady && isNowReady) {
       initStoreObj.setState({ isAppReady: true });
       console.log('All components initialized, app is ready');
-      
+
       // Dispatch app-ready event
       document.dispatchEvent(new CustomEvent(APP_EVENTS.APP_READY));
     }
-  }
+  },
 };
 
 // Export a simplified interface to the store
@@ -81,7 +81,7 @@ const initStore = {
   get configEditorReady() { return initStoreObj.get('configEditorReady'); },
   get formatterDisplayReady() { return initStoreObj.get('formatterDisplayReady'); },
   setComponentReady: initActions.setComponentReady.bind(initActions),
-  checkIfAppReady: initActions.checkIfAppReady.bind(initActions)
+  checkIfAppReady: initActions.checkIfAppReady.bind(initActions),
 };
 
 export { initStore };

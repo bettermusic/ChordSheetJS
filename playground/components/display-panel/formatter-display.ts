@@ -1,6 +1,6 @@
 import { formatterState } from '../../stores/formatter-store';
 import { songState } from '../../stores/song-store';
-import { initStore, APP_EVENTS } from '../../stores/init-store';
+import { APP_EVENTS, initStore } from '../../stores/init-store';
 import { MeasuredHtmlFormatter, Song } from '../../../src';
 import { editorActions } from '../../stores/editor-store';
 
@@ -9,8 +9,11 @@ import { editorActions } from '../../stores/editor-store';
  */
 export class FormatterDisplay extends HTMLElement {
   private contentContainer: HTMLDivElement | null = null;
+
   private initialized = false;
+
   private pdfBlobUrl: string | null = null;
+
   private resizeObserver: ResizeObserver | null = null;
 
   constructor() {
@@ -54,7 +57,7 @@ export class FormatterDisplay extends HTMLElement {
         :host {
           display: block;
           height: 100%;
-          width: 300px;
+          // width: 300px;
           overflow: auto;
           padding: 16px;
           box-sizing: border-box;
@@ -180,7 +183,7 @@ export class FormatterDisplay extends HTMLElement {
     // Clean up any existing blob URLs
     this.cleanupBlobUrls();
 
-    const currentFormatter = formatterState.currentFormatter;
+    const { currentFormatter } = formatterState;
 
     if (currentFormatter === 'MeasuredHTML') {
       if (!this.resizeObserver) {
@@ -191,11 +194,9 @@ export class FormatterDisplay extends HTMLElement {
         });
         this.resizeObserver.observe(this.contentContainer);
       }
-    } else {
-      if (this.resizeObserver) {
-        this.resizeObserver.disconnect();
-        this.resizeObserver = null;
-      }
+    } else if (this.resizeObserver) {
+      this.resizeObserver.disconnect();
+      this.resizeObserver = null;
     }
 
     this.updateDisplay();
@@ -217,7 +218,7 @@ export class FormatterDisplay extends HTMLElement {
   handleConfigUpdate = () => {
     console.log('Formatter config updated');
 
-    const currentFormatter = formatterState.currentFormatter;
+    const { currentFormatter } = formatterState;
 
     if (currentFormatter === 'PDF') {
       console.log('PDF formatter config changed, regenerating PDF');
@@ -265,7 +266,7 @@ export class FormatterDisplay extends HTMLElement {
 
     try {
       // Get the PDF formatter instance
-      const pdfFormatter = formatterState.formatter_instances['PDF'];
+      const pdfFormatter = formatterState.formatter_instances.PDF;
 
       if (!pdfFormatter || !songState.parsedSong) {
         throw new Error('PDF formatter or song not available');
@@ -312,7 +313,7 @@ export class FormatterDisplay extends HTMLElement {
   updateDisplay(content?: string) {
     if (!this.contentContainer) return;
 
-    const currentFormatter = formatterState.currentFormatter;
+    const { currentFormatter } = formatterState;
 
     if (currentFormatter === 'PDF') {
       this.contentContainer.className = 'content-container';
@@ -323,7 +324,7 @@ export class FormatterDisplay extends HTMLElement {
       if (song) {
         // Measure the container's dimensions
         const width = this.contentContainer.clientWidth;
-        const height = this.contentContainer.clientHeight // 'auto';
+        const height = this.contentContainer.clientHeight; // 'auto';
 
         // Check if the container is visible
         if (width === 0) {
@@ -338,7 +339,7 @@ export class FormatterDisplay extends HTMLElement {
           pageSize: { width, height },
         };
 
-        let metadata = configWithPageSize.metadata || {};
+        const metadata = configWithPageSize.metadata || {};
         for (const key in metadata) {
           song = song.changeMetadata(key, metadata[key]);
         }

@@ -1,20 +1,33 @@
-import { parse } from './parser/chord/peg_parser';
-import Key from './key';
-import { isMinor, normalizeChordSuffix } from './utilities';
 import ChordParsingError from './chord_parsing_error';
+import Key from './key';
+import { parse } from './parser/chord/peg_parser';
+import { isMinor, normalizeChordSuffix } from './utilities';
+
 import {
   ChordType,
   Modifier,
   NUMERAL,
   NUMERIC,
-  SYMBOL,
   SOLFEGE,
+  SYMBOL,
 } from './constants';
 
 interface ChordProperties {
   root?: Key | null;
   suffix?: string | null;
   bass?: Key | null;
+  optional?: boolean;
+}
+
+export interface ChordConstructorOptions {
+  base?: string | number | null;
+  modifier?: Modifier | null;
+  suffix?: string | null;
+  bassBase?: string | number | null;
+  bassModifier?: Modifier | null;
+  root?: Key | null;
+  bass?: Key | null;
+  chordType?: ChordType | null;
   optional?: boolean;
 }
 
@@ -280,25 +293,8 @@ class Chord implements ChordProperties {
    */
   toString({ useUnicodeModifier = false } = {}): string {
     let chordString = '';
-    let suffix = this.suffix || '';
+    const suffix = this.suffix || '';
     const showMinor = suffix[0] !== 'm';
-
-    // if the chord is numeric and this.root is 2,3,6 remove the m from the suffix
-    // only if it's a standalone minor indicator (just "m", not "m7", "ma", etc.)
-    if (this.isNumeric()) {
-      switch (this.root?.toString()) {
-        case '2':
-        case '3':
-        case '6':
-          // Only remove 'm' if it's exactly 'm' (standalone minor)
-          if (suffix === 'm') {
-            suffix = '';
-          }
-          break;
-        default:
-          break;
-      }
-    }
 
     if (this.root) chordString = this.root.toString({ showMinor, useUnicodeModifier }) + suffix;
     if (this.bass) chordString = `${chordString}/${this.bass.toString({ useUnicodeModifier })}`;
@@ -337,7 +333,7 @@ class Chord implements ChordProperties {
    * @param {boolean} [options.normalizeSuffix=true] whether to normalize the chord suffix after transposing
    * @returns {Chord} the normalized chord
    */
-  normalize(key: Key | string | null = null, { normalizeSuffix = true } = {}): Chord {
+  normalize(key: Key | string | null = null, { normalizeSuffix = true }: { normalizeSuffix?: boolean; } = {}): Chord {
     const suffix = normalizeSuffix ? normalizeChordSuffix(this.suffix) : this.suffix;
     let normalizedRoot = this.root;
 
@@ -398,17 +394,7 @@ class Chord implements ChordProperties {
       bass = null,
       chordType = null,
       optional = false,
-    }: {
-      base?: string | number | null,
-      modifier?: Modifier | null,
-      suffix?: string | null,
-      bassBase?: string | number | null,
-      bassModifier?: Modifier | null,
-      root?: Key | null,
-      bass?: Key | null,
-      chordType?: ChordType | null,
-      optional?: boolean,
-    },
+    }: ChordConstructorOptions,
   ) {
     this.suffix = suffix || null;
     this.optional = optional;

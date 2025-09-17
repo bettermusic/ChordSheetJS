@@ -11,13 +11,13 @@ import JsPDFRenderer from '../chord_diagram/js_pdf_renderer';
 import Condition from '../layout/engine/condition';
 import {
   Alignment,
+  ConditionalRule,
   LayoutContentItem,
   LayoutContentItemWithImage,
   LayoutContentItemWithLine,
   LayoutContentItemWithText,
   LayoutItem,
   LayoutSection,
-  ConditionalRule,
 } from '../formatter/configuration';
 import { getCapos } from '../helpers';
 import ChordProParser from '../parser/chord_pro_parser';
@@ -93,12 +93,12 @@ class JsPdfRenderer extends Renderer {
   /**
    * Override the base getExtraMetadata method to include PDF-specific metadata
    */
-  protected getExtraMetadata(page: number, totalPages: number): Record<string, number | string | string[]> {
+  protected getExtraMetadata(page: number, totalPages: number): Record<string, | string | string[]> {
     // Create base metadata
-    const baseMetadata: Record<string, number | string | string[]> = {
-      page,
-      pages: totalPages,
-      renderTime: this.renderTime,
+    const baseMetadata: Record<string, | string | string[]> = {
+      page: page.toString(),
+      pages: totalPages.toString(),
+      renderTime: this.renderTime.toString(),
     };
 
     // Add capo metadata if present

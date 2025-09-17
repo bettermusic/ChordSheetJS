@@ -96,6 +96,8 @@ export type NoModifier = 'NM';
 export type ModifierMaybe = Modifier | NoModifier;
 
 export type ChordType = 'symbol' | 'solfege' | 'numeric' | 'numeral';
+export type ChordStyle = 'symbol' | 'solfege' | 'number' | 'numeral';
+export type NullableChordStyle = ChordStyle | null;
 
 export const MINOR = 'm';
 export const MAJOR = 'M';
@@ -103,13 +105,14 @@ export const MAJOR = 'M';
 export type Mode = 'M' | 'm';
 
 export type FretNumber = number;
-export type StringNumber = 1 | 2 | 3 | 4 | 5 | 6;
 export type OpenFret = 0;
-export type FingerNumber = 1 | 2 | 3 | 4 | 5 | OpenFret;
 export type NonSoundingString = '-1' | 'N' | 'x';
 
-export const openFret = 0 as OpenFret;
+export type StringNumber = 1 | 2 | 3 | 4 | 5 | 6;
+export type FingerNumber = 1 | 2 | 3 | 4 | 5 | OpenFret;
+
 export const nonSoundingString = ['N', '-1', 'x'] as NonSoundingString[];
+export const openFret = 0 as OpenFret;
 
 export type Fret = FretNumber | OpenFret | NonSoundingString;
 

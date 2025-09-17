@@ -9,12 +9,12 @@ import { getCapos } from '../helpers';
 import Metadata from '../chord_sheet/metadata';
 import {
   Alignment,
+  ConditionalRule,
   LayoutContentItem,
   LayoutContentItemWithImage,
   LayoutContentItemWithLine,
   LayoutContentItemWithText,
   LayoutSection,
-  ConditionalRule,
 } from '../formatter/configuration';
 import Condition from '../layout/engine/condition';
 import { MeasuredHtmlFormatterConfiguration } from '../formatter/configuration/measured_html_configuration';
@@ -852,12 +852,12 @@ class PositionedHtmlRenderer extends Renderer {
   /**
    * Gets extra metadata for templates
    */
-  protected getExtraMetadata(page: number, totalPages: number): Record<string, number | string | string[]> {
+  protected getExtraMetadata(page: number, totalPages: number): Record<string, | string | string[]> {
     // Create base metadata
-    const baseMetadata: Record<string, number | string | string[]> = {
-      page,
-      pages: totalPages,
-      renderTime: this.renderTime,
+    const baseMetadata: Record<string, | string | string[]> = {
+      page: page.toString(),
+      pages: totalPages.toString(),
+      renderTime: this.renderTime.toString(),
     };
 
     // Add capo metadata if present

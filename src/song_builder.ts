@@ -1,16 +1,18 @@
+import FontStack from './chord_sheet/font_stack';
+import Item from './chord_sheet/item';
+import Metadata from './chord_sheet/metadata';
+import ParserWarning from './parser/parser_warning';
+import Song from './chord_sheet/song';
+import Tag from './chord_sheet/tag';
+import TagInterpreter from './chord_sheet/tag_interpreter';
+import TraceInfo from './chord_sheet/trace_info';
+
+import { KEY, NEW_KEY, TRANSPOSE } from './chord_sheet/tags';
+import Line, { LineType } from './chord_sheet/line';
+
 import {
   AUTO, END_TAG, NONE, PART, START_TAG,
 } from './constants';
-import Line, { LineType } from './chord_sheet/line';
-import Metadata from './chord_sheet/metadata';
-import FontStack from './chord_sheet/font_stack';
-import Item from './chord_sheet/item';
-import TraceInfo from './chord_sheet/trace_info';
-import ParserWarning from './parser/parser_warning';
-import Song from './chord_sheet/song';
-import TagInterpreter from './chord_sheet/tag_interpreter';
-import { KEY, NEW_KEY, TRANSPOSE } from './chord_sheet/tags';
-import Tag from './chord_sheet/tag';
 
 class SongBuilder {
   currentKey: string | null = null;
@@ -36,7 +38,6 @@ class SongBuilder {
   constructor(song: Song) {
     this.song = song;
     this.song.lines = this.lines;
-    this.song.metadata = this.metadata;
     this.song.warnings = this.warnings;
   }
 
@@ -60,7 +61,7 @@ class SongBuilder {
 
     this.setCurrentProperties(this.sectionType, this.selector);
     this.currentLine.transposeKey = this.transposeKey ?? this.currentKey;
-    this.currentLine.key = this.currentKey || this.metadata.getSingle(KEY);
+    this.currentLine.key = this.currentKey || this.song.getMetadata().getSingle(KEY);
     this.currentLine.lineNumber = this.lines.length - 1;
     return this.currentLine;
   }
@@ -109,9 +110,7 @@ class SongBuilder {
   }
 
   private applyTagOnSong(tag: Tag) {
-    if (tag.isMetaTag()) {
-      this.setMetadata(tag.name, tag.value || '');
-    } else if (tag.name === TRANSPOSE) {
+    if (tag.name === TRANSPOSE) {
       this.transposeKey = tag.value;
     } else if (tag.name === NEW_KEY) {
       this.currentKey = tag.value;
@@ -126,10 +125,6 @@ class SongBuilder {
     this.ensureLine();
     if (!this.currentLine) throw new Error('Expected this.currentLine to be present');
     this.currentLine.addTag(tag);
-  }
-
-  setMetadata(name: string, value: string): void {
-    this.metadata.add(name, value);
   }
 
   setSectionTypeFromTag(tag: Tag): void {
@@ -156,7 +151,6 @@ class SongBuilder {
       this.sectionType = sectionType;
     }
 
-    this.selector = tag.selector;
     this.setCurrentProperties(sectionType, tag.selector);
   }
 
