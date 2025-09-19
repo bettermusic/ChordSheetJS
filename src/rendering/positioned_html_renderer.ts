@@ -1,12 +1,21 @@
-import Renderer, { ParagraphLayout, PositionedElement } from './renderer';
-import Song from '../chord_sheet/song';
-import { FontConfiguration } from '../formatter/configuration';
-import { LineLayout, MeasuredItem } from '../layout/engine';
-import Dimensions from '../layout/engine/dimensions';
+import ChordLyricsPair from '../chord_sheet/chord_lyrics_pair';
 import ChordProParser from '../parser/chord_pro_parser';
+import Condition from '../layout/engine/condition';
+import Dimensions from '../layout/engine/dimensions';
+import { FontConfiguration } from '../formatter/configuration';
+import HtmlDocWrapper from './html_doc_wrapper';
+import Line from '../chord_sheet/line';
+import { MeasuredHtmlFormatterConfiguration } from '../formatter/configuration/measured_html_configuration';
+import Metadata from '../chord_sheet/metadata';
+import SoftLineBreak from '../chord_sheet/soft_line_break';
+import Song from '../chord_sheet/song';
+import Tag from '../chord_sheet/tag';
 import TextFormatter from '../formatter/text_formatter';
 import { getCapos } from '../helpers';
-import Metadata from '../chord_sheet/metadata';
+import { LineLayout, MeasuredItem } from '../layout/engine';
+import Renderer, { ParagraphLayout, PositionedElement } from './renderer';
+import { isColumnBreak, isComment } from '../template_helpers';
+
 import {
   Alignment,
   ConditionalRule,
@@ -16,14 +25,6 @@ import {
   LayoutContentItemWithText,
   LayoutSection,
 } from '../formatter/configuration';
-import Condition from '../layout/engine/condition';
-import { MeasuredHtmlFormatterConfiguration } from '../formatter/configuration/measured_html_configuration';
-import HtmlDocWrapper from './html_doc_wrapper';
-import { isColumnBreak, isComment } from '../template_helpers';
-import Tag from '../chord_sheet/tag';
-import SoftLineBreak from '../chord_sheet/soft_line_break';
-import Line from '../chord_sheet/line';
-import ChordLyricsPair from '../chord_sheet/chord_lyrics_pair';
 
 declare const document: any;
 declare type HTMLElement = any;

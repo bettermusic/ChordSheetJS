@@ -1,5 +1,5 @@
-import { FingerNumber, FretNumber, StringNumber } from '../constants';
 import { Renderer } from './renderer';
+import { FingerNumber, FretNumber, StringNumber } from '../constants';
 
 export interface Barre {
   from: StringNumber;

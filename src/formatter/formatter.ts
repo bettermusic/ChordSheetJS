@@ -1,7 +1,7 @@
-import { mergeConfigs } from '../utilities';
 import { BaseFormatterConfiguration } from './configuration/base_configuration';
 import { DeepPartial } from '../utilities';
 import { getBaseDefaultConfig } from './configuration/default_config_manager';
+import { mergeConfigs } from '../utilities';
 
 /**
  * Base formatter class that provides configuration handling for all formatters

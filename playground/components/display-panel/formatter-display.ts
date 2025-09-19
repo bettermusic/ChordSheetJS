@@ -2,7 +2,6 @@ import { formatterState } from '../../stores/formatter-store';
 import { songState } from '../../stores/song-store';
 import { APP_EVENTS, initStore } from '../../stores/init-store';
 import { MeasuredHtmlFormatter, Song } from '../../../src';
-import { editorActions } from '../../stores/editor-store';
 
 /**
  * Web component for displaying formatted output

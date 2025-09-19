@@ -1,9 +1,9 @@
-import Line from '../../chord_sheet/line';
 import ChordLyricsPair from '../../chord_sheet/chord_lyrics_pair';
-import SoftLineBreak from '../../chord_sheet/soft_line_break';
-import { LineLayout, MeasuredItem } from './types';
 import { ItemProcessor } from './item_processor';
 import { LayoutFactory } from './layout_factory';
+import Line from '../../chord_sheet/line';
+import SoftLineBreak from '../../chord_sheet/soft_line_break';
+import { LineLayout, MeasuredItem } from './types';
 
 /**
  * Handles breaking lines into layouts based on available width

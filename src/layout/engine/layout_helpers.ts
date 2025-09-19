@@ -1,6 +1,6 @@
-import { LayoutConfig, LineLayout } from './types';
 import Tag from '../../chord_sheet/tag';
 import { isColumnBreak } from '../../template_helpers';
+import { LayoutConfig, LineLayout } from './types';
 
 /**
  * Create a column break line layout

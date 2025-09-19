@@ -1,3 +1,5 @@
+import { parse } from '../parser/chord_definition/peg_parser';
+
 import {
   Fret,
   NonSoundingString,
@@ -5,7 +7,6 @@ import {
   nonSoundingString,
   openFret,
 } from '../constants';
-import { parse } from '../parser/chord_definition/peg_parser';
 
 export function isOpenFret(fret: Fret): fret is OpenFret {
   return fret === openFret;

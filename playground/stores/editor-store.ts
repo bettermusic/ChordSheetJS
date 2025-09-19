@@ -1,12 +1,17 @@
-import { createStore } from './store';
-import {
-  EditorView, highlightActiveLine, keymap, lineNumbers,
-} from '@codemirror/view';
-import { defaultKeymap, history } from '@codemirror/commands';
-import { lintGutter } from '@codemirror/lint';
 import { json } from '@codemirror/lang-json';
-import { APP_EVENTS, initStore } from './init-store';
+import { lintGutter } from '@codemirror/lint';
+import { defaultKeymap, history } from '@codemirror/commands';
+
 import { chordproExamples } from '../fixtures/content/example-chordpro';
+import { createStore } from './store';
+import { APP_EVENTS, initStore } from './init-store';
+
+import {
+  EditorView,
+  highlightActiveLine,
+  keymap,
+  lineNumbers,
+} from '@codemirror/view';
 
 // Example chord sheet content - always use the first example
 const exampleChordPro = chordproExamples[0].content;

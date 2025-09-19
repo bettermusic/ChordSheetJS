@@ -80,6 +80,14 @@ export default tseslint.config(
     },
   },
   {
+    files: ['playground/**/*.ts', 'test/formatter/pdf/pdf-dev.js'],
+    languageOptions: {
+      globals: {
+        ...globals.browser,
+      },
+    },
+  },
+  {
     files: ['src/formatter/templates/*.ts'],
     rules: {
       'indent': 'off',

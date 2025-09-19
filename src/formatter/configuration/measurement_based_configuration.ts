@@ -1,8 +1,10 @@
-import {
-  BaseFormatterConfiguration,
-  ConfigurationProperties,
-} from './base_configuration';
 import { ImageCompression } from 'jspdf';
+
+import { ChordDiagramRenderingConfig } from '../../chord_diagram/chord_diagram';
+import Item from '../../chord_sheet/item';
+import { ParagraphType } from '../../constants';
+import { BaseFormatterConfiguration, ConfigurationProperties } from './base_configuration';
+
 import {
   ChordLyricsPair,
   Comment,
@@ -10,9 +12,6 @@ import {
   SoftLineBreak,
   Tag,
 } from '../../index';
-import Item from '../../chord_sheet/item';
-import { ParagraphType } from '../../constants';
-import { ChordDiagramRenderingConfig } from '../../chord_diagram/chord_diagram';
 
 export interface Margins {
   top: number;

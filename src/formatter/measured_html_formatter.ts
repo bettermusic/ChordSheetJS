@@ -1,10 +1,10 @@
-import Song from '../chord_sheet/song';
-import { LayoutConfig, LayoutEngine } from '../layout/engine';
-import { getMeasuredHtmlDefaultConfig } from './configuration/default_config_manager';
+import { DomMeasurer } from '../layout/measurement';
+import { MeasuredHtmlFormatterConfiguration } from './configuration';
 import MeasurementBasedFormatter from './measurement_based_formatter';
 import PositionedHtmlRenderer from '../rendering/positioned_html_renderer';
-import { DomMeasurer } from '../layout/measurement/dom_measurer';
-import { MeasuredHtmlFormatterConfiguration } from './configuration/measured_html_configuration';
+import Song from '../chord_sheet/song';
+import { getMeasuredHtmlDefaultConfig } from './configuration/default_config_manager';
+import { LayoutConfig, LayoutEngine } from '../layout/engine';
 
 declare type HTMLElement = any;
 

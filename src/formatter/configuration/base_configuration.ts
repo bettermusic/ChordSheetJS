@@ -1,6 +1,6 @@
-import { META_TAGS } from '../../chord_sheet/tag';
-import Key from '../../key';
 import { ContentType } from '../../serialized_types';
+import Key from '../../key';
+import { META_TAGS } from '../../chord_sheet/tag';
 
 export type Delegate = (_string: string) => string;
 export const defaultDelegate: Delegate = (string: string) => string;

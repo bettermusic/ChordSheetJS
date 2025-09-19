@@ -1,7 +1,7 @@
+import { APP_EVENTS } from '../../stores/init-store';
+import { formatterConfigExamples } from '../../fixtures';
 import { editorActions, editorState } from '../../stores/editor-store';
 import { formatterActions, formatterState } from '../../stores/formatter-store';
-import { formatterConfigExamples } from '../../fixtures';
-import { APP_EVENTS } from '../../stores/init-store';
 
 /**
  * Web component for configuration controls

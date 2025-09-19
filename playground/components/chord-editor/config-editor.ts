@@ -1,7 +1,6 @@
-import { EditorView } from '@codemirror/view';
+import { APP_EVENTS, initStore } from '../../stores/init-store';
 import { editorActions, editorState } from '../../stores/editor-store';
 import { formatterActions, formatterState } from '../../stores/formatter-store';
-import { APP_EVENTS, initStore } from '../../stores/init-store';
 
 /**
  * Web component for the configuration editor using CodeMirror

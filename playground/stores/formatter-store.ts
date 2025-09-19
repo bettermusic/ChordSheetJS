@@ -1,21 +1,22 @@
+import { APP_EVENTS } from './init-store';
 import { createStore } from './store';
-import {
-  ChordProFormatter,
-  ChordsOverWordsFormatter,
-  HtmlDivFormatter,
-  MeasuredHtmlFormatter,
-  PdfFormatter,
-} from '../../src/index';
-import { APP_EVENTS, initStore } from './init-store';
 import { formatterConfigExamples } from '../fixtures';
+import { getMeasuredHtmlDefaultConfig } from '../../src/formatter/configuration/default_config_manager';
+import { mergeConfigs } from '../../src/utilities';
+import { songState } from './song-store';
+
 import {
   getDefaultConfig,
   getHTMLDefaultConfig,
   getPDFDefaultConfig,
 } from '../../src/formatter/configuration';
-import { songState } from './song-store';
-import { mergeConfigs } from '../../src/utilities';
-import { getMeasuredHtmlDefaultConfig } from '../../src/formatter/configuration/default_config_manager';
+
+import {
+  ChordProFormatter,
+  ChordsOverWordsFormatter,
+  HtmlDivFormatter,
+  PdfFormatter,
+} from '../../src/index';
 
 // Define the available formatter types
 export type FormatterType = 'PDF' | 'ChordPro' | 'ChordsOverWords' | 'HTML' | 'MeasuredHTML';

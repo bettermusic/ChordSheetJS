@@ -1,5 +1,3 @@
-import { pdfSpecificDefaults } from '../../../src/formatter/configuration';
-
 export const measuredHtmlConfigs = [
   {
     name: 'Html Config',

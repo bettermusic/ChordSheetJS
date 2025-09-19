@@ -1,13 +1,18 @@
-import Line from '../../chord_sheet/line';
 import ChordLyricsPair from '../../chord_sheet/chord_lyrics_pair';
-import Tag from '../../chord_sheet/tag';
-import SoftLineBreak from '../../chord_sheet/soft_line_break';
 import { FontConfiguration } from '../../formatter/configuration';
-import { Measurer } from '../measurement/measurer';
-import { LayoutConfig, MeasuredItem } from './types';
+import Line from '../../chord_sheet/line';
+import { Measurer } from '../measurement';
+import SoftLineBreak from '../../chord_sheet/soft_line_break';
 import Song from '../../chord_sheet/song';
+import Tag from '../../chord_sheet/tag';
+import { LayoutConfig, MeasuredItem } from './types';
+
 import {
-  isChordLyricsPair, isComment, isSoftLineBreak, isTag, renderChord,
+  isChordLyricsPair,
+  isComment,
+  isSoftLineBreak,
+  isTag,
+  renderChord,
 } from '../../template_helpers';
 
 /**

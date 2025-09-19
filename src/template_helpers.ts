@@ -8,15 +8,19 @@ import Paragraph from './chord_sheet/paragraph';
 import Tag from './chord_sheet/tag';
 import When from './template_helpers/when';
 import WhenCallback from './template_helpers/when_callback';
-import { MetadataConfiguration, MetadataRule } from './formatter/configuration/base_configuration';
 
-import {
-  Configuration, Delegate, HtmlTemplateCssClasses, defaultDelegate,
-} from './formatter/configuration';
-import { Literal, SoftLineBreak } from './index';
 import { renderChord } from './helpers';
 import { INDETERMINATE, NONE } from './constants';
+import { Literal, SoftLineBreak } from './index';
+import { MetadataConfiguration, MetadataRule } from './formatter/configuration/base_configuration';
 import { hasChordContents, isEmptyString, isEvaluatable } from './utilities';
+
+import {
+  Configuration,
+  Delegate,
+  HtmlTemplateCssClasses,
+  defaultDelegate,
+} from './formatter/configuration';
 
 type EachCallback = (_item: any) => string;
 

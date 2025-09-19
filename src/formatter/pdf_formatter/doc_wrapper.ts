@@ -1,12 +1,14 @@
-import { PdfConstructor } from './types';
 import { ImageCompression, jsPDFOptions } from 'jspdf';
+
+import { PdfConstructor } from './types';
+import { FontConfiguration, LineStyle, defaultFontConfigurations } from '../configuration';
+
 import {
   NimbusSansLBolBold,
   NimbusSansLBolItaBoldItalic,
   NimbusSansLRegItaItalic,
   NimbusSansLRegNormal,
 } from './fonts/NimbusSansLFonts.base64';
-import { FontConfiguration, LineStyle, defaultFontConfigurations } from '../configuration';
 
 const defaultOptions: jsPDFOptions = {
   orientation: 'p',

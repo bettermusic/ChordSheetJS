@@ -2,8 +2,6 @@ import Chord from './chord';
 import ChordDefinition from './chord_definition/chord_definition';
 import ChordLyricsPair from './chord_sheet/chord_lyrics_pair';
 import ChordProFormatter from './formatter/chord_pro_formatter';
-import PdfFormatter from './formatter/pdf_formatter';
-import MeasuredHtmlFormatter from './formatter/measured_html_formatter';
 import ChordProParser from './parser/chord_pro_parser';
 import ChordSheetParser from './parser/chord_sheet_parser';
 import ChordSheetSerializer from './chord_sheet_serializer';
@@ -15,8 +13,10 @@ import HtmlDivFormatter from './formatter/html_div_formatter';
 import HtmlTableFormatter from './formatter/html_table_formatter';
 import Line from './chord_sheet/line';
 import Literal from './chord_sheet/chord_pro/literal';
+import MeasuredHtmlFormatter from './formatter/measured_html_formatter';
 import Metadata from './chord_sheet/metadata';
 import Paragraph from './chord_sheet/paragraph';
+import PdfFormatter from './formatter/pdf_formatter';
 import SoftLineBreak from './chord_sheet/soft_line_break';
 import Song from './chord_sheet/song';
 import Tag from './chord_sheet/tag';
@@ -52,11 +52,11 @@ import {
   VERSE,
 } from './constants';
 
-import { BaseMeasurer } from './layout/measurement/measurer';
+import { BaseMeasurer } from './layout/measurement';
 import { CanvasMeasurer } from './layout/measurement';
-import { JsPdfMeasurer } from './layout/measurement';
-import { LayoutEngine } from './layout/engine/layout_engine';
 import { DomMeasurer } from './layout/measurement';
+import { JsPdfMeasurer } from './layout/measurement';
+import { LayoutEngine } from './layout/engine';
 
 export { default as Chord } from './chord';
 export { default as ChordDefinition } from './chord_definition/chord_definition';

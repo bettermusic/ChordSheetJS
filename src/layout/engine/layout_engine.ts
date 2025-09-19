@@ -1,21 +1,16 @@
-import { Measurer } from '../measurement/measurer';
-import Song from '../../chord_sheet/song';
-import Paragraph from '../../chord_sheet/paragraph';
-import {
-  LayoutConfig, LineLayout, ParagraphLayoutResult,
-} from './types';
-import {
-  calculateTotalHeight,
-  isColumnBreakLayout,
-} from './layout_helpers';
-import { ParagraphSplitter } from './paragraph_splitter';
+import Item from '../../chord_sheet/item';
 import { ItemProcessor } from './item_processor';
 import { LayoutFactory } from './layout_factory';
 import { LineBreaker } from './line_breaker';
-import { isComment, isTag, lineHasContents } from '../../template_helpers';
-import Tag from '../../chord_sheet/tag';
+import { Measurer } from '../measurement';
+import Paragraph from '../../chord_sheet/paragraph';
+import { ParagraphSplitter } from './paragraph_splitter';
 import SoftLineBreak from '../../chord_sheet/soft_line_break';
-import Item from '../../chord_sheet/item';
+import Song from '../../chord_sheet/song';
+import Tag from '../../chord_sheet/tag';
+import { LayoutConfig, LineLayout, ParagraphLayoutResult } from './types';
+import { calculateTotalHeight, isColumnBreakLayout } from './layout_helpers';
+import { isComment, isTag, lineHasContents } from '../../template_helpers';
 
 /**
  * Cache entry for repeated sections

@@ -1,5 +1,6 @@
-import { BaseMeasurer, TextDimensions } from './measurer';
 import { FontConfiguration } from '../../formatter/configuration';
+import { BaseMeasurer, TextDimensions } from './measurer';
+
 declare const document: any;
 declare type HTMLElement = any;
 

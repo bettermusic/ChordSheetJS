@@ -1,4 +1,5 @@
 // Import fixture configs for each formatter
+import measuredHtmlConfigs from './configs/measured-html-formatter-configs';
 import { pdfFormatterConfigs } from './configs/pdf-formatter-configs';
 // import { chordProFormatterConfigs } from './configs/chordpro-formatter-configs';
 // import { chordsOverWordsFormatterConfigs } from './configs/chords-over-words-formatter-configs';
@@ -10,7 +11,6 @@ import {
   getHTMLDefaultConfig,
   getPDFDefaultConfig,
 } from '../../src/formatter/configuration';
-import measuredHtmlConfigs from './configs/measured-html-formatter-configs';
 
 // Define base config for all formatters
 const baseConfig = getDefaultConfig('base');

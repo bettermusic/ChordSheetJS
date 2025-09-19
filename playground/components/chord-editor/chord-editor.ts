@@ -1,6 +1,5 @@
-import { EditorView } from '@codemirror/view';
-import { editorActions, editorState } from '../../stores/editor-store';
 import { APP_EVENTS, initStore } from '../../stores/init-store';
+import { editorActions, editorState } from '../../stores/editor-store';
 
 /**
  * Web component for the chord editor using CodeMirror

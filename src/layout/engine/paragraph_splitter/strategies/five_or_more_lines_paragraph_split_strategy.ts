@@ -1,5 +1,5 @@
-import { LineLayout, ParagraphSplitStrategy } from '../../types';
 import { createColumnBreakLineLayout } from '../../layout_helpers';
+import { LineLayout, ParagraphSplitStrategy } from '../../types';
 
 export class FiveOrMoreLinesParagraphSplitStrategy implements ParagraphSplitStrategy {
   private totalChordLyricPairLines!: number;

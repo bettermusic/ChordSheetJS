@@ -1,6 +1,6 @@
 import { createStore } from './store';
-import { ChordProParser, ChordsOverWordsParser } from '../../src/index';
 import { APP_EVENTS, initStore } from './init-store';
+import { ChordProParser, ChordsOverWordsParser } from '../../src/index';
 import { getCapos, getKeys } from '../../src/helpers.js';
 
 // Interfaces for Song and Parser (simplified - would use actual types from your library)

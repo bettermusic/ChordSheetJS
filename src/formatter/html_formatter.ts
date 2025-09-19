@@ -1,9 +1,9 @@
 import Formatter from './formatter';
-import { HTMLFormatterConfiguration, HtmlTemplateCssClasses } from './configuration';
-import Song from '../chord_sheet/song';
-import { scopeCss } from '../utilities';
 import Paragraph from '../chord_sheet/paragraph';
-import { getHTMLDefaultConfig } from './configuration/default_config_manager';
+import Song from '../chord_sheet/song';
+import { getHTMLDefaultConfig } from './configuration';
+import { scopeCss } from '../utilities';
+import { HTMLFormatterConfiguration, HtmlTemplateCssClasses } from './configuration';
 
 export interface HtmlTemplateArgs {
   configuration: HTMLFormatterConfiguration;

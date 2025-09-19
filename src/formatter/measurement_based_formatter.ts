@@ -1,7 +1,7 @@
-import Formatter from './formatter';
-import { MeasurementBasedFormatterConfiguration } from './configuration/measurement_based_configuration';
-import { getMeasurementDefaultConfig } from './configuration/default_config_manager';
 import { DeepPartial } from '../utilities';
+import Formatter from './formatter';
+import { MeasurementBasedFormatterConfiguration } from './configuration';
+import { getMeasurementDefaultConfig } from './configuration/default_config_manager';
 
 /**
  * Base formatter for formatters that need measurements to position elements

@@ -1,5 +1,5 @@
-import { FormatterType, formatterActions, formatterState } from '../../stores/formatter-store';
 import { APP_EVENTS } from '../../stores/init-store';
+import { FormatterType, formatterActions, formatterState } from '../../stores/formatter-store';
 
 /**
  * Web component for formatter controls

@@ -1,4 +1,8 @@
-import { normalize } from 'path';
+import { chordproExamples } from './chordpro-examples';
+import { configExamples } from './config-examples';
+import { exampleSongSolfege, exampleSongSymbol } from '../../fixtures/song';
+import { getCapos, getKeys } from '../../../src/helpers';
+
 import {
   ChordProFormatter,
   ChordProParser,
@@ -9,10 +13,6 @@ import {
   PdfFormatter,
   TextFormatter,
 } from '../../../src';
-import { getCapos, getKeys } from '../../../src/helpers';
-import { chordproExamples } from './chordpro-examples';
-import { configExamples } from './config-examples';
-import { exampleSongSolfege, exampleSongSymbol } from '../../fixtures/song';
 
 // Initialize CodeMirror instances
 const editor = CodeMirror(document.getElementById('editor'), {

@@ -1,7 +1,7 @@
-import { editorActions, editorState } from '../../stores/editor-store';
 import { APP_EVENTS } from '../../stores/init-store.js';
-import { songActions, songState } from '../../stores/song-store';
 import { chordproExamples } from '../../fixtures/content/example-chordpro';
+import { editorActions, editorState } from '../../stores/editor-store';
+import { songActions, songState } from '../../stores/song-store';
 
 /**
  * Web component for editor controls

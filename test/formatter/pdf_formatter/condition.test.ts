@@ -1,5 +1,5 @@
-import { ConditionalRule } from '../../../src/formatter/configuration';
 import Condition from '../../../src/layout/engine/condition';
+import { ConditionalRule } from '../../../src/formatter/configuration';
 
 describe('Condition', () => {
   describe('#evaluate', () => {

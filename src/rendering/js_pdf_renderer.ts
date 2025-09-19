@@ -1,14 +1,25 @@
-import Renderer, { PositionedElement } from './renderer';
-import Song from '../chord_sheet/song';
-import { FontConfiguration, PDFFormatterConfiguration } from '../formatter/configuration';
-import { MeasuredItem } from '../layout/engine';
-import DocWrapper from '../formatter/pdf_formatter/doc_wrapper';
+import { Blob } from 'buffer';
+
+import ChordProParser from '../parser/chord_pro_parser';
+import Condition from '../layout/engine/condition';
 import Dimensions from '../layout/engine/dimensions';
+import DocWrapper from '../formatter/pdf_formatter/doc_wrapper';
+import JsPDFRenderer from '../chord_diagram/js_pdf_renderer';
+import { MeasuredItem } from '../layout/engine';
+import Metadata from '../chord_sheet/metadata';
 import { PdfConstructor } from '../formatter/pdf_formatter/types';
+import Song from '../chord_sheet/song';
+import TextFormatter from '../formatter/text_formatter';
+import { getCapos } from '../helpers';
 import ChordDefinition, { isNonSoundingString, isOpenFret } from '../chord_definition/chord_definition';
 import ChordDiagram, { Barre, StringMarker } from '../chord_diagram/chord_diagram';
-import JsPDFRenderer from '../chord_diagram/js_pdf_renderer';
-import Condition from '../layout/engine/condition';
+import { FontConfiguration, PDFFormatterConfiguration } from '../formatter/configuration';
+import Renderer, { PositionedElement } from './renderer';
+
+import {
+  FingerNumber, Fret, FretNumber, StringNumber,
+} from '../constants';
+
 import {
   Alignment,
   ConditionalRule,
@@ -19,14 +30,6 @@ import {
   LayoutItem,
   LayoutSection,
 } from '../formatter/configuration';
-import { getCapos } from '../helpers';
-import ChordProParser from '../parser/chord_pro_parser';
-import TextFormatter from '../formatter/text_formatter';
-import Metadata from '../chord_sheet/metadata';
-import {
-  FingerNumber, Fret, FretNumber, StringNumber,
-} from '../constants';
-import { Blob } from 'buffer';
 
 class JsPdfRenderer extends Renderer {
   private configuration: PDFFormatterConfiguration;

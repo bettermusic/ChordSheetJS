@@ -1,7 +1,7 @@
-import { LineLayout, ParagraphSplitStrategy } from '../types';
-import { ThreeOrLessLinesParagraphSplitStrategy } from './strategies/three_or_less_lines_paragraph_split_strategy';
-import { FourLinesParagraphSplitStrategy } from './strategies/four_lines_paragraph_split_strategy';
 import { FiveOrMoreLinesParagraphSplitStrategy } from './strategies/five_or_more_lines_paragraph_split_strategy';
+import { FourLinesParagraphSplitStrategy } from './strategies/four_lines_paragraph_split_strategy';
+import { ThreeOrLessLinesParagraphSplitStrategy } from './strategies/three_or_less_lines_paragraph_split_strategy';
+import { LineLayout, ParagraphSplitStrategy } from '../types';
 
 export class ParagraphSplitter {
   splitParagraph(

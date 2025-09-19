@@ -1,6 +1,6 @@
 import { HtmlTemplateCssClasses } from './configuration';
-import HtmlFormatter, { CSS, Template } from './html_formatter';
 import template from './templates/html_table_formatter';
+import HtmlFormatter, { CSS, Template } from './html_formatter';
 
 function defaultCss(cssClasses: HtmlTemplateCssClasses): CSS {
   const {

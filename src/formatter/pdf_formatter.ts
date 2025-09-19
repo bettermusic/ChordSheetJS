@@ -1,16 +1,15 @@
 import { Blob } from 'buffer';
 import JsPDF from 'jspdf';
 
-import Song from '../chord_sheet/song';
-import { JsPdfMeasurer } from '../index';
-import { PDFFormatterConfiguration } from './configuration';
-import { LayoutConfig, LayoutEngine } from '../layout/engine';
-
-import { PdfConstructor } from './pdf_formatter/types';
-import { getPDFDefaultConfig } from './configuration/default_config_manager';
-import MeasurementBasedFormatter from './measurement_based_formatter';
-import JsPdfRenderer from '../rendering/js_pdf_renderer';
 import DocWrapper from './pdf_formatter/doc_wrapper';
+import { JsPdfMeasurer } from '../index';
+import JsPdfRenderer from '../rendering/js_pdf_renderer';
+import MeasurementBasedFormatter from './measurement_based_formatter';
+import { PDFFormatterConfiguration } from './configuration';
+import { PdfConstructor } from './pdf_formatter/types';
+import Song from '../chord_sheet/song';
+import { getPDFDefaultConfig } from './configuration';
+import { LayoutConfig, LayoutEngine } from '../layout/engine';
 
 class PdfFormatter extends MeasurementBasedFormatter<PDFFormatterConfiguration> {
   private song: Song = new Song();
