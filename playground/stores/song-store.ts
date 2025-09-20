@@ -168,10 +168,10 @@ const songActions = {
 
     try {
       // Normalize content (example from your code)
-      content = content.replace(/{k:/g, '{key:');
+      const normalizedContent = content.replace(/{k:/g, '{key:');
 
       // Parse and set song in state
-      const song = state.parser.parse(content, { softLineBreaks: true });
+      const song = state.parser.parse(normalizedContent, { softLineBreaks: true });
       const detectedKey = song.key || 'C'; // Use 'C' as fallback
 
       // Update song and original key

@@ -37,8 +37,6 @@ const initStoreObj = createStore<InitStoreState>({
 // Init store actions
 const initActions = {
   setComponentReady(componentName: string, isReady = true) {
-    const state = initStoreObj.getState();
-
     switch (componentName) {
       case 'chordEditor':
         initStoreObj.setState({ chordEditorReady: isReady });
@@ -49,6 +47,8 @@ const initActions = {
       case 'formatterDisplay':
         initStoreObj.setState({ formatterDisplayReady: isReady });
         break;
+      default:
+        console.warn(`Unknown component name: ${componentName}`);
     }
 
     this.checkIfAppReady();

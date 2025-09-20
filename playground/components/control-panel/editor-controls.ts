@@ -141,7 +141,7 @@ export class EditorControls extends HTMLElement {
 
   // Generate capo options with both capo number and resulting key
   renderCapoOptions() {
-    const options = [];
+    const options: string[] = [];
 
     // Always include 0 (No capo) option first
     options.push(`<option value="0" ${songState.capo === 0 ? 'selected' : ''}>
@@ -151,7 +151,7 @@ export class EditorControls extends HTMLElement {
     // If we have capos in the songState, add those (excluding 0 which we already added)
     if (songState.capos && Object.keys(songState.capos).length > 0) {
       Object.entries(songState.capos).forEach(([capoNumber, resultingKey]) => {
-        const capoValue = parseInt(capoNumber);
+        const capoValue = parseInt(capoNumber, 10);
         // Skip 0 since we already added it
         if (capoValue > 0) {
           options.push(`<option value="${capoValue}" ${capoValue === songState.capo ? 'selected' : ''}>
@@ -161,7 +161,7 @@ export class EditorControls extends HTMLElement {
       });
     } else {
       // Fallback to just showing capo numbers without keys (starting from 1 since we already added 0)
-      for (let i = 1; i < 12; i++) {
+      for (let i = 1; i < 12; i += 1) {
         options.push(`<option value="${i}" ${i === songState.capo ? 'selected' : ''}>
           ${i}
         </option>`);
@@ -249,8 +249,8 @@ export class EditorControls extends HTMLElement {
   // Handle file selection change
   handleFileChange = () => {
     if (this.fileSelector) {
-      const selectedIndex = parseInt(this.fileSelector.value);
-      if (!isNaN(selectedIndex) && selectedIndex >= 0 && selectedIndex < chordproExamples.length) {
+      const selectedIndex = parseInt(this.fileSelector.value, 10);
+      if (!Number.isNaN(selectedIndex) && selectedIndex >= 0 && selectedIndex < chordproExamples.length) {
         const selectedExample = chordproExamples[selectedIndex];
         console.log('File changed to:', selectedExample.name);
 
@@ -291,7 +291,7 @@ export class EditorControls extends HTMLElement {
 
   handleCapoChange = () => {
     if (this.capoSelector && !songState.isProcessing) {
-      const capoValue = parseInt(this.capoSelector.value);
+      const capoValue = parseInt(this.capoSelector.value, 10);
       console.log('Capo changing to:', capoValue);
       songActions.setCapo(capoValue);
     }

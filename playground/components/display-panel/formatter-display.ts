@@ -339,9 +339,10 @@ export class FormatterDisplay extends HTMLElement {
         };
 
         const metadata = configWithPageSize.metadata || {};
-        for (const key in metadata) {
-          song = song.changeMetadata(key, metadata[key]);
-        }
+
+        Object.entries(metadata).forEach(([key, value]) => {
+          song = song.changeMetadata(key, value as string);
+        });
 
         // Create and configure the formatter
         const formatter = new MeasuredHtmlFormatter(this.contentContainer);

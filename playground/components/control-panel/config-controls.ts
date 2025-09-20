@@ -155,7 +155,7 @@ export class ConfigControls extends HTMLElement {
       const configContent = editorState.configInput;
       JSON.parse(configContent);
       this.setConfigValidity(true);
-    } catch (error) {
+    } catch (_error) {
       this.setConfigValidity(false);
     }
   };
@@ -199,7 +199,7 @@ export class ConfigControls extends HTMLElement {
 
     // Parse the preset index
     const presetIndex = parseInt(selectedValue, 10);
-    if (!isNaN(presetIndex)) {
+    if (!Number.isNaN(presetIndex)) {
       // Load the preset configuration
       const formatter = formatterState.currentFormatter;
       const presets = formatterConfigExamples[formatter];

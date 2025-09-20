@@ -1,3 +1,5 @@
+import { Key } from '../../src';
+
 import { APP_EVENTS } from './init-store';
 import { createStore } from './store';
 import { formatterConfigExamples } from '../fixtures';
@@ -6,6 +8,7 @@ import { mergeConfigs } from '../../src/utilities';
 import { songState } from './song-store';
 
 import {
+  BaseFormatterConfiguration,
   getDefaultConfig,
   getHTMLDefaultConfig,
   getPDFDefaultConfig,
@@ -98,26 +101,23 @@ const formatterActions = {
     return state;
   },
 
-  // Load default configuration for a formatter
-  loadDefaultConfig(formatter: FormatterType) {
-    let defaultConfig;
-
+  getDefaultConfig(formatter: FormatterType) {
     switch (formatter) {
       case 'PDF':
-        defaultConfig = getPDFDefaultConfig();
-        break;
+        return getPDFDefaultConfig();
       case 'HTML':
-        defaultConfig = getHTMLDefaultConfig();
-        break;
+        return getHTMLDefaultConfig();
       case 'MeasuredHTML':
-        defaultConfig = getMeasuredHtmlDefaultConfig();
-        break;
+        return getMeasuredHtmlDefaultConfig();
       default:
-        const configType = formatterConfigMap[formatter];
-        defaultConfig = getDefaultConfig(configType);
+        return getDefaultConfig(formatterConfigMap[formatter]);
     }
+  },
 
-    defaultConfig.key = songState.originalKey || songState.currentKey;
+  // Load default configuration for a formatter
+  loadDefaultConfig(formatter: FormatterType) {
+    const defaultConfig: BaseFormatterConfiguration = this.getDefaultConfig(formatter);
+    defaultConfig.key = Key.parse(songState.originalKey || songState.currentKey);
 
     const currentConfigs = formatterStore.getState().formatterConfigs;
     formatterStore.setState({
@@ -182,13 +182,9 @@ const formatterActions = {
     formatterStore.setState({ currentConfig: newConfig });
 
     // Check if there are actual changes
-    let hasChanges = false;
-    for (const key in config) {
-      if (JSON.stringify(config[key]) !== JSON.stringify(currentConfig[key])) {
-        hasChanges = true;
-        break;
-      }
-    }
+    const hasChanges = Object.entries(config).some(([k, v]) => (
+      JSON.stringify(v) !== JSON.stringify(currentConfig[k])
+    ));
 
     if (hasChanges) {
       // Update the config

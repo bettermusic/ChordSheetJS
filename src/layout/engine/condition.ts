@@ -48,7 +48,7 @@ class Condition {
     }
 
     if ('equals' in rule) {
-      return value == rule.equals;
+      return value == rule.equals; // eslint-disable-line eqeqeq
     }
 
     if ('exists' in rule) {
@@ -88,7 +88,7 @@ class Condition {
     }
 
     if ('not_equals' in rule) {
-      return value != rule.not_equals;
+      return value != rule.not_equals; // eslint-disable-line eqeqeq
     }
 
     if ('not_in' in rule) {

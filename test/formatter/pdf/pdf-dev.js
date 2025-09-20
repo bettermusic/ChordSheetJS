@@ -57,7 +57,7 @@ const allExamples = [
 ];
 
 function populateSelect(selectElement, options) {
-  selectElement.innerHTML = '';
+  selectElement.innerHTML = ''; // eslint-disable-line no-param-reassign
   options.forEach((option, index) => {
     const opt = document.createElement('option');
     opt.value = index;
@@ -95,7 +95,7 @@ function initializeKeyAndCapoSelectors(songKey) {
 }
 
 const updateOutput = async (key, capo) => {
-  const selectedExampleIndex = parseInt(chordproSelect.value);
+  const selectedExampleIndex = parseInt(chordproSelect.value, 10);
   const selectedExample = allExamples[selectedExampleIndex];
   const configText = configEditor.getValue();
   const selectedFormatter = formatterSelect.value;
@@ -135,7 +135,7 @@ const updateOutput = async (key, capo) => {
     const initialKey = key || (keySelect.value || song.key);
     const capoPosition = capo || capoSelect.value;
     if (initialKey && song.key) song = song.changeKey(initialKey);
-    if (capoPosition !== 'none') song = song.setCapo(parseInt(capoPosition));
+    if (capoPosition !== 'none') song = song.setCapo(parseInt(capoPosition, 10));
 
     // Prepare for rendering
     if (selectedFormatter === 'PdfFormatter') {
@@ -282,16 +282,6 @@ function initialize() {
   configSelect.value = 0;
   loadExample(chordproSelect.value);
   loadConfigExample(configSelect.value);
-}
-
-// Add a debounce function at the top of your file
-function debounce(func, wait) {
-  let timeout;
-  return function (...args) {
-    const context = this;
-    clearTimeout(timeout);
-    timeout = setTimeout(() => func.apply(context, args), wait);
-  };
 }
 
 // Initialize on load

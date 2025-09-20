@@ -86,6 +86,9 @@ export default tseslint.config(
         ...globals.browser,
       },
     },
+    rules: {
+      'no-console': 'off',
+    },
   },
   {
     files: ['src/formatter/templates/*.ts'],
