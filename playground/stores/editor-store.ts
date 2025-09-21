@@ -28,6 +28,8 @@ interface EditorStoreState {
   isCreatingEditor: boolean; // Flag to prevent multiple editor creations
 }
 
+let editorStore;
+
 // Create input change listener for CodeMirror
 const updateListener = EditorView.updateListener.of((v) => {
   if (v.docChanged) {
@@ -64,7 +66,7 @@ const sharedExtensions = [
 ];
 
 // Create the editor store
-const editorStore = createStore<EditorStoreState>({
+editorStore = createStore<EditorStoreState>({
   editorMode: 'chordpro',
   editorView: null,
   jsonView: null,
@@ -223,6 +225,16 @@ const editorActions = {
   },
 };
 
+// Export a simplified interface to the store
+const editorState = {
+  get editorMode() { return editorStore.getState().editorMode; },
+  get input() { return editorStore.getState().input; },
+  get configInput() { return editorStore.getState().configInput; },
+  get editorView() { return editorStore.getState().editorView; },
+  get jsonView() { return editorStore.getState().jsonView; },
+  get isCreatingEditor() { return editorStore.getState().isCreatingEditor; },
+};
+
 // Listen for app-ready event to trigger initial content dispatch
 document.addEventListener(APP_EVENTS.APP_READY, () => {
   // Trigger an initial content change event to ensure the song gets parsed
@@ -233,15 +245,5 @@ document.addEventListener(APP_EVENTS.APP_READY, () => {
     }));
   }
 });
-
-// Export a simplified interface to the store
-const editorState = {
-  get editorMode() { return editorStore.getState().editorMode; },
-  get input() { return editorStore.getState().input; },
-  get configInput() { return editorStore.getState().configInput; },
-  get editorView() { return editorStore.getState().editorView; },
-  get jsonView() { return editorStore.getState().jsonView; },
-  get isCreatingEditor() { return editorStore.getState().isCreatingEditor; },
-};
 
 export { editorState, editorActions };
