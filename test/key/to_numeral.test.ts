@@ -1,6 +1,6 @@
 /* eslint quote-props: 0 */
 
-import { buildKey } from '../utilities';
+import { buildKey } from '../util/utilities';
 import { Key, NUMERAL } from '../../src';
 
 const examples = {

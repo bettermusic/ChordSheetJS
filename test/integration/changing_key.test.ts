@@ -1,4 +1,4 @@
-import { heredoc } from '../utilities';
+import { heredoc } from '../util/utilities';
 import { ChordProFormatter, ChordProParser, TextFormatter } from '../../src';
 
 describe('changing the key of an existing song (symbol chords)', () => {

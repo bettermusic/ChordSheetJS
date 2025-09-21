@@ -127,7 +127,7 @@ export default tseslint.config(
     },
   },
   {
-    files: ['test/matchers.ts', 'test/utilities.ts', 'unibuild.ts'],
+    files: ['test/util/**/*.ts', 'unibuild.ts'],
     rules: {
       'jest/no-export': 'off',
       'max-lines-per-function': 'off',

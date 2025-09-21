@@ -16,7 +16,7 @@ import {
   createSongFromAst,
   createTag,
   tag,
-} from '../utilities';
+} from '../util/utilities';
 
 const createLineStub = ({ renderable }) => (
   {

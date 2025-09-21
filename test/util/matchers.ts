@@ -1,7 +1,7 @@
 import levenshtein from 'js-levenshtein';
 import print from 'print';
 
-import StubbedPdfDoc, { RenderedItem, RenderedLine, RenderedText } from './formatter/stubbed_pdf_doc';
+import StubbedPdfDoc, { RenderedItem, RenderedLine, RenderedText } from '../formatter/stubbed_pdf_doc';
 
 import {
   ChordLyricsPair,
@@ -10,7 +10,7 @@ import {
   SoftLineBreak,
   Tag,
   Ternary,
-} from '../src';
+} from '../../src';
 
 function typeRepresentation(type, value) {
   if (type === 'object') {

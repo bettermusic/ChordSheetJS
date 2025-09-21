@@ -1,7 +1,7 @@
-import '../matchers';
+import '../util/matchers';
 
 import { PART } from '../../src/constants';
-import { heredoc } from '../utilities';
+import { heredoc } from '../util/utilities';
 
 import {
   ABC,

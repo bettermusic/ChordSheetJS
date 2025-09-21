@@ -1,7 +1,7 @@
-import '../matchers';
+import '../util/matchers';
 
 import { ChordsOverWordsParser } from '../../src';
-import { heredoc } from '../utilities';
+import { heredoc } from '../util/utilities';
 
 describe('ChordsOverWordsParser', () => {
   it('parses chords over words correctly', () => {

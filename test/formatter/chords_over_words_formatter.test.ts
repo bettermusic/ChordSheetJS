@@ -1,4 +1,4 @@
-import '../matchers';
+import '../util/matchers';
 
 import songWithIntro from '../fixtures/song_with_intro';
 
@@ -13,7 +13,7 @@ import {
 import {
   chordLyricsPair,
   createSongFromAst, heredoc, section,
-} from '../utilities';
+} from '../util/utilities';
 
 describe('ChordsOverWordsFormatter', () => {
   it('formats a symbol song to a text chord sheet correctly', () => {

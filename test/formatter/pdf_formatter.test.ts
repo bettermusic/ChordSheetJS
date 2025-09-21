@@ -1,4 +1,4 @@
-import '../matchers';
+import '../util/matchers';
 import { PDFConfigurationProperties } from '../../src/formatter/configuration';
 import PdfFormatter from '../../src/formatter/pdf_formatter';
 import Song from '../../src/chord_sheet/song';

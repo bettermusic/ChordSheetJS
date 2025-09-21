@@ -1,4 +1,4 @@
-import '../matchers';
+import '../util/matchers';
 import ChordSheetSerializer from '../../src/chord_sheet_serializer';
 
 import { ContentType } from '../../src/serialized_types';
@@ -19,7 +19,7 @@ import {
   heredoc,
   html,
   section,
-} from '../utilities';
+} from '../util/utilities';
 
 describe('HtmlTableFormatter', () => {
   it('formats a symbol song to a html chord sheet correctly', () => {
