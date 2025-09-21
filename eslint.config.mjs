@@ -150,7 +150,7 @@ export default tseslint.config(
       'src/normalize_mappings/suffix-normalize-mapping.ts',
       'src/parser/*/peg_parser.ts',
       'tmp/**/*',
-      './**/*.html',
+      './**/*.{css,html}',
     ],
   },
 );
