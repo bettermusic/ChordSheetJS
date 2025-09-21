@@ -90,7 +90,10 @@ export class EditorControls extends HTMLElement {
           <label>Parser:</label>
           <select id="parser-selector">
             <option value="chordpro" ${editorState.editorMode === 'chordpro' ? 'selected' : ''}>ChordPro Parser</option>
-            <option value="chords_over_words" ${editorState.editorMode === 'chords_over_words' ? 'selected' : ''}>Chords Over Words Parser</option>
+            <option 
+              value="chords_over_words" 
+              ${editorState.editorMode === 'chords_over_words' ? 'selected' : ''}
+            >Chords Over Words Parser</option>
           </select>
         </div>
         <div class="control-group">
@@ -136,7 +139,11 @@ export class EditorControls extends HTMLElement {
       songState.keys :
       ['C', 'C#', 'Db', 'D', 'D#', 'Eb', 'E', 'F', 'F#', 'Gb', 'G', 'G#', 'Ab', 'A', 'A#', 'Bb', 'B'];
 
-    return keys.map((key) => `<option value="${key}" ${key === songState.currentKey ? 'selected' : ''}>${key}</option>`).join('');
+    return keys
+      .map((key) => (
+        `<option value="${key}" ${key === songState.currentKey ? 'selected' : ''}>${key}</option>`
+      ))
+      .join('');
   }
 
   // Generate capo options with both capo number and resulting key

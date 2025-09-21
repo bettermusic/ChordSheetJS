@@ -27,6 +27,13 @@ export class FormatterControls extends HTMLElement {
   render() {
     if (!this.shadowRoot) return;
 
+    const formatterSelectOptions =
+      formatterState.formatters
+        .map((fmt) => (
+          `<option value="${fmt}" ${fmt === formatterState.currentFormatter ? 'selected' : ''}>${fmt}</option>`
+        ))
+        .join('');
+
     this.shadowRoot.innerHTML = `
       <style>
         :host {
@@ -67,7 +74,7 @@ export class FormatterControls extends HTMLElement {
         <div class="control-group">
           <label>Formatter:</label>
           <select id="formatter-selector">
-            ${formatterState.formatters.map((fmt) => `<option value="${fmt}" ${fmt === formatterState.currentFormatter ? 'selected' : ''}>${fmt}</option>`).join('')}
+            ${formatterSelectOptions}
           </select>
         </div>
       </div>

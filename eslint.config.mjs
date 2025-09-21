@@ -122,14 +122,24 @@ export default tseslint.config(
   {
     files: ['test/fixtures/**/*.ts'],
     rules: {
+      'max-len': 'off',
       'max-lines': 'off',
       'max-lines-per-function': 'off',
     },
   },
   {
-    files: ['test/util/**/*.ts', 'unibuild.ts'],
+    files: ['playground/fixtures/content/example-chordpro.ts'],
     rules: {
+      'max-len': 'off',
+    },
+  },
+  {
+    files: ['playground/**/*.*', 'test/util/**/*.ts', '**/*.js', 'unibuild.ts'],
+    rules: {
+      'complexity': 'off',
       'jest/no-export': 'off',
+      'max-depth': 'off',
+      'max-lines': 'off',
       'max-lines-per-function': 'off',
       'max-statements': 'off',
     },
@@ -140,6 +150,7 @@ export default tseslint.config(
       'src/normalize_mappings/suffix-normalize-mapping.ts',
       'src/parser/*/peg_parser.ts',
       'tmp/**/*',
+      './**/*.html',
     ],
   },
 );

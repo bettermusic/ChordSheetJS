@@ -2,7 +2,7 @@ import '../util/matchers';
 import { PDFConfigurationProperties } from '../../src/formatter/configuration';
 import PdfFormatter from '../../src/formatter/pdf_formatter';
 import Song from '../../src/chord_sheet/song';
-import StubbedPdfDoc from './stubbed_pdf_doc';
+import StubbedPdfDoc from '../util/stubbed_pdf_doc';
 import { exampleSongSymbol } from '../fixtures/song';
 
 describe('PdfFormatter', () => {

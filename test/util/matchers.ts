@@ -1,7 +1,7 @@
 import levenshtein from 'js-levenshtein';
 import print from 'print';
 
-import StubbedPdfDoc, { RenderedItem, RenderedLine, RenderedText } from '../formatter/stubbed_pdf_doc';
+import StubbedPdfDoc, { RenderedItem, RenderedLine, RenderedText } from './stubbed_pdf_doc';
 
 import {
   ChordLyricsPair,
