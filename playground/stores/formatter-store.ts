@@ -228,11 +228,8 @@ const formatterActions = {
       document.dispatchEvent(new CustomEvent('formatter-output-updated', {
         detail: { content: formattedContent },
       }));
-
-      return formattedContent;
     } catch (error) {
       console.error('Error formatting song:', error);
-      return null;
     }
   },
 
