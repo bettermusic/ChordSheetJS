@@ -239,7 +239,7 @@ abstract class Renderer {
     // Determine line types
     const hasChords = items.some(({ item }) => item instanceof ChordLyricsPair && item.chords);
     const hasLyrics = items.some(
-      ({ item }) => item instanceof ChordLyricsPair && item.lyrics && item.lyrics.trim() !== '',
+      ({ item }) => item instanceof ChordLyricsPair && item.hasLyrics(),
     );
 
     let chordsYOffset = yOffset;
