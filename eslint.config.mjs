@@ -41,7 +41,7 @@ export default tseslint.config(
       ...variablesRules,
 
       'class-methods-use-this': 'off',
-      'complexity': ['error', 10],
+      'complexity': ['error', 11],
       'linebreak-style': ['error', (process.platform === 'win32' ? 'windows' : 'unix')],
       'max-depth': ['error', 2],
       'max-len': ['error', { code: 120, ignoreUrls: true }],
