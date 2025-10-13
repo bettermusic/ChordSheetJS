@@ -169,31 +169,39 @@ class ChordDiagram {
 
   renderNut(renderer: Renderer) {
     if (this.chordDiagramDefinition.baseFret === 1) {
-      renderer.line({
-        x1: this.neckX - this.config.stringThickness,
-        y1: this.neckY,
-        x2: this.neckX + this.config.neckWidth + this.config.stringThickness,
-        y2: this.neckY,
-        thickness: this.config.nutThickness,
-      });
+      this.renderStandardNut(renderer);
     } else {
-      renderer.text(
-        this.chordDiagramDefinition.baseFret.toString(),
-        {
-          fontSize: this.config.baseFretFontSize,
-          x: this.neckX - this.config.fretThickness - (this.config.baseFretFontSize * 3),
-          y: this.neckY + (this.config.neckHeight / this.chordDiagramDefinition.fretCount),
-        },
-      );
-      renderer.line({
-        x1: this.neckX - this.config.fretThickness,
-        y1: this.neckY + this.nutThicknessCorrection + 1,
-        x2: this.neckX - this.config.fretThickness + this.config.neckWidth + (2 * this.config.fretThickness),
-        y2: this.neckY + this.nutThicknessCorrection,
-        thickness: this.config.fretThickness,
-        color: this.config.nutColor,
-      });
+      this.renderTransposedNut(renderer);
     }
+  }
+
+  private renderTransposedNut(renderer: Renderer) {
+    renderer.text(
+      this.chordDiagramDefinition.baseFret.toString(),
+      {
+        fontSize: this.config.baseFretFontSize,
+        x: this.neckX - this.config.fretThickness - (this.config.baseFretFontSize * 3),
+        y: this.neckY + (this.config.neckHeight / this.chordDiagramDefinition.fretCount),
+      },
+    );
+    renderer.line({
+      x1: this.neckX - this.config.fretThickness,
+      y1: this.neckY + this.nutThicknessCorrection + 1,
+      x2: this.neckX - this.config.fretThickness + this.config.neckWidth + (2 * this.config.fretThickness),
+      y2: this.neckY + this.nutThicknessCorrection,
+      thickness: this.config.fretThickness,
+      color: this.config.nutColor,
+    });
+  }
+
+  private renderStandardNut(renderer: Renderer) {
+    renderer.line({
+      x1: this.neckX - this.config.stringThickness,
+      y1: this.neckY,
+      x2: this.neckX + this.config.neckWidth + this.config.stringThickness,
+      y2: this.neckY,
+      thickness: this.config.nutThickness,
+    });
   }
 
   renderFrets(renderer: Renderer) {
