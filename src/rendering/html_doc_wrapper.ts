@@ -38,17 +38,26 @@ class HtmlDocWrapper {
     const page = document.createElement('div');
     page.className = 'chord-sheet-page';
     page.style.position = 'relative';
-    page.style.width = `${this.pageSize.width}px`;
-    page.style.height = `${this.pageSize.height}px`;
-    page.style.overflow = 'hidden';
-    page.style.boxSizing = 'border-box';
-    page.style.backgroundColor = 'var(--studio-diplay-background-color)';
+
+    Object.entries(this.pageStyles).forEach(([key, value]) => {
+      page.style[key] = value;
+    });
 
     this.container.appendChild(page);
     this.pages.push(page);
     this.totalPages = this.pages.length;
 
     return page;
+  }
+
+  get pageStyles(): Record<string, string> {
+    return {
+      width: `${this.pageSize.width}px`,
+      height: `${this.pageSize.height}px`,
+      overflow: 'hidden',
+      boxSizing: 'border-box',
+      backgroundColor: 'var(--studio-display-background-color)',
+    };
   }
 
   /**
