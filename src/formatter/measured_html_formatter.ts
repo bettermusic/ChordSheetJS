@@ -69,6 +69,7 @@ class MeasuredHtmlFormatter extends MeasurementBasedFormatter<MeasuredHtmlFormat
   /**
    * Create the layout engine with the appropriate configuration
    */
+  // eslint-disable-next-line max-lines-per-function
   private createLayoutEngine(): LayoutEngine {
     if (!this.renderer) {
       throw new Error('Renderer not initialized');
