@@ -8,47 +8,66 @@ export class FourLinesParagraphSplitStrategy implements ParagraphSplitStrategy {
     columnStartY: number,
     columnBottomY: number,
   ): LineLayout[][] {
-    let newLineLayouts: LineLayout[][] = [];
+    if (lineLayouts.length === 0) {
+      return [];
+    }
 
-    let chordLyricPairLinesSeen = 0;
-    let splitIndex = -1;
-    let heightFirstPart = 0;
+    const { splitIndex, heightFirstPart } = this.findSplitMetadata(lineLayouts);
 
-    for (let i = 0; i < lineLayouts.length; i += 1) {
-      const lines = lineLayouts[i];
-      let linesHeight = 0;
-      let chordLyricPairLinesSeenInLineLayout = 0;
-
-      lines.forEach((lineLayout) => {
-        linesHeight += lineLayout.lineHeight;
-
-        if (lineLayout.type === 'ChordLyricsPair') {
-          chordLyricPairLinesSeenInLineLayout += 1;
-        }
-      });
-
-      chordLyricPairLinesSeen += chordLyricPairLinesSeenInLineLayout;
-
-      heightFirstPart += linesHeight;
-      if (chordLyricPairLinesSeen >= 2) { // Always split after 2nd chord-lyric line for 4-line paragraphs
-        splitIndex = i + 1;
-        break;
-      }
+    if (splitIndex === null) {
+      return this.prependColumnBreakIfNeeded(lineLayouts, currentY, columnStartY);
     }
 
     if (currentY + heightFirstPart <= columnBottomY) {
-      // First part fits in current column
-      newLineLayouts = newLineLayouts.concat(lineLayouts.slice(0, splitIndex));
-      newLineLayouts.push([createColumnBreakLineLayout()]);
-      newLineLayouts = newLineLayouts.concat(lineLayouts.slice(splitIndex));
-    } else {
-      // First part doesn't fit; insert column break before paragraph
-      if (currentY !== columnStartY) {
-        newLineLayouts.push([createColumnBreakLineLayout()]);
-      }
-      newLineLayouts = newLineLayouts.concat(lineLayouts);
+      return this.buildSplitResult(lineLayouts, splitIndex);
     }
 
-    return newLineLayouts;
+    return this.prependColumnBreakIfNeeded(lineLayouts, currentY, columnStartY);
+  }
+
+  private findSplitMetadata(lineLayouts: LineLayout[][]): { splitIndex: number | null; heightFirstPart: number } {
+    let chordLyricPairLinesSeen = 0;
+    let heightFirstPart = 0;
+
+    for (let i = 0; i < lineLayouts.length; i += 1) {
+      const { height, chordCount } = this.summarizeLineLayout(lineLayouts[i]);
+
+      chordLyricPairLinesSeen += chordCount;
+      heightFirstPart += height;
+
+      if (chordLyricPairLinesSeen >= 2) {
+        return { splitIndex: i + 1, heightFirstPart };
+      }
+    }
+
+    return { splitIndex: null, heightFirstPart };
+  }
+
+  private summarizeLineLayout(lines: LineLayout[]): { height: number; chordCount: number } {
+    return lines.reduce<{ height: number; chordCount: number }>((acc, lineLayout) => ({
+      height: acc.height + lineLayout.lineHeight,
+      chordCount: acc.chordCount + (lineLayout.type === 'ChordLyricsPair' ? 1 : 0),
+    }), { height: 0, chordCount: 0 });
+  }
+
+  private buildSplitResult(lineLayouts: LineLayout[][], splitIndex: number): LineLayout[][] {
+    const firstPart = lineLayouts.slice(0, splitIndex);
+    const secondPart = lineLayouts.slice(splitIndex);
+
+    return firstPart
+      .concat([[createColumnBreakLineLayout()]])
+      .concat(secondPart);
+  }
+
+  private prependColumnBreakIfNeeded(
+    lineLayouts: LineLayout[][],
+    currentY: number,
+    columnStartY: number,
+  ): LineLayout[][] {
+    if (currentY === columnStartY) {
+      return lineLayouts;
+    }
+
+    return [[createColumnBreakLineLayout()]].concat(lineLayouts);
   }
 }

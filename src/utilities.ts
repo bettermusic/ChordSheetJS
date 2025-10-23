@@ -256,6 +256,8 @@ mergeConfigs = <T>(target: T, source: any): T => {
   return mergeObjects(target, source);
 };
 
+export { mergeConfigs };
+
 /**
  * Utility type that creates a deep partial type
  * This makes all properties optional recursively through the entire object

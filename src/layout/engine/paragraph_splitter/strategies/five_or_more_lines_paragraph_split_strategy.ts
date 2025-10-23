@@ -1,6 +1,12 @@
 import { createColumnBreakLineLayout } from '../../layout_helpers';
 import { LineLayout, ParagraphSplitStrategy } from '../../types';
 
+interface PartitionAccumulator {
+  firstPart: LineLayout[][];
+  secondPart: LineLayout[][];
+  processed: number;
+}
+
 export class FiveOrMoreLinesParagraphSplitStrategy implements ParagraphSplitStrategy {
   private totalChordLyricPairLines!: number;
 
@@ -16,115 +22,128 @@ export class FiveOrMoreLinesParagraphSplitStrategy implements ParagraphSplitStra
     columnStartY: number,
     columnBottomY: number,
   ): LineLayout[][] {
-    let newLineLayouts: LineLayout[][] = [];
+    const flatLineLayouts = this.flattenLineLayouts(lineLayouts);
+    const splitResult = this.trySplitParagraph(
+      lineLayouts,
+      flatLineLayouts,
+      currentY,
+      columnBottomY,
+    );
 
-    // Flatten lineLayouts into a flat array of LineLayout
-    const flatLineLayouts: LineLayout[] = [];
-    const lineLayoutIndices: { outerIndex: number; innerIndex: number }[] = [];
-
-    for (let outerIndex = 0; outerIndex < lineLayouts.length; outerIndex += 1) {
-      const innerArray = lineLayouts[outerIndex];
-      for (let innerIndex = 0; innerIndex < innerArray.length; innerIndex += 1) {
-        flatLineLayouts.push(innerArray[innerIndex]);
-        lineLayoutIndices.push({ outerIndex, innerIndex });
-      }
+    if (splitResult) {
+      return splitResult;
     }
 
-    const acceptableSplits: { index: number; heightFirstPart: number }[] = [];
-
-    let heightFirstPart = 0;
-    let chordLyricLinesInFirstPart = 0;
-
-    // Identify all acceptable split points where both parts have at least two chord-lyric lines
-    for (let i = 0; i < flatLineLayouts.length - 1; i += 1) {
-      const lineLayout = flatLineLayouts[i];
-      heightFirstPart += lineLayout.lineHeight;
-
-      if (lineLayout.type === 'ChordLyricsPair') {
-        chordLyricLinesInFirstPart += 1;
-      }
-
-      const remainingChordLyricLines = this.totalChordLyricPairLines - chordLyricLinesInFirstPart;
-
-      // Ensure at least two chord-lyric lines remain in both parts
-      if (chordLyricLinesInFirstPart >= 2 && remainingChordLyricLines >= 2) {
-        acceptableSplits.push({ index: i + 1, heightFirstPart });
-      }
+    if (currentY !== columnStartY) {
+      return [[createColumnBreakLineLayout()], ...lineLayouts];
     }
 
-    // Try to find the best split point that fits in the current column
-    let splitFound = false;
+    return lineLayouts;
+  }
 
-    // Start from the split point that includes the most lines in the first part
+  private trySplitParagraph(
+    lineLayouts: LineLayout[][],
+    flatLineLayouts: LineLayout[],
+    currentY: number,
+    columnBottomY: number,
+  ): LineLayout[][] | null {
+    const acceptableSplits = this.findAcceptableSplits(flatLineLayouts);
+    const selectedSplit = this.selectSplit(acceptableSplits, currentY, columnBottomY);
+
+    if (selectedSplit) {
+      return this.buildSplitResult(lineLayouts, selectedSplit.index);
+    }
+
+    return null;
+  }
+
+  private selectSplit(
+    acceptableSplits: { index: number; heightFirstPart: number }[],
+    currentY: number,
+    columnBottomY: number,
+  ): { index: number; heightFirstPart: number } | null {
     for (let i = acceptableSplits.length - 1; i >= 0; i -= 1) {
       const split = acceptableSplits[i];
 
       if (currentY + split.heightFirstPart <= columnBottomY) {
-        // First part fits in current column
-
-        // Map the flat indices back to lineLayouts indices
-        const splitIndex = split.index;
-        const firstPartLineLayouts: LineLayout[][] = [];
-        const secondPartLineLayouts: LineLayout[][] = [];
-
-        // Collect lineLayouts for the first part
-        let currentOuterIndex = lineLayoutIndices[0].outerIndex;
-        let currentInnerArray: LineLayout[] = [];
-        for (let j = 0; j < splitIndex; j += 1) {
-          const { outerIndex } = lineLayoutIndices[j];
-          const lineLayout = flatLineLayouts[j];
-
-          if (outerIndex !== currentOuterIndex) {
-            if (currentInnerArray.length > 0) {
-              firstPartLineLayouts.push(currentInnerArray);
-            }
-            currentInnerArray = [];
-            currentOuterIndex = outerIndex;
-          }
-          currentInnerArray.push(lineLayout);
-        }
-        if (currentInnerArray.length > 0) {
-          firstPartLineLayouts.push(currentInnerArray);
-        }
-
-        // Collect lineLayouts for the second part
-        currentOuterIndex = lineLayoutIndices[splitIndex].outerIndex;
-        currentInnerArray = [];
-        for (let j = splitIndex; j < flatLineLayouts.length; j += 1) {
-          const { outerIndex } = lineLayoutIndices[j];
-          const lineLayout = flatLineLayouts[j];
-
-          if (outerIndex !== currentOuterIndex) {
-            if (currentInnerArray.length > 0) {
-              secondPartLineLayouts.push(currentInnerArray);
-            }
-            currentInnerArray = [];
-            currentOuterIndex = outerIndex;
-          }
-          currentInnerArray.push(lineLayout);
-        }
-        if (currentInnerArray.length > 0) {
-          secondPartLineLayouts.push(currentInnerArray);
-        }
-
-        // Build newLineLayouts
-        newLineLayouts = newLineLayouts.concat(firstPartLineLayouts);
-        newLineLayouts.push([createColumnBreakLineLayout()]);
-        newLineLayouts = newLineLayouts.concat(secondPartLineLayouts);
-
-        splitFound = true;
-        break;
+        return split;
       }
     }
 
-    if (!splitFound) {
-      // No acceptable split point fits; move entire paragraph to the next column
-      if (currentY !== columnStartY) {
-        newLineLayouts.push([createColumnBreakLineLayout()]);
-      }
-      newLineLayouts = newLineLayouts.concat(lineLayouts);
+    return null;
+  }
+
+  private buildSplitResult(
+    lineLayouts: LineLayout[][],
+    splitIndex: number,
+  ): LineLayout[][] {
+    const { firstPart, secondPart } = this.partitionLineLayouts(lineLayouts, splitIndex);
+    return [...firstPart, [createColumnBreakLineLayout()], ...secondPart];
+  }
+
+  private flattenLineLayouts(lineLayouts: LineLayout[][]): LineLayout[] {
+    const flatLineLayouts: LineLayout[] = [];
+
+    lineLayouts.forEach((unit) => {
+      unit.forEach((lineLayout) => {
+        flatLineLayouts.push(lineLayout);
+      });
+    });
+
+    return flatLineLayouts;
+  }
+
+  private findAcceptableSplits(flatLineLayouts: LineLayout[]): { index: number; heightFirstPart: number }[] {
+    let heightFirstPart = 0;
+    let chordCount = 0;
+
+    return flatLineLayouts
+      .slice(0, -1)
+      .reduce<{ index: number; heightFirstPart: number }[]>((splits, lineLayout, index) => {
+        heightFirstPart += lineLayout.lineHeight;
+        chordCount += lineLayout.type === 'ChordLyricsPair' ? 1 : 0;
+
+        const remaining = this.totalChordLyricPairLines - chordCount;
+        if (chordCount >= 2 && remaining >= 2) {
+          splits.push({ index: index + 1, heightFirstPart });
+        }
+
+        return splits;
+      }, []);
+  }
+
+  private partitionLineLayouts(
+    lineLayouts: LineLayout[][],
+    splitIndex: number,
+  ): { firstPart: LineLayout[][]; secondPart: LineLayout[][] } {
+    const result = lineLayouts.reduce<PartitionAccumulator>(
+      (accumulator, unit) => this.partitionReducer(accumulator, unit, splitIndex),
+      { firstPart: [], secondPart: [], processed: 0 },
+    );
+
+    return { firstPart: result.firstPart, secondPart: result.secondPart };
+  }
+
+  private partitionReducer(
+    accumulator: PartitionAccumulator,
+    unit: LineLayout[],
+    splitIndex: number,
+  ): PartitionAccumulator {
+    const unitLength = unit.length;
+    const fitsBeforeSplit = accumulator.processed + unitLength <= splitIndex;
+    const isAfterSplit = accumulator.processed >= splitIndex;
+
+    if (fitsBeforeSplit) {
+      accumulator.firstPart.push(unit);
+    } else if (isAfterSplit) {
+      accumulator.secondPart.push(unit);
+    } else {
+      const splitPoint = splitIndex - accumulator.processed;
+      accumulator.firstPart.push(unit.slice(0, splitPoint));
+      accumulator.secondPart.push(unit.slice(splitPoint));
     }
 
-    return newLineLayouts;
+    accumulator.processed += unitLength;
+    return accumulator;
   }
 }
