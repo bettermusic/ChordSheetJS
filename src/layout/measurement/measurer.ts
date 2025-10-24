@@ -55,4 +55,84 @@ export abstract class BaseMeasurer implements Measurer {
   }
 
   abstract splitTextToSize(text: string, maxWidth: number, fontConfig: FontConfiguration): string[];
+
+  protected splitTextWithMeasure(
+    text: string,
+    maxWidth: number,
+    measure: (value: string) => number,
+  ): string[] {
+    if (!text) return [];
+
+    const normalizedText = text.replace(/\r\n|\r/g, '\n');
+
+    return normalizedText
+      .split('\n')
+      .reduce<string[]>((acc, paragraph) => {
+        acc.push(...this.wrapParagraph(paragraph, maxWidth, measure));
+        return acc;
+      }, []);
+  }
+
+  protected wrapParagraph(
+    paragraph: string,
+    maxWidth: number,
+    measure: (value: string) => number,
+  ): string[] {
+    if (paragraph.length === 0) return [''];
+
+    const { lines, currentLine } = this.accumulateWords(
+      paragraph.split(' '),
+      maxWidth,
+      measure,
+    );
+
+    return currentLine.length === 0 ? lines : [...lines, currentLine];
+  }
+
+  protected splitWord(
+    word: string,
+    maxWidth: number,
+    measure: (value: string) => number,
+  ): { lines: string[]; remainder: string } {
+    const result = [...word].reduce<{ lines: string[]; partial: string }>((acc, char) => {
+      const testChar = `${acc.partial}${char}`;
+
+      if (measure(testChar) <= maxWidth) {
+        acc.partial = testChar;
+      } else if (acc.partial.length > 0) {
+        acc.lines.push(acc.partial);
+        acc.partial = char;
+      } else {
+        acc.lines.push(char);
+        acc.partial = '';
+      }
+
+      return acc;
+    }, { lines: [], partial: '' });
+
+    return { lines: result.lines, remainder: result.partial };
+  }
+
+  private accumulateWords(
+    words: string[],
+    maxWidth: number,
+    measure: (value: string) => number,
+  ): { lines: string[]; currentLine: string } {
+    return words.reduce<{ lines: string[]; currentLine: string }>((acc, word) => {
+      const testLine = acc.currentLine.length === 0 ? word : `${acc.currentLine} ${word}`;
+
+      if (measure(testLine) <= maxWidth) {
+        acc.currentLine = testLine;
+      } else if (acc.currentLine.length > 0) {
+        acc.lines.push(acc.currentLine);
+        acc.currentLine = word;
+      } else {
+        const { lines: wordLines, remainder } = this.splitWord(word, maxWidth, measure);
+        acc.lines.push(...wordLines);
+        acc.currentLine = remainder;
+      }
+
+      return acc;
+    }, { lines: [], currentLine: '' });
+  }
 }
