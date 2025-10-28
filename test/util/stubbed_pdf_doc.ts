@@ -329,6 +329,18 @@ class StubbedPdfDoc {
     return this;
   }
 
+  addPage(): StubbedPdfDoc {
+    return this;
+  }
+
+  output(type?: string): any {
+    if (type === 'blob') {
+      return new Blob([]);
+    }
+
+    return '';
+  }
+
   setDrawColor(ch1: string | number, ch2?: number, ch3?: number, ch4?: number): StubbedPdfDoc {
     this.drawColor = this.#normalizeColor(ch1, ch2, ch3, ch4);
     return this;
