@@ -35,52 +35,26 @@ export class LineBreaker {
       return [];
     }
 
-    const totalWidth = items.reduce((sum, mi) => sum + mi.width, 0);
+    const { totalWidth, softBreakIndices } = this.analyzeContent(items);
 
-    if (totalWidth <= availableWidth) {
+    if (this.shouldReturnSingleLayout(totalWidth, availableWidth)) {
       return [this.layoutFactory.createLineLayout(items, line as Line)];
     }
-
-    // Find soft line break indices
-    const softBreakIndices = items
-      .map((item, idx) => (item.item instanceof SoftLineBreak ? idx : -1))
-      .filter((idx) => idx !== -1);
 
     if (softBreakIndices.length === 0) {
       return this.handleNoSoftBreaks(items, availableWidth, line);
     }
 
-    // Calculate the middle of the entire content
-    const targetWidth = totalWidth / 2;
+    const { firstChunk, secondChunk } = this.splitAtBestSoftBreak(items, softBreakIndices, totalWidth);
 
-    // Find the soft break closest to the middle of the total content
-    const breakOptions = softBreakIndices.map((idx) => ({
-      index: idx,
-      widthUpToBreak: this.getWidthUpToIndex(items, idx + 1),
-    }));
-    const bestBreak = breakOptions.reduce((best, current) => (
-      Math.abs(current.widthUpToBreak - targetWidth) < Math.abs(best.widthUpToBreak - targetWidth) ?
-        current :
-        best
-    ));
-
-    // Split into two chunks
-    const firstChunk = items.slice(0, bestBreak.index);
-    const secondChunk = items.slice(bestBreak.index + 1); // Skip the soft break
-
-    // Handle trailing comma in first chunk
-    const lastFirstItem = firstChunk[firstChunk.length - 1];
-    if (lastFirstItem?.item instanceof ChordLyricsPair && lastFirstItem.item.lyrics?.endsWith(',')) {
-      lastFirstItem.item.lyrics = lastFirstItem.item.lyrics.slice(0, -1) || '';
-      lastFirstItem.width = this.remeasureLyrics(lastFirstItem);
+    if (firstChunk.length === 0) {
+      return this.breakContent(secondChunk, availableWidth, line);
     }
 
-    // Capitalize second chunk's first lyrics
-    this.capitalizeNextItem(secondChunk, secondChunk, 0);
+    const firstLayout = this.layoutFactory.createLineLayout(firstChunk, line as Line);
 
-    // Recursively process each chunk
     return [
-      ...this.breakContent(firstChunk, availableWidth, line),
+      firstLayout,
       ...this.breakContent(secondChunk, availableWidth, line),
     ];
   }
@@ -89,39 +63,20 @@ export class LineBreaker {
    * Handle content with no soft breaks
    */
   private handleNoSoftBreaks(items: MeasuredItem[], availableWidth: number, line: Line | null): LineLayout[] {
-    let currentWidth = 0;
-    let breakIndex = 0;
+    const breakIndex = this.findBreakIndex(items, availableWidth);
 
-    for (let i = 0; i < items.length; i += 1) {
-      if (currentWidth + items[i].width > availableWidth) {
-        breakIndex = i;
-        break;
-      }
-      currentWidth += items[i].width;
-    }
-
-    if (breakIndex === 0 && items[0].width > availableWidth) {
-      const [firstPart, secondPart] = this.itemProcessor.splitMeasuredItem(items[0], availableWidth);
-      const remainingItems = secondPart ? [secondPart, ...items.slice(1)] : items.slice(1);
-      return [
-        this.layoutFactory.createLineLayout([firstPart], line as Line),
-        ...this.breakContent(remainingItems, availableWidth, line),
-      ];
+    if (breakIndex === -1) {
+      return [this.layoutFactory.createLineLayout(items, line as Line)];
     }
 
     if (breakIndex === 0) {
-      return [this.layoutFactory.createLineLayout(items, line as Line)];
+      return this.handleOversizedFirstItem(items, availableWidth, line);
     }
 
     const firstChunk = items.slice(0, breakIndex);
     const secondChunk = items.slice(breakIndex);
 
-    // Handle trailing comma
-    const lastFirstItem = firstChunk[firstChunk.length - 1];
-    if (lastFirstItem?.item instanceof ChordLyricsPair && lastFirstItem.item.lyrics?.endsWith(',')) {
-      lastFirstItem.item.lyrics = lastFirstItem.item.lyrics.slice(0, -1) || '';
-      lastFirstItem.width = this.remeasureLyrics(lastFirstItem);
-    }
+    this.removeTrailingComma(firstChunk);
 
     return [
       this.layoutFactory.createLineLayout(firstChunk, line as Line),
@@ -134,23 +89,114 @@ export class LineBreaker {
    */
   private consolidateConsecutiveSoftBreaks(items: MeasuredItem[]): MeasuredItem[] {
     const consolidated: MeasuredItem[] = [];
-    let i = 0;
 
-    while (i < items.length) {
-      const item = items[i];
+    for (let index = 0; index < items.length; index += 1) {
+      const item = items[index];
+      consolidated.push(item);
 
       if (item.item instanceof SoftLineBreak) {
-        consolidated.push(item);
-        while (i + 1 < items.length && items[i + 1].item instanceof SoftLineBreak) {
-          i += 1;
-        }
-      } else {
-        consolidated.push(item);
+        index = this.skipConsecutiveSoftBreaks(items, index);
       }
-      i += 1;
     }
 
     return consolidated;
+  }
+
+  private skipConsecutiveSoftBreaks(items: MeasuredItem[], startIndex: number): number {
+    let index = startIndex;
+
+    while (index + 1 < items.length && items[index + 1].item instanceof SoftLineBreak) {
+      index += 1;
+    }
+
+    return index;
+  }
+
+  private findBreakIndex(items: MeasuredItem[], availableWidth: number): number {
+    let currentWidth = 0;
+
+    for (let i = 0; i < items.length; i += 1) {
+      if (currentWidth + items[i].width > availableWidth) {
+        return i;
+      }
+      currentWidth += items[i].width;
+    }
+
+    return -1;
+  }
+
+  private handleOversizedFirstItem(
+    items: MeasuredItem[],
+    availableWidth: number,
+    line: Line | null,
+  ): LineLayout[] {
+    const [firstPart, secondPart] = this.itemProcessor.splitMeasuredItem(items[0], availableWidth);
+    const remainingItems = secondPart ? [secondPart, ...items.slice(1)] : items.slice(1);
+
+    return [
+      this.layoutFactory.createLineLayout([firstPart], line as Line),
+      ...this.breakContent(remainingItems, availableWidth, line),
+    ];
+  }
+
+  private analyzeContent(items: MeasuredItem[]): {
+    totalWidth: number;
+    softBreakIndices: number[];
+  } {
+    const softBreakIndices: number[] = [];
+    const totalWidth = items.reduce((sum, measuredItem, index) => {
+      if (measuredItem.item instanceof SoftLineBreak) {
+        softBreakIndices.push(index);
+      }
+      return sum + measuredItem.width;
+    }, 0);
+
+    return { totalWidth, softBreakIndices };
+  }
+
+  private shouldReturnSingleLayout(
+    totalWidth: number,
+    availableWidth: number,
+  ): boolean {
+    return totalWidth <= availableWidth;
+  }
+
+  private splitAtBestSoftBreak(
+    items: MeasuredItem[],
+    softBreakIndices: number[],
+    totalWidth: number,
+  ): { firstChunk: MeasuredItem[]; secondChunk: MeasuredItem[] } {
+    const targetWidth = totalWidth / 2;
+    const breakOptions = softBreakIndices.map((idx) => ({
+      index: idx,
+      widthUpToBreak: this.getWidthUpToIndex(items, idx),
+    }));
+    const bestBreak = breakOptions.reduce((best, current) => {
+      const currentDistance = Math.abs(current.widthUpToBreak - targetWidth);
+      const bestDistance = Math.abs(best.widthUpToBreak - targetWidth);
+
+      if (currentDistance === bestDistance) {
+        return current.index > best.index ? current : best;
+      }
+
+      return currentDistance < bestDistance ? current : best;
+    });
+
+    const firstChunk = items.slice(0, bestBreak.index);
+    const secondChunk = items.slice(bestBreak.index + 1);
+
+    this.removeTrailingComma(firstChunk);
+    this.capitalizeNextItem(secondChunk, secondChunk, 0);
+
+    return { firstChunk, secondChunk };
+  }
+
+  private removeTrailingComma(items: MeasuredItem[]): void {
+    const lastItem = items[items.length - 1];
+    if (lastItem?.item instanceof ChordLyricsPair && lastItem.item.lyrics?.endsWith(',')) {
+      lastItem.item.lyrics = lastItem.item.lyrics.slice(0, -1) || '';
+      lastItem.width = this.remeasureLyrics(lastItem);
+    }
   }
 
   /**
@@ -186,34 +232,55 @@ export class LineBreaker {
     }
 
     const pair = item.item;
-    const chords = pair.chords || '';
-    const lyrics = pair.lyrics || '';
+    const widths = this.measureChordAndLyricWidths(pair);
+    const adjustedChordWidth = this.adjustChordWidth(pair, widths, nextItem);
 
-    // Get font configurations
+    return Math.max(adjustedChordWidth, widths.lyricsWidth);
+  }
+
+  private measureChordAndLyricWidths(pair: ChordLyricsPair): { chordWidth: number; lyricsWidth: number } {
     const chordFont = this.itemProcessor.config.fonts.chord;
     const lyricsFont = this.itemProcessor.config.fonts.lyrics;
 
-    // Measure chord and lyrics widths
-    const chordWidth = chords ? this.itemProcessor.measurer.measureTextWidth(chords, chordFont) : 0;
-    const lyricsWidth = lyrics ? this.itemProcessor.measurer.measureTextWidth(lyrics, lyricsFont) : 0;
+    const chordWidth = pair.chords ? this.itemProcessor.measurer.measureTextWidth(pair.chords, chordFont) : 0;
+    const lyricsWidth = pair.lyrics ? this.itemProcessor.measurer.measureTextWidth(pair.lyrics, lyricsFont) : 0;
 
-    // Check if next item has chords (for spacing logic)
-    const nextItemHasChords = nextItem &&
-      nextItem.item instanceof ChordLyricsPair &&
-      (nextItem.item as ChordLyricsPair).chords?.trim() !== '';
+    return { chordWidth, lyricsWidth };
+  }
 
-    // Apply chord spacing logic (same as ItemProcessor.processChordLyricsPair)
-    let adjustedChordWidth = chordWidth;
-    if (!this.itemProcessor.config.displayLyricsOnly && nextItemHasChords && chordWidth > 0) {
-      const spaceWidth = this.itemProcessor.measurer.measureTextWidth(' ', lyricsFont);
-      if (chordWidth >= (lyricsWidth - spaceWidth)) {
-        const spacing = ' '.repeat(this.itemProcessor.config.chordSpacing);
-        adjustedChordWidth = this.itemProcessor.measurer.measureTextWidth(chords + spacing, chordFont);
-      }
+  private adjustChordWidth(
+    pair: ChordLyricsPair,
+    widths: { chordWidth: number; lyricsWidth: number },
+    nextItem: MeasuredItem | null,
+  ): number {
+    if (this.shouldSkipChordSpacing(widths.chordWidth, nextItem)) {
+      return widths.chordWidth;
     }
 
-    // Return the maximum width (same logic as in ItemProcessor.processChordLyricsPair)
-    return Math.max(adjustedChordWidth, lyricsWidth);
+    const lyricsFont = this.itemProcessor.config.fonts.lyrics;
+    const spaceWidth = this.itemProcessor.measurer.measureTextWidth(' ', lyricsFont);
+
+    if (widths.chordWidth < (widths.lyricsWidth - spaceWidth)) {
+      return widths.chordWidth;
+    }
+
+    const chordFont = this.itemProcessor.config.fonts.chord;
+    const spacing = ' '.repeat(this.itemProcessor.config.chordSpacing);
+    const chordsWithSpacing = `${pair.chords || ''}${spacing}`;
+
+    return this.itemProcessor.measurer.measureTextWidth(chordsWithSpacing, chordFont);
+  }
+
+  private shouldSkipChordSpacing(chordWidth: number, nextItem: MeasuredItem | null): boolean {
+    if (this.itemProcessor.config.displayLyricsOnly || chordWidth === 0) {
+      return true;
+    }
+
+    if (!nextItem || !(nextItem.item instanceof ChordLyricsPair)) {
+      return true;
+    }
+
+    return (nextItem.item.chords || '').trim() === '';
   }
 
   /**

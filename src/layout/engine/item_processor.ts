@@ -171,7 +171,7 @@ export class ItemProcessor {
 
       tagLines.forEach((tagLine) => {
         const width = this.measurer.measureTextWidth(tagLine, font);
-        items.push({ item: new Tag(tag.name, tagLine), width });
+        items.push(this.createMeasuredTagItem(tag, tagLine, width));
       });
     } else {
       // For other types of tags (like column_break)
@@ -179,6 +179,24 @@ export class ItemProcessor {
     }
 
     return items;
+  }
+
+  private createMeasuredTagItem(tag: Tag, tagLine: string, width: number): MeasuredItem {
+    const tagItem = new Tag(tag.name, tagLine);
+
+    if (tag.attributes.__titleSeparator === 'true') {
+      (tagItem as any)._value = ' > ';
+      tagItem.attributes.__titleSeparator = 'true';
+      Object.defineProperty(tagItem, 'value', {
+        configurable: true,
+        get: () => ' > ',
+        set: (newValue: string) => {
+          (tagItem as any)._value = newValue;
+        },
+      });
+    }
+
+    return { item: tagItem, width };
   }
 
   /**

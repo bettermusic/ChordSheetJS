@@ -48,11 +48,13 @@ class MockElement {
   }
 }
 
-const mockDomMeasurer = jest.fn();
-
 jest.mock('../../src/layout/measurement', () => ({
-  DomMeasurer: mockDomMeasurer,
+  DomMeasurer: jest.fn(),
 }));
+
+const { DomMeasurer: mockDomMeasurer } = jest.requireMock('../../src/layout/measurement') as {
+  DomMeasurer: jest.Mock;
+};
 
 describe('HtmlDocWrapper', () => {
   const globalAny = globalThis as typeof globalThis & { document: any };
