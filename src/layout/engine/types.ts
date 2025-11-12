@@ -35,7 +35,7 @@ export interface LineLayout {
   type: 'ChordLyricsPair' | 'Comment' | 'SectionLabel' | 'Tag' | 'Empty';
   lineHeight: number;
   items: MeasuredItem[];
-  line?: Line;
+  line: Line;
 }
 
 /**

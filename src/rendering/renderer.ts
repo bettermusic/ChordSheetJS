@@ -144,66 +144,96 @@ abstract class Renderer {
    */
   protected renderLines(lines: LineLayout[]): void {
     lines.forEach((lineLayout) => {
-      const { items, lineHeight, line } = lineLayout;
-
-      // Filter items that are column breaks and handle them first
-      const hasColumnBreak = items.length === 1 && items[0].item instanceof Tag && isColumnBreak(items[0].item);
-      if (hasColumnBreak) {
-        this.moveToNextColumn();
-        return; // Skip to the next iteration of lines
-      }
-
-      // Check if the line will fit in the current column
-      if (this.y + lineHeight > this.getColumnBottomY()) {
-        this.moveToNextColumn();
-      }
-
-      const yOffset = this.y;
-      const { chordsYOffset, lyricsYOffset } = this.calculateChordLyricYOffsets(items, yOffset);
-
-      let currentX = this.x;
-
-      // Process each item in the line
-      items.forEach((measuredItem) => {
-        const { item, width } = measuredItem;
-
-        if (item instanceof ChordLyricsPair) {
-          let { chords } = item;
-          const { lyrics } = item;
-
-          if (chords) {
-            chords = this.processChords(chords, line as Line);
-          }
-
-          // Add chord element if not lyrics-only mode
-          if (!this.isLyricsOnly() && chords) {
-            const chordBaseline = this.calculateChordBaseline(chordsYOffset, items, chords);
-            this.addTextElement(chords, currentX, chordBaseline, 'chord');
-          }
-
-          // Always add lyrics if present
-          if (lyrics && lyrics.trim() !== '') {
-            this.addTextElement(lyrics, currentX, lyricsYOffset, 'lyrics');
-          }
-        } else if (item instanceof Tag) {
-          if (item.isSectionDelimiter()) {
-            this.addSectionLabel(item.label, currentX, yOffset);
-          } else if (isComment(item)) {
-            this.addComment(item.value, currentX, yOffset);
-          }
-        } else if (item instanceof SoftLineBreak) {
-          this.addTextElement(item.content, currentX, lyricsYOffset, 'lyrics');
-        }
-
-        currentX += width;
-      });
-
-      // Update the vertical position after rendering the line
-      this.y += lineHeight;
-
-      // Reset x to the left margin for the next line
-      this.x = this.getColumnStartX();
+      this.renderLine(lineLayout);
     });
+  }
+
+  private renderLine(lineLayout: LineLayout) {
+    const { items, lineHeight, line } = lineLayout;
+
+    // Filter items that are column breaks and handle them first
+    if (this.hasColumnBreak(lineLayout)) {
+      this.moveToNextColumn();
+      return; // Skip to the next iteration of lines
+    }
+
+    // Check if the line will fit in the current column
+    if (this.y + lineHeight > this.getColumnBottomY()) {
+      this.moveToNextColumn();
+    }
+
+    const yOffset = this.y;
+    const { chordsYOffset, lyricsYOffset } = this.calculateChordLyricYOffsets(items, yOffset);
+
+    let currentX = this.x;
+
+    // Process each item in the line
+    items.forEach((measuredItem) => {
+      const { item, width } = measuredItem;
+      this.renderItem(item, line, currentX, chordsYOffset, lyricsYOffset, items, yOffset);
+      currentX += width;
+    });
+
+    // Update the vertical position after rendering the line
+    this.y += lineHeight;
+
+    // Reset x to the left margin for the next line
+    this.x = this.getColumnStartX();
+  }
+
+  protected hasColumnBreak(lineLayout: LineLayout) {
+    const { items } = lineLayout;
+
+    return items.length === 1 && items[0].item instanceof Tag && isColumnBreak(items[0].item);
+  }
+
+  private renderItem(
+    item: ChordLyricsPair | Tag | SoftLineBreak | null,
+    line: Line,
+    currentX: number,
+    chordsYOffset: number,
+    lyricsYOffset: number,
+    items: MeasuredItem[],
+    yOffset: number,
+  ) {
+    if (item instanceof ChordLyricsPair) {
+      this.renderChordLyricsPair(item, line, currentX, chordsYOffset, lyricsYOffset, items);
+    } else if (item instanceof Tag) {
+      if (item.isSectionDelimiter()) {
+        this.addSectionLabel(item.label, currentX, yOffset);
+      } else if (isComment(item)) {
+        this.addComment(item.value, currentX, yOffset);
+      }
+    } else if (item instanceof SoftLineBreak) {
+      this.addTextElement(item.content, currentX, lyricsYOffset, 'lyrics');
+    }
+  }
+
+  private renderChordLyricsPair(
+    item: ChordLyricsPair,
+    line: Line,
+    currentX: number,
+    chordsYOffset: number,
+    lyricsYOffset: number,
+    items: MeasuredItem[],
+  ) {
+    let { chords } = item;
+    const { lyrics } = item;
+
+    if (chords) {
+      chords = this.processChords(chords, line);
+    }
+
+    // Add chord element if not lyrics-only mode
+    if (!this.isLyricsOnly() && chords) {
+      const chordBaseline = this.calculateChordBaseline(chordsYOffset, items, chords);
+      this.addTextElement(chords, currentX, chordBaseline, 'chord');
+    }
+
+    // Always add lyrics if present
+    if (lyrics && lyrics.trim() !== '') {
+      this.addTextElement(lyrics, currentX, lyricsYOffset, 'lyrics');
+    }
   }
 
   /**
