@@ -1,13 +1,16 @@
+import * as FiveOrMoreStrategyModule
+  from '../../../../src/layout/engine/paragraph_splitter/strategies/five_or_more_lines_paragraph_split_strategy';
+import * as FourLinesStrategyModule
+  from '../../../../src/layout/engine/paragraph_splitter/strategies/four_lines_paragraph_split_strategy';
+import * as ThreeOrLessStrategyModule from
+  '../../../../src/layout/engine/paragraph_splitter/strategies/three_or_less_lines_paragraph_split_strategy';
 import ChordLyricsPair from '../../../../src/chord_sheet/chord_lyrics_pair';
 import Tag from '../../../../src/chord_sheet/tag';
+import type { LineLayout, MeasuredItem } from '../../../../src/layout/engine/types';
 import {
   createColumnBreakLineLayout,
   isColumnBreakLayout,
 } from '../../../../src/layout/engine/layout_helpers';
-import type { LineLayout, MeasuredItem } from '../../../../src/layout/engine/types';
-import * as FiveOrMoreStrategyModule from '../../../../src/layout/engine/paragraph_splitter/strategies/five_or_more_lines_paragraph_split_strategy';
-import * as FourLinesStrategyModule from '../../../../src/layout/engine/paragraph_splitter/strategies/four_lines_paragraph_split_strategy';
-import * as ThreeOrLessStrategyModule from '../../../../src/layout/engine/paragraph_splitter/strategies/three_or_less_lines_paragraph_split_strategy';
 
 const {
   FiveOrMoreLinesParagraphSplitStrategy,
@@ -186,7 +189,7 @@ describe('FourLinesParagraphSplitStrategy', () => {
 
   it('moves entire paragraph when first part does not fit and not at top', () => {
     const paragraph = createFourLineParagraph();
-  const columnBottomY = DEFAULT_LINE_HEIGHT + 5;
+    const columnBottomY = DEFAULT_LINE_HEIGHT + 5;
 
     const result = strategy.splitParagraph(paragraph, 10, columnStartY, columnBottomY);
 
@@ -196,7 +199,7 @@ describe('FourLinesParagraphSplitStrategy', () => {
 
   it('keeps paragraph together at top when first part does not fit', () => {
     const paragraph = createFourLineParagraph();
-  const columnBottomY = DEFAULT_LINE_HEIGHT - 1;
+    const columnBottomY = DEFAULT_LINE_HEIGHT - 1;
 
     const result = strategy.splitParagraph(paragraph, columnStartY, columnStartY, columnBottomY);
 
