@@ -1,3 +1,4 @@
+import Line from '../../chord_sheet/line';
 import Tag from '../../chord_sheet/tag';
 import { isColumnBreak } from '../../template_helpers';
 import { LayoutConfig, LineLayout } from './types';
@@ -8,6 +9,7 @@ import { LayoutConfig, LineLayout } from './types';
 export function createColumnBreakLineLayout(): LineLayout {
   return {
     type: 'Tag',
+    line: new Line(),
     items: [{ item: new Tag('column_break'), width: 0 }],
     lineHeight: 0,
   };

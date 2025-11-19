@@ -29,6 +29,13 @@ import {
 declare const document: any;
 declare type HTMLElement = any;
 
+interface Bounds {
+  minX: number;
+  minY: number;
+  maxX: number;
+  maxY: number;
+}
+
 /**
  * HtmlRenderer renders a song as HTML with absolute positioning
  */
@@ -175,98 +182,157 @@ class PositionedHtmlRenderer extends Renderer {
     }
   }
 
+  private groupElementsByPageAndColumn(elements: PositionedElement[]): Record<string, PositionedElement[]> {
+    const groups: Record<string, PositionedElement[]> = {};
+
+    elements.forEach((el) => {
+      const key = `${el.page}-${el.column}`;
+      if (!groups[key]) groups[key] = [];
+      groups[key].push(el);
+    });
+
+    return groups;
+  }
+
   protected renderParagraphs(paragraphLayouts: ParagraphLayout[]): void {
     paragraphLayouts.forEach((layout, index) => {
-      const prefix = this.configuration.cssClassPrefix || 'chord-sheet-';
-      const paragraphElements: PositionedElement[] = [];
-      const originalElements = this.elements;
-      this.elements = paragraphElements;
-
-      // Render all lines for the paragraph
-      layout.units.forEach((lines) => {
-        this.renderLines(lines);
-      });
-
-      // Group elements by page and column to handle splits
-      const groups: Record<string, PositionedElement[]> = {};
-      paragraphElements.forEach((el) => {
-        const key = `${el.page}-${el.column}`;
-        if (!groups[key]) groups[key] = [];
-        groups[key].push(el);
-      });
-
-      // Render each group as a separate paragraph div
-      let divCount = 0;
-      Object.values(groups).forEach((group) => {
-        // Set the correct page for this group
-        const { page } = group[0];
-        this.doc.setPage(page);
-
-        const paragraphDiv = document.createElement('div');
-        paragraphDiv.className = `${prefix}paragraph paragraph-${index}-${divCount} ${prefix}${layout.sectionType}`;
-        divCount += 1;
-
-        // Calculate bounds of this group
-        let minX = Number.MAX_VALUE;
-        let minY = Number.MAX_VALUE;
-        let maxX = Number.MIN_VALUE;
-        let maxY = Number.MIN_VALUE;
-
-        group.forEach((element) => {
-          minX = Math.min(minX, element.x);
-          minY = Math.min(minY, element.y);
-          maxX = Math.max(maxX, element.x + element.width);
-          maxY = Math.max(maxY, element.y + element.height);
-        });
-
-        const width = maxX - minX;
-        const height = maxY - minY;
-
-        // Style the paragraph div
-        Object.assign(paragraphDiv.style, {
-          position: 'absolute',
-          left: `${minX}px`,
-          top: `${minY}px`,
-          width: `${width}px`,
-          height: `${height}px`,
-        });
-
-        // Add child elements
-        group.forEach((element) => {
-          const htmlElement = document.createElement('div');
-          htmlElement.className = `${prefix}element ${prefix}${element.type}`;
-          if (this.configuration.cssClasses?.[element.type]) {
-            htmlElement.classList.add(this.configuration.cssClasses[element.type]);
-          }
-          htmlElement.textContent = element.content;
-          if (element.style) this.applyElementStyle(htmlElement, element);
-          Object.assign(htmlElement.style, {
-            position: 'absolute',
-            left: `${element.x - minX}px`,
-            top: `${element.y - minY}px`,
-          });
-          paragraphDiv.appendChild(htmlElement);
-        });
-
-        // Add the div to the correct page
-        this.doc.addElement(paragraphDiv, minX, minY);
-        // Do NOT update this.y here; let renderLines manage it
-      });
-
-      // Add spacing only after the entire paragraph (all groups)
-      if (layout.addSpacing && index < paragraphLayouts.length - 1) {
-        this.y += this.getParagraphSpacing();
-      }
-
-      this.x = this.getColumnStartX();
-      this.elements = originalElements;
+      this.renderParagraph(layout, index, paragraphLayouts);
     });
+  }
+
+  private renderParagraph(layout: ParagraphLayout, paragraphIndex: number, paragraphLayouts: ParagraphLayout[]) {
+    const prefix = this.configuration.cssClassPrefix || 'chord-sheet-';
+    const paragraphElements: PositionedElement[] = [];
+    const originalElements = this.elements;
+    this.elements = paragraphElements;
+
+    // Render all lines for the paragraph
+    layout.units.forEach((lines) => {
+      this.renderLineItems(lines);
+    });
+
+    // Group elements by page and column to handle splits
+    const groups = this.groupElementsByPageAndColumn(paragraphElements);
+
+    // Render each group as a separate paragraph div
+    Object.values(groups).forEach((group, groupIndex) => {
+      this.renderElementGroup(group, prefix, paragraphIndex, groupIndex, layout);
+    });
+
+    // Add spacing only after the entire paragraph (all groups)
+    if (layout.addSpacing && paragraphIndex < paragraphLayouts.length - 1) {
+      this.y += this.getParagraphSpacing();
+    }
+
+    this.x = this.getColumnStartX();
+    this.elements = originalElements;
+  }
+
+  private calculateBounds(group: PositionedElement[]): Bounds {
+    let minX = Number.MAX_VALUE;
+    let minY = Number.MAX_VALUE;
+    let maxX = Number.MIN_VALUE;
+    let maxY = Number.MIN_VALUE;
+
+    group.forEach((element) => {
+      minX = Math.min(minX, element.x);
+      minY = Math.min(minY, element.y);
+      maxX = Math.max(maxX, element.x + element.width);
+      maxY = Math.max(maxY, element.y + element.height);
+    });
+
+    return {
+      minX, minY, maxX, maxY,
+    };
+  }
+
+  private createParagraphDiv(bounds: Bounds, classes: (string | undefined)[]) {
+    const width = bounds.maxX - bounds.minX;
+    const height = bounds.maxY - bounds.minY;
+    const div = document.createElement('div');
+    div.className = classes.filter((clazz) => clazz).join(' ');
+
+    Object.assign(div.style, {
+      position: 'absolute',
+      left: `${bounds.minX}px`,
+      top: `${bounds.minY}px`,
+      width: `${width}px`,
+      height: `${height}px`,
+    });
+
+    return div;
+  }
+
+  private createElementGroupDiv(
+    x: number,
+    y: number,
+    content: string,
+    classes: (string | undefined)[],
+  ): HTMLElement {
+    const div = document.createElement('div');
+    div.className = classes.filter((clazz) => clazz).join(' ');
+
+    Object.assign(div.style, {
+      position: 'absolute',
+      left: `${x}px`,
+      top: `${y}px`,
+    });
+
+    div.textContent = content;
+    return div;
+  }
+
+  private renderElementGroup(
+    group: PositionedElement[],
+    prefix: string,
+    paragraphIndex: number,
+    groupIndex: number,
+    layout: ParagraphLayout,
+  ) {
+    // Set the correct page for this group
+    const { page } = group[0];
+    this.doc.setPage(page);
+
+    const bounds = this.calculateBounds(group);
+
+    const paragraphDiv = this.createParagraphDiv(
+      bounds,
+      [
+        `${prefix}paragraph`,
+        `paragraph-${paragraphIndex}-${groupIndex}`,
+        `${prefix}${layout.sectionType}`,
+      ],
+    );
+
+    // Add child elements
+    group.forEach((element) => {
+      this.renderElement(element, bounds, prefix, paragraphDiv);
+    });
+
+    // Add the div to the correct page
+    this.doc.addElement(paragraphDiv, bounds.minX, bounds.minY);
+    // Do NOT update this.y here; let renderLineItems manage it
+  }
+
+  private renderElement(element: PositionedElement, bounds: Bounds, prefix: string, paragraphDiv) {
+    const htmlElement = this.createElementGroupDiv(
+      element.x - bounds.minX,
+      element.y - bounds.minY,
+      element.content,
+      [
+        `${prefix}element ${prefix}${element.type}`,
+        this.configuration.cssClasses?.[element.type],
+      ],
+    );
+
+    this.applyElementStyle(htmlElement, element);
+    paragraphDiv.appendChild(htmlElement);
   }
 
   /**
    * Render lines of content with chords, lyrics, and other elements
    */
-  protected renderLines(lines: LineLayout[]): void {
+  protected renderLineItems(lines: LineLayout[]): void {
     let { currentColumn } = this;
     let { currentPage } = this;
 
@@ -516,6 +582,8 @@ class PositionedHtmlRenderer extends Renderer {
   private applyElementStyle(htmlElement: HTMLElement, element: PositionedElement): void {
     const { style } = element;
 
+    if (!style) return;
+
     // Base styles that apply to all elements
     const baseStyles = {
       whiteSpace: 'pre',
@@ -591,7 +659,7 @@ class PositionedHtmlRenderer extends Renderer {
         } else if (item.type === 'image') {
           this.renderImage(item as LayoutContentItemWithImage, sectionY);
         } else if (item.type === 'line') {
-          this.renderLine(item as LayoutContentItemWithLine, sectionY);
+          this.renderLineItem(item as LayoutContentItemWithLine, sectionY);
         }
       }
     });
@@ -752,7 +820,7 @@ class PositionedHtmlRenderer extends Renderer {
   /**
    * Renders a line
    */
-  private renderLine(lineItem: LayoutContentItemWithLine, sectionY: number): void {
+  private renderLineItem(lineItem: LayoutContentItemWithLine, sectionY: number): void {
     const { style, position } = lineItem;
 
     const lineElement = document.createElement('div');

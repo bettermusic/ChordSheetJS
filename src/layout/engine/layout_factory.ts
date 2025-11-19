@@ -71,6 +71,7 @@ export class LayoutFactory {
   createColumnBreakLayout(): LineLayout {
     return {
       type: 'Tag',
+      line: new Line(),
       items: [{ item: new Tag('column_break'), width: 0 }],
       lineHeight: 0,
     };
