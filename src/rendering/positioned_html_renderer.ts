@@ -2,32 +2,28 @@ import ChordLyricsPair from '../chord_sheet/chord_lyrics_pair';
 import ChordProParser from '../parser/chord_pro_parser';
 import Condition from '../layout/engine/condition';
 import Dimensions from '../layout/engine/dimensions';
-import { FontConfiguration } from '../formatter/configuration';
 import HtmlDocWrapper from './html_doc_wrapper';
 import Line from '../chord_sheet/line';
-import { MeasuredHtmlFormatterConfiguration } from '../formatter/configuration/measured_html_configuration';
+import {
+  Alignment,
+  ConditionalRule,
+  FontConfiguration,
+  LayoutContentItem,
+  LayoutContentItemWithImage,
+  LayoutContentItemWithLine,
+  LayoutContentItemWithText,
+  LayoutSection,
+  MeasuredHtmlFormatterConfiguration,
+} from '../formatter/configuration';
 import Metadata from '../chord_sheet/metadata';
 import SoftLineBreak from '../chord_sheet/soft_line_break';
 import Song from '../chord_sheet/song';
 import Tag from '../chord_sheet/tag';
 import TextFormatter from '../formatter/text_formatter';
 import { getCapos } from '../helpers';
+import { isComment } from '../template_helpers';
 import { LineLayout, MeasuredItem } from '../layout/engine';
 import Renderer, { ParagraphLayout, PositionedElement } from './renderer';
-import { isColumnBreak, isComment } from '../template_helpers';
-
-import {
-  Alignment,
-  ConditionalRule,
-  LayoutContentItem,
-  LayoutContentItemWithImage,
-  LayoutContentItemWithLine,
-  LayoutContentItemWithText,
-  LayoutSection,
-} from '../formatter/configuration';
-
-declare const document: any;
-declare type HTMLElement = any;
 
 interface Bounds {
   minX: number;
@@ -339,8 +335,7 @@ class PositionedHtmlRenderer extends Renderer {
     lines.forEach((lineLayout) => {
       const { items, lineHeight, line } = lineLayout;
 
-      const hasColumnBreak = items.length === 1 && items[0].item instanceof Tag && isColumnBreak(items[0].item);
-      if (hasColumnBreak) {
+      if (this.hasColumnBreak(lineLayout)) {
         this.moveToNextColumn();
         currentColumn = this.currentColumn;
         currentPage = this.currentPage;
@@ -372,29 +367,24 @@ class PositionedHtmlRenderer extends Renderer {
           if (!this.isLyricsOnly() && chords) {
             const chordBaseline = this.calculateChordBaseline(chordsYOffset, items, chords);
             this.addTextElement(chords, currentX, chordBaseline, 'chord');
-            this.elements[this.elements.length - 1].column = currentColumn;
-            this.elements[this.elements.length - 1].page = currentPage;
+            this.updatePosition(currentColumn, currentPage);
           }
 
           if (lyrics && lyrics.trim() !== '') {
             this.addTextElement(lyrics, currentX, lyricsYOffset, 'lyrics');
-            this.elements[this.elements.length - 1].column = currentColumn;
-            this.elements[this.elements.length - 1].page = currentPage;
+            this.updatePosition(currentColumn, currentPage);
           }
         } else if (item instanceof Tag) {
           if (item.isSectionDelimiter()) {
             this.addSectionLabel(item.label, currentX, yOffset);
-            this.elements[this.elements.length - 1].column = currentColumn;
-            this.elements[this.elements.length - 1].page = currentPage;
+            this.updatePosition(currentColumn, currentPage);
           } else if (isComment(item)) {
             this.addComment(item.value, currentX, yOffset);
-            this.elements[this.elements.length - 1].column = currentColumn;
-            this.elements[this.elements.length - 1].page = currentPage;
+            this.updatePosition(currentColumn, currentPage);
           }
         } else if (item instanceof SoftLineBreak) {
           this.addTextElement(item.content, currentX, lyricsYOffset, 'lyrics');
-          this.elements[this.elements.length - 1].column = currentColumn;
-          this.elements[this.elements.length - 1].page = currentPage;
+          this.updatePosition(currentColumn, currentPage);
         }
 
         currentX += width;
@@ -403,6 +393,11 @@ class PositionedHtmlRenderer extends Renderer {
       this.y += lineHeight;
       this.x = this.getColumnStartX();
     });
+  }
+
+  private updatePosition(currentColumn: number, currentPage: number) {
+    this.elements[this.elements.length - 1].column = currentColumn;
+    this.elements[this.elements.length - 1].page = currentPage;
   }
 
   /**
@@ -590,8 +585,19 @@ class PositionedHtmlRenderer extends Renderer {
       lineHeight: style.lineHeight || 1,
     };
 
-    // Conditional styles based on element properties
-    const conditionalStyles = {
+    const conditionalStyles = this.getConditionalStyles(style);
+    const typeSpecificStyles = this.getTypeSpecificStyles(element);
+
+    Object.assign(
+      htmlElement.style,
+      baseStyles,
+      conditionalStyles,
+      typeSpecificStyles,
+    );
+  }
+
+  private getConditionalStyles(style: any) {
+    return {
       ...(style.name && { fontFamily: style.name }),
       ...(style.size && { fontSize: `${style.size}px` }),
       ...(style.weight && { fontWeight: style.weight }),
@@ -602,42 +608,34 @@ class PositionedHtmlRenderer extends Renderer {
       ...(style.textDecoration && { textDecoration: style.textDecoration }),
       ...(style.letterSpacing && { letterSpacing: style.letterSpacing }),
     };
+  }
 
-    // Element-specific styling based on type
-    let typeSpecificStyles = {};
-
+  getTypeSpecificStyles(element: PositionedElement): Partial<CSSStyleDeclaration> {
     switch (element.type) {
-      case 'chord': {
-        const contentIsRhythm = element.content === '|' || element.content === '/';
-        typeSpecificStyles = {
-          color: style.color || '#0066cc',
-          ...(
-            contentIsRhythm && style.weight && style.weight > 500 && { fontWeight: 500 }),
-        };
-        break;
-      }
+      case 'chord':
+        return this.chordStyles(element);
       case 'sectionLabel':
-        typeSpecificStyles = {
-          fontWeight: style.weight || 'bold',
-        };
-        break;
+        return { fontWeight: element.style.weight || 'bold' };
       case 'comment':
-        typeSpecificStyles = {
-          fontStyle: style.style || 'italic',
-          color: style.color || '#666666',
+        return {
+          fontStyle: element.style.style || 'italic',
+          color: element.style.color || '#666666',
         };
-        break;
       default:
-        break;
+        return {};
+    }
+  }
+
+  chordStyles(element: PositionedElement): Partial<CSSStyleDeclaration> {
+    const { style } = element;
+    const contentIsRhythm = element.content === '|' || element.content === '/';
+    const chordStyles: Partial<CSSStyleDeclaration> = { color: style.color || '#0066cc' };
+
+    if (contentIsRhythm && style.weight && style.weight > 500) {
+      chordStyles.fontWeight = '500';
     }
 
-    // Apply all styles using Object.assign
-    Object.assign(
-      htmlElement.style,
-      baseStyles,
-      conditionalStyles,
-      typeSpecificStyles,
-    );
+    return chordStyles;
   }
 
   /**
@@ -698,9 +696,7 @@ class PositionedHtmlRenderer extends Renderer {
       return;
     }
 
-    const { width: pageWidth } = this.doc.pageSize;
-    const availableWidth = position.width ||
-      (pageWidth - this.dimensions.margins.left - this.dimensions.margins.right);
+    const availableWidth = position.width || this.availableWidth;
     const y = sectionY + position.y;
 
     if (position.clip) {
@@ -732,20 +728,23 @@ class PositionedHtmlRenderer extends Renderer {
       textElement.style.width = `${availableWidth}px`;
       textElement.textContent = textValue;
     } else {
-      // Manual clipping without ellipsis
-      let clippedText = textValue;
-      let textWidth = this.doc.getTextWidth(clippedText, style);
-
-      while (textWidth > availableWidth && clippedText.length > 0) {
-        clippedText = clippedText.slice(0, -1);
-        textWidth = this.doc.getTextWidth(clippedText, style);
-      }
-
-      textElement.textContent = clippedText;
+      textElement.textContent = this.clipText(textValue, availableWidth, style);
     }
 
     const x = this.calculateX(position.x, availableWidth);
     this.doc.addElement(textElement, x, y);
+  }
+
+  clipText(text: string, availableWidth: number, style: FontConfiguration): string {
+    let clippedText = text;
+    let textWidth = this.doc.getTextWidth(clippedText, style);
+
+    while (textWidth > availableWidth && clippedText.length > 0) {
+      clippedText = clippedText.slice(0, -1);
+      textWidth = this.doc.getTextWidth(clippedText, style);
+    }
+
+    return clippedText;
   }
 
   /**
@@ -824,8 +823,7 @@ class PositionedHtmlRenderer extends Renderer {
     const { style, position } = lineItem;
 
     const lineElement = document.createElement('div');
-    const prefix = this.configuration.cssClassPrefix || 'chord-sheet-';
-    lineElement.className = `${prefix}line`;
+    lineElement.className = `${this.configuration.cssClassPrefix || 'chord-sheet-'}line`;
 
     // Apply line styles
     lineElement.style.borderBottomWidth = `${style.width || 1}px`;
@@ -834,15 +832,16 @@ class PositionedHtmlRenderer extends Renderer {
 
     const x = this.dimensions.margins.left + (position.x || 0);
     const y = sectionY + position.y;
-
-    const { width: pageWidth } = this.doc.pageSize;
-    const availableWidth = pageWidth - this.dimensions.margins.left - this.dimensions.margins.right;
-    const lineWidth = position.width === 'auto' ? availableWidth : position.width;
+    const lineWidth = position.width === 'auto' ? this.availableWidth : position.width;
 
     lineElement.style.width = `${lineWidth}px`;
     lineElement.style.height = `${position.height || 1}px`;
 
     this.doc.addElement(lineElement, x, y);
+  }
+
+  private get availableWidth(): number {
+    return this.doc.pageSize.width - this.dimensions.margins.left - this.dimensions.margins.right;
   }
 
   /**

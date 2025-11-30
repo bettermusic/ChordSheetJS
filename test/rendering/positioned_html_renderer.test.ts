@@ -667,7 +667,7 @@ describe('PositionedHtmlRenderer', () => {
       } as any);
       expect(element.style.whiteSpace).toBe('pre');
       expect(element.style.color).toBe('#ff0000');
-      expect(element.style.fontWeight).toBe(500);
+      expect(element.style.fontWeight).toBe('500');
     });
   });
 

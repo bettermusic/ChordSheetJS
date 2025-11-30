@@ -29,6 +29,7 @@ export default tseslint.config(
     languageOptions: {
       globals: {
         ...globals.node,
+        ...globals.browser, // Voeg browser globals toe zodat ESLint DOM types zoals HTMLElement en document herkent
       },
     },
     rules: {

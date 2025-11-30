@@ -11,6 +11,7 @@ import {
   createColumnBreakLineLayout,
   isColumnBreakLayout,
 } from '../../../../src/layout/engine/layout_helpers';
+import Line from '../../../../src/chord_sheet/line';
 
 const {
   FiveOrMoreLinesParagraphSplitStrategy,
@@ -37,6 +38,7 @@ const createLineLayout = (
   type,
   lineHeight,
   items,
+  line: new Line(),
 });
 
 const createChordLyricLineLayout = (

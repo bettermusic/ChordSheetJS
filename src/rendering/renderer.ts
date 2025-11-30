@@ -144,11 +144,11 @@ abstract class Renderer {
    */
   protected renderLines(lines: LineLayout[]): void {
     lines.forEach((lineLayout) => {
-      this.renderLine(lineLayout);
+      this.renderLineLayout(lineLayout);
     });
   }
 
-  private renderLine(lineLayout: LineLayout) {
+  private renderLineLayout(lineLayout: LineLayout) {
     const { items, lineHeight, line } = lineLayout;
 
     // Filter items that are column breaks and handle them first

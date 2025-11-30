@@ -418,7 +418,7 @@ describe('Renderer base class', () => {
       type,
       items,
       lineHeight,
-      line,
+      line: line || new Line(),
     };
   }
 

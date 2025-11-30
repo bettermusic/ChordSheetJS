@@ -2889,6 +2889,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@types/web@npm:^0.0.294":
+  version: 0.0.294
+  resolution: "@types/web@npm:0.0.294"
+  checksum: 10c0/d6c69d08097aeeff75ceb05bc2ab9063757a4781cf9324b4c26de5452ef23c0ecc337fa46b951a0ce9025a4d13b94237d78fdc1151c55da954f29e7d8c448a4c
+  languageName: node
+  linkType: hard
+
 "@types/yargs-parser@npm:*":
   version: 21.0.3
   resolution: "@types/yargs-parser@npm:21.0.3"
@@ -3852,6 +3859,7 @@ __metadata:
     "@types/jest": "npm:^30.0.0"
     "@types/js-levenshtein": "npm:^1"
     "@types/node": "npm:^24.0.0"
+    "@types/web": "npm:^0.0.294"
     esbuild: "npm:^0.25.0"
     eslint: "npm:^9.11.0"
     eslint-config-airbnb: "npm:^19.0.4"
