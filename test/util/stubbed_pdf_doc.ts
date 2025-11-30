@@ -1,6 +1,5 @@
 /* eslint-disable no-promise-executor-return */
 
-/* eslint-disable no-undef */
 import JsPDF, {
   ImageCompression, ImageFormat, ImageOptions, RGBAData, TextOptionsLight, jsPDFOptions,
 } from 'jspdf';

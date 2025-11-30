@@ -14,7 +14,6 @@ export interface PdfDoc {
   };
 
   addImage(
-    // eslint-disable-next-line no-undef
     imageData: string | HTMLImageElement | HTMLCanvasElement | Uint8Array | RGBAData,
     format: string,
     x: number,
@@ -27,7 +26,6 @@ export interface PdfDoc {
   ): PdfDoc;
 
   addImage(
-    // eslint-disable-next-line no-undef
     imageData: string | HTMLImageElement | HTMLCanvasElement | Uint8Array | RGBAData,
     x: number,
     y: number,
