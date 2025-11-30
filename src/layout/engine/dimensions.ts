@@ -57,66 +57,78 @@ class Dimensions {
 
     // If only maxColumnWidth is provided, fit as many columns as possible
     if (maxColumnWidth && !minColumnWidth) {
-      return Math.max(
-        1,
-        Math.floor((availableWidth + columnSpacing) / (maxColumnWidth + columnSpacing)),
-      );
+      return this.fitMaxColumns(availableWidth, columnSpacing, maxColumnWidth);
     }
 
     // If only minColumnWidth is provided, fit as many columns as possible
     // while ensuring each column meets the minimum width requirement
     if (minColumnWidth && !maxColumnWidth) {
-      // For n columns, we need: n * minColumnWidth + (n-1) * columnSpacing <= availableWidth
-      // Solving for n: n <= (availableWidth + columnSpacing) / (minColumnWidth + columnSpacing)
-      const maxColumns = Math.floor((availableWidth + columnSpacing) / (minColumnWidth + columnSpacing));
-
-      // Verify the calculation by checking if the columns actually fit
-      const actualColumns = Math.max(1, maxColumns);
-      const totalSpacingNeeded = (actualColumns - 1) * columnSpacing;
-      const totalWidthNeeded = actualColumns * minColumnWidth + totalSpacingNeeded;
-
-      // If our calculation is correct, this should always be true, but let's be safe
-      if (totalWidthNeeded <= availableWidth) {
-        return actualColumns;
-      }
-
-      // Fallback: try one less column
-      return Math.max(1, actualColumns - 1);
+      return this.fitMaxColumnsWithMinWidth(availableWidth, columnSpacing, minColumnWidth);
     }
 
     // Both constraints provided - find the optimal column count
     if (minColumnWidth && maxColumnWidth) {
-      // Start with the minimum number of columns that respect minColumnWidth
-      const maxPossibleColumns = Math.floor(
-        (availableWidth + columnSpacing) / (minColumnWidth + columnSpacing),
-      );
-
-      // Test each possible column count to find the best fit
-      for (let columnCount = 1; columnCount <= maxPossibleColumns; columnCount += 1) {
-        const totalSpacing = (columnCount - 1) * columnSpacing;
-        const columnWidth = (availableWidth - totalSpacing) / columnCount;
-
-        // If this column width fits within our constraints, it's valid
-        if (columnWidth >= minColumnWidth && columnWidth <= maxColumnWidth) {
-          // Check if the next column count would still be valid
-          const nextColumnCount = columnCount + 1;
-          const nextTotalSpacing = (nextColumnCount - 1) * columnSpacing;
-          const nextColumnWidth = (availableWidth - nextTotalSpacing) / nextColumnCount;
-
-          // If the next column count would be too narrow, use current count
-          if (nextColumnWidth < minColumnWidth) {
-            return columnCount;
-          }
-        } else if (columnWidth < minColumnWidth) {
-          // This and higher column counts will be too narrow
-          return Math.max(1, columnCount - 1);
-        }
-      }
-
-      return Math.max(1, maxPossibleColumns);
+      return this.findMaxColumnsWithinBounds(availableWidth, columnSpacing, minColumnWidth, maxColumnWidth);
     }
 
     return 1;
+  }
+
+  private findMaxColumnsWithinBounds(availableWidth: number, columnSpacing: number, minColumnWidth: number, maxColumnWidth: number) {
+    // Start with the minimum number of columns that respect minColumnWidth
+    const maxPossibleColumns = Math.floor(
+      (availableWidth + columnSpacing) / (minColumnWidth + columnSpacing),
+    );
+
+    // Test each possible column count to find the best fit
+    for (let columnCount = 1; columnCount <= maxPossibleColumns; columnCount += 1) {
+      const totalSpacing = (columnCount - 1) * columnSpacing;
+      const columnWidth = (availableWidth - totalSpacing) / columnCount;
+
+      // If this column width fits within our constraints, it's valid
+      if (columnWidth >= minColumnWidth && columnWidth <= maxColumnWidth) {
+        // Check if the next column count would still be valid
+        const nextColumnCount = columnCount + 1;
+        const nextTotalSpacing = (nextColumnCount - 1) * columnSpacing;
+        const nextColumnWidth = (availableWidth - nextTotalSpacing) / nextColumnCount;
+
+        // If the next column count would be too narrow, use current count
+        if (nextColumnWidth < minColumnWidth) {
+          return columnCount;
+        }
+      } else if (columnWidth < minColumnWidth) {
+        // This and higher column counts will be too narrow
+        return Math.max(1, columnCount - 1);
+      }
+    }
+
+    return Math.max(1, maxPossibleColumns);
+  }
+
+  private fitMaxColumnsWithMinWidth(availableWidth: number, columnSpacing: number, minColumnWidth: number) {
+    // For n columns, we need: n * minColumnWidth + (n-1) * columnSpacing <= availableWidth
+    // Solving for n: n <= (availableWidth + columnSpacing) / (minColumnWidth + columnSpacing)
+    const maxColumns = Math.floor((availableWidth + columnSpacing) / (minColumnWidth + columnSpacing));
+
+    // Verify the calculation by checking if the columns actually fit
+    const actualColumns = Math.max(1, maxColumns);
+    const totalSpacingNeeded = (actualColumns - 1) * columnSpacing;
+    const totalWidthNeeded = actualColumns * minColumnWidth + totalSpacingNeeded;
+
+    // If our calculation is correct, this should always be true, but let's be safe
+    if (totalWidthNeeded <= availableWidth) {
+      return actualColumns;
+    }
+
+    // Fallback: try one less column
+    return Math.max(1, actualColumns - 1);
+  }
+
+  private fitMaxColumns(availableWidth: number, columnSpacing: number, maxColumnWidth: number) {
+    return Math.max(
+      1,
+      Math.floor((availableWidth + columnSpacing) / (maxColumnWidth + columnSpacing)),
+    );
   }
 
   /**
@@ -208,14 +220,17 @@ class Dimensions {
     );
   }
 
+  get availableSpace(): number {
+    const { left, right } = this.margins;
+    return this.pageWidth - left - right;
+  }
+
   get columnWidth(): number {
     const effectiveCount = this.effectiveColumnCount;
     const spacing = this.effectiveColumnSpacing;
 
-    const { left, right } = this.margins;
-    const availableSpace = this.pageWidth - left - right;
     const totalColumnSpacing = (effectiveCount - 1) * spacing;
-    const columnWidth = (availableSpace - totalColumnSpacing) / effectiveCount;
+    const columnWidth = (this.availableSpace - totalColumnSpacing) / effectiveCount;
 
     const { maxColumnWidth, minColumnWidth } = this.columns;
 
