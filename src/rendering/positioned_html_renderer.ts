@@ -4,6 +4,16 @@ import Condition from '../layout/engine/condition';
 import Dimensions from '../layout/engine/dimensions';
 import HtmlDocWrapper from './html_doc_wrapper';
 import Line from '../chord_sheet/line';
+import Metadata from '../chord_sheet/metadata';
+import SoftLineBreak from '../chord_sheet/soft_line_break';
+import Song from '../chord_sheet/song';
+import Tag from '../chord_sheet/tag';
+import TextFormatter from '../formatter/text_formatter';
+import { getCapos } from '../helpers';
+import { isComment } from '../template_helpers';
+import { LineLayout, MeasuredItem } from '../layout/engine';
+import Renderer, { ParagraphLayout, PositionedElement } from './renderer';
+
 import {
   Alignment,
   ConditionalRule,
@@ -15,15 +25,6 @@ import {
   LayoutSection,
   MeasuredHtmlFormatterConfiguration,
 } from '../formatter/configuration';
-import Metadata from '../chord_sheet/metadata';
-import SoftLineBreak from '../chord_sheet/soft_line_break';
-import Song from '../chord_sheet/song';
-import Tag from '../chord_sheet/tag';
-import TextFormatter from '../formatter/text_formatter';
-import { getCapos } from '../helpers';
-import { isComment } from '../template_helpers';
-import { LineLayout, MeasuredItem } from '../layout/engine';
-import Renderer, { ParagraphLayout, PositionedElement } from './renderer';
 
 interface Bounds {
   minX: number;
