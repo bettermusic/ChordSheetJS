@@ -5,13 +5,13 @@ import * as FourLinesStrategyModule
 import * as ThreeOrLessStrategyModule from
   '../../../../src/layout/engine/paragraph_splitter/strategies/three_or_less_lines_paragraph_split_strategy';
 import ChordLyricsPair from '../../../../src/chord_sheet/chord_lyrics_pair';
+import Line from '../../../../src/chord_sheet/line';
 import Tag from '../../../../src/chord_sheet/tag';
 import type { LineLayout, MeasuredItem } from '../../../../src/layout/engine/types';
 import {
   createColumnBreakLineLayout,
   isColumnBreakLayout,
 } from '../../../../src/layout/engine/layout_helpers';
-import Line from '../../../../src/chord_sheet/line';
 
 const {
   FiveOrMoreLinesParagraphSplitStrategy,
