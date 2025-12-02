@@ -392,10 +392,26 @@ describe('LayoutEngine', () => {
       const engine = new LayoutEngine(song, measurer, config);
 
       const layouts = engine.computeParagraphLayouts();
-      const firstLayoutLineCount = countLineLayouts([layouts[0]]);
-      const secondLayoutLineCount = countLineLayouts([layouts[1]]);
 
-      expect(firstLayoutLineCount).toBeGreaterThan(secondLayoutLineCount);
+      // Original (layouts[0]) should have chord-lyrics content
+      const originalItems = layouts[0].units[0][0].items;
+      const originalHasContent = originalItems.some(
+        (item) => item.item && item.item.constructor.name === 'ChordLyricsPair',
+      );
+      expect(originalHasContent).toBe(true);
+
+      // Repeated (layouts[1]) should only have section label, no chord-lyrics content
+      const repeatedItems = layouts[1].units[0][0].items;
+      const repeatedHasContent = repeatedItems.some(
+        (item) => item.item && item.item.constructor.name === 'ChordLyricsPair',
+      );
+      expect(repeatedHasContent).toBe(false);
+
+      // Repeated should have a section delimiter tag
+      const repeatedHasLabel = repeatedItems.some(
+        (item) => item.item instanceof Tag && (item.item as Tag).isSectionDelimiter(),
+      );
+      expect(repeatedHasLabel).toBe(true);
     });
 
     it('title_only mode consolidates consecutive repeated sections', () => {
@@ -406,7 +422,12 @@ describe('LayoutEngine', () => {
       const engine = new LayoutEngine(song, measurer, config);
 
       const layouts = engine.computeParagraphLayouts();
-      const consolidated = layouts[0].units[0][0].items
+
+      // Should have 2 layouts: original + consolidated repeats
+      expect(layouts.length).toBe(2);
+
+      // The consolidated repeated section (layouts[1]) should have title separators
+      const consolidated = layouts[1].units[0][0].items
         .filter((item) => item.item instanceof Tag && (item.item as Tag).value === ' > ');
 
       expect(consolidated.length).toBeGreaterThan(0);
@@ -447,6 +468,57 @@ describe('LayoutEngine', () => {
 
       const processedParagraphs = (engine as any).song.renderParagraphs;
       expect(processedParagraphs.length).toBe(2);
+    });
+
+    it('title_only mode does not corrupt cached paragraph when different sections repeat consecutively', () => {
+      // Create: Verse 1 (original), Chorus 1 (original), Verse 1 (repeat), Chorus 1 (repeat)
+      const verse1 = createSectionLabelParagraph('Verse 1', 'verse');
+      const chorus1 = createSectionLabelParagraph('Chorus 1', 'chorus');
+      const song = createTestSong([verse1, chorus1, verse1, chorus1]);
+      const config = createTestConfig({ repeatedSections: 'title_only' });
+      const engine = new LayoutEngine(song, measurer, config);
+
+      const layouts = engine.computeParagraphLayouts();
+
+      // Should have 3 layouts: original Verse 1, original Chorus 1, consolidated repeated titles
+      expect(layouts.length).toBe(3);
+
+      // The first Verse 1 (original) should NOT have title separators - it shouldn't be corrupted
+      const firstVerseFirstLine = layouts[0].units[0][0];
+      const hasTitleSeparatorInOriginal = firstVerseFirstLine.items.some(
+        (item) => item.item instanceof Tag && (item.item as Tag).value === ' > ',
+      );
+      expect(hasTitleSeparatorInOriginal).toBe(false);
+
+      // The original Verse 1 header should only contain the original label, not repeated labels
+      const verse1TagItems = firstVerseFirstLine.items.filter(
+        (item) => item.item instanceof Tag && (item.item as Tag).isSectionDelimiter(),
+      );
+      // Should only have ONE section delimiter tag (the original Verse 1)
+      expect(verse1TagItems.length).toBe(1);
+    });
+
+    it('title_only mode keeps original section content intact when section repeats multiple times', () => {
+      // Create: Verse 1 (original), Verse 1 (repeat), Verse 1 (repeat again)
+      const verse1 = createSectionLabelParagraph('Verse', 'verse');
+      const song = createTestSong([verse1, verse1, verse1]);
+      const config = createTestConfig({ repeatedSections: 'title_only' });
+      const engine = new LayoutEngine(song, measurer, config);
+
+      // Process layouts
+      engine.computeParagraphLayouts();
+
+      // The original cached paragraph should not be modified
+      // Check that the first paragraph in renderParagraphs (the original) still has its content
+      const processedParagraphs = (engine as any).song.renderParagraphs;
+      const originalParagraph = processedParagraphs[0];
+      const originalFirstLine = originalParagraph.lines[0];
+
+      // Original should have the chord-lyrics content, not just the title
+      const hasChordLyricsPair = originalFirstLine.items.some(
+        (item: Item) => !(item instanceof Tag) && item.constructor.name === 'ChordLyricsPair',
+      );
+      expect(hasChordLyricsPair).toBe(true);
     });
   });
 

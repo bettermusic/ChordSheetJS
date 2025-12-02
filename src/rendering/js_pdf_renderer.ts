@@ -129,100 +129,102 @@ class JsPdfRenderer extends Renderer {
   }
 
   protected renderChordDiagrams(): void {
-    const {
-      renderingConfig,
-      enabled,
-      fonts,
-      overrides = { global: {}, byKey: {} },
-    } = this.configuration.layout.chordDiagrams;
+    const { enabled, overrides = { global: {}, byKey: {} } } = this.configuration.layout.chordDiagrams;
+    if (!enabled) return;
 
-    if (!enabled) {
-      return;
-    }
+    const layout = this.calculateDiagramLayout();
+    this.initializeDiagramPosition(layout.height);
 
-    const diagramSpacing = renderingConfig?.diagramSpacing || 7;
-    const maxDiagramsPerRow = renderingConfig?.maxDiagramsPerRow || null;
+    let diagramsInRow = 0;
+    const songKey = this.song.key || 0;
 
+    this.getChordDefinitions().forEach((def: ChordDefinition) => {
+      const result = this.renderSingleChordDiagram(def, songKey, overrides, layout, diagramsInRow);
+      if (result !== null) diagramsInRow = result;
+    });
+  }
+
+  private calculateDiagramLayout(): {
+    width: number; height: number; spacing: number; perRow: number;
+    } {
+    const { renderingConfig } = this.configuration.layout.chordDiagrams;
+    const spacing = renderingConfig?.diagramSpacing || 7;
+    const maxPerRow = renderingConfig?.maxDiagramsPerRow || null;
     const { columnWidth } = this.dimensions;
-    const yMargin = diagramSpacing; // Vertical spacing
 
-    // Define minimum and maximum widths for readability
-    const minChordDiagramWidth = 30; // Minimum width for legibility
-    const maxChordDiagramWidth = 35; // Maximum width to prevent excessive growth
+    const minWidth = 30;
+    const maxWidth = 35;
+    const potentialPerRow = Math.floor(columnWidth / (minWidth + spacing));
+    const perRow = maxPerRow ? Math.min(maxPerRow, potentialPerRow) : potentialPerRow;
+    const totalSpacing = (perRow - 1) * spacing;
+    const width = Math.max(minWidth, Math.min(maxWidth, (columnWidth - totalSpacing) / perRow));
+    const height = JsPDFRenderer.calculateHeight(width);
 
-    // Estimate how many diagrams can fit per row, considering spacing
-    const potentialDiagramsPerRow = Math.floor(columnWidth / (minChordDiagramWidth + diagramSpacing));
-    const diagramsPerRow = maxDiagramsPerRow ?
-      Math.min(maxDiagramsPerRow, potentialDiagramsPerRow) :
-      potentialDiagramsPerRow;
+    return {
+      width, height, spacing, perRow,
+    };
+  }
 
-    // Calculate the actual width per diagram, ensuring it stays within bounds
-    const totalSpacing = (diagramsPerRow - 1) * diagramSpacing;
-    const chordDiagramWidth = Math.max(
-      minChordDiagramWidth,
-      Math.min(maxChordDiagramWidth, (columnWidth - totalSpacing) / diagramsPerRow),
-    );
-    const chordDiagramHeight = JsPDFRenderer.calculateHeight(chordDiagramWidth);
-
-    // If we're starting chord diagrams on a new page, always use the first column
+  private initializeDiagramPosition(height: number): void {
     if (this.y === this.getMinY() && this.currentPage > 1) {
       this.currentColumn = 1;
       this.x = this.getColumnStartX();
     }
-
-    // Handle column continuation or new page
-    if (this.y + chordDiagramHeight > this.getColumnBottomY()) {
+    if (this.y + height > this.getColumnBottomY()) {
       this.moveToNextColumn();
       this.y = this.getMinY();
       this.x = this.getColumnStartX();
     }
+  }
 
-    const songKey = this.song.key || 0;
+  private renderSingleChordDiagram(
+    chordDef: ChordDefinition,
+    songKey: any,
+    overrides: any,
+    layout: { width: number; height: number; spacing: number; perRow: number },
+    diagramsInRow: number,
+  ): number | null {
+    const { shouldHide, customDefinition } = this.processChordOverrides(chordDef.name, songKey, overrides);
+    if (shouldHide) return null;
 
-    // Multi-column: wrap horizontally with dynamic width
-    let diagramsInRow = 0;
-    this.getChordDefinitions().forEach((chordDefinitionFromSong: ChordDefinition) => {
-      let chordDefinition = chordDefinitionFromSong;
-      const chordName = chordDefinition.name;
+    const definition = customDefinition ? ChordDefinition.parse(customDefinition) : chordDef;
+    const newRowCount = this.positionForNextDiagram(layout, diagramsInRow);
 
-      // Process overrides and determine if we should hide this chord
-      const { shouldHide, customDefinition } = this.processChordOverrides(chordName, songKey, overrides);
+    this.drawChordDiagram(definition, layout.width, layout.spacing);
+    return newRowCount + 1;
+  }
 
-      if (shouldHide) {
-        return;
-      }
+  private positionForNextDiagram(
+    layout: { width: number; height: number; spacing: number; perRow: number },
+    diagramsInRow: number,
+  ): number {
+    const { columnWidth } = this.dimensions;
+    let count = diagramsInRow;
 
-      if (customDefinition) {
-        chordDefinition = ChordDefinition.parse(customDefinition);
-      }
+    if (count >= layout.perRow || this.x + layout.width > this.getColumnStartX() + columnWidth) {
+      this.y += layout.height + layout.spacing;
+      this.x = this.getColumnStartX();
+      count = 0;
+    }
 
-      // Check if we need to move to a new row or column
-      if (diagramsInRow >= diagramsPerRow || this.x + chordDiagramWidth > this.getColumnStartX() + columnWidth) {
-        this.y += chordDiagramHeight + yMargin;
-        this.x = this.getColumnStartX();
-        diagramsInRow = 0;
-      }
+    if (this.y + layout.height > this.getColumnBottomY()) {
+      this.moveToNextColumn();
+      this.y = this.getMinY();
+      this.x = this.getColumnStartX();
+      count = 0;
+    }
 
-      if (this.y + chordDiagramHeight > this.getColumnBottomY()) {
-        this.moveToNextColumn();
-        this.y = this.getMinY();
-        this.x = this.getColumnStartX();
-        diagramsInRow = 0;
-      }
+    return count;
+  }
 
-      // Build and render the chord diagram
-      const chordDiagram = this.buildChordDiagram(chordDefinition);
-      const renderer = new JsPDFRenderer(this.doc, {
-        x: this.x,
-        y: this.y,
-        width: chordDiagramWidth,
-        fonts,
-      });
-
-      chordDiagram.render(renderer);
-      this.x += chordDiagramWidth + diagramSpacing;
-      diagramsInRow += 1;
+  private drawChordDiagram(definition: ChordDefinition, width: number, spacing: number): void {
+    const { fonts } = this.configuration.layout.chordDiagrams;
+    const diagram = this.buildChordDiagram(definition);
+    const renderer = new JsPDFRenderer(this.doc, {
+      x: this.x, y: this.y, width, fonts,
     });
+    diagram.render(renderer);
+    this.x += width + spacing;
   }
 
   protected renderHeadersAndFooters(): void {
@@ -366,18 +368,21 @@ class JsPdfRenderer extends Renderer {
       case 'chord':
       case 'lyrics':
       case 'sectionLabel':
-      case 'comment':
+      case 'comment': {
         // Draw the text at the specified position
         this.doc.text(element.content, element.x, element.y);
 
         // Add underline if specified in the style (especially for section labels)
-        if (element.style?.underline && element.content !== '>') {
+        // Skip underline for title separator (content is ' > ')
+        const isTitleSeparator = element.content?.trim() === '>';
+        if (element.style?.underline && !isTitleSeparator) {
           const { w: textWidth } = this.doc.getTextDimensions(element.content);
           this.doc.setDrawColor(0);
           this.doc.setLineWidth(1.25);
           this.doc.line(element.x, element.y + 3, element.x + textWidth, element.y + 3);
         }
         break;
+      }
       // Handle other element types if needed
       default:
         // eslint-disable-next-line no-console
@@ -391,34 +396,20 @@ class JsPdfRenderer extends Renderer {
     songKey: number | string,
     overrides: any,
   ): { shouldHide: boolean; customDefinition: string | null } {
-    let shouldHide = false;
-    let customDefinition: string | null = null;
+    const keyOverride = overrides?.byKey?.[songKey]?.[chordName];
+    if (keyOverride) return this.extractOverrideValues(keyOverride);
 
-    // Check key-specific overrides first
-    if (overrides?.byKey?.[songKey]?.[chordName]) {
-      const keyOverride = overrides.byKey[songKey][chordName];
-      if (keyOverride.hide !== undefined) {
-        shouldHide = keyOverride.hide;
-      }
-      if (keyOverride.definition) {
-        customDefinition = keyOverride.definition;
-      }
-    }
+    const globalOverride = overrides?.global?.[chordName];
+    if (globalOverride) return this.extractOverrideValues(globalOverride);
 
-    // Fall back to global overrides if no key-specific override exists
-    if (!overrides?.byKey?.[songKey]?.[chordName]) {
-      if (overrides?.global?.[chordName]) {
-        const globalOverride = overrides.global[chordName];
-        if (globalOverride.hide !== undefined) {
-          shouldHide = globalOverride.hide;
-        }
-        if (globalOverride.definition) {
-          customDefinition = globalOverride.definition;
-        }
-      }
-    }
+    return { shouldHide: false, customDefinition: null };
+  }
 
-    return { shouldHide, customDefinition };
+  private extractOverrideValues(override: any): { shouldHide: boolean; customDefinition: string | null } {
+    return {
+      shouldHide: override.hide ?? false,
+      customDefinition: override.definition ?? null,
+    };
   }
 
   private getChordDefinitions(): ChordDefinition[] {
@@ -464,76 +455,77 @@ class JsPdfRenderer extends Renderer {
   }
 
   private processFingeringAndBarres(chordDefinition: ChordDefinition, markers: StringMarker[], barres: Barre[]): void {
-    // Only proceed with barre detection if fingerings are provided
     if (!chordDefinition.fingers || chordDefinition.fingers.length === 0) {
-      // No fingerings provided, treat all non-open/non-muted frets as individual markers
-      chordDefinition.frets.forEach((fret: Fret, index: number) => {
-        if (!isNonSoundingString(fret) && !isOpenFret(fret)) {
-          const stringNumber = (index + 1) as StringNumber;
-          markers.push({
-            string: stringNumber,
-            fret,
-            finger: 0,
-          });
-        }
-      });
+      this.addMarkersWithoutFingering(chordDefinition.frets, markers);
       return;
     }
 
-    // Group strings by fret and finger to detect barres, using provided fingerings
-    const fretFingerGroups: Record<number, Record<number, number[]>> = {};
+    const fretFingerGroups = this.groupFretsByFinger(chordDefinition);
+    this.processFretFingerGroups(fretFingerGroups, markers, barres);
+  }
 
-    chordDefinition.frets.forEach((fret: Fret, index: number) => {
+  private addMarkersWithoutFingering(frets: Fret[], markers: StringMarker[]): void {
+    frets.forEach((fret: Fret, index: number) => {
       if (!isNonSoundingString(fret) && !isOpenFret(fret)) {
-        const stringNumber = (index + 1) as StringNumber;
-        const finger = chordDefinition.fingers[index] || 0;
-
-        if (finger !== 0) {
-          const fretNum = fret as number;
-
-          if (!fretFingerGroups[fretNum]) {
-            fretFingerGroups[fretNum] = {};
-          }
-          if (!fretFingerGroups[fretNum][finger]) {
-            fretFingerGroups[fretNum][finger] = [];
-          }
-          fretFingerGroups[fretNum][finger].push(stringNumber);
-        }
+        markers.push({ string: (index + 1) as StringNumber, fret, finger: 0 });
       }
     });
+  }
 
-    // Process each fret and finger combination to identify barres
-    Object.entries(fretFingerGroups).forEach(([fretStr, fingers]) => {
+  private groupFretsByFinger(chordDefinition: ChordDefinition): Record<number, Record<number, number[]>> {
+    const groups: Record<number, Record<number, number[]>> = {};
+
+    chordDefinition.frets.forEach((fret: Fret, index: number) => {
+      if (isNonSoundingString(fret) || isOpenFret(fret)) return;
+
+      const finger = chordDefinition.fingers[index] || 0;
+      if (finger === 0) return;
+
+      const fretNum = fret as number;
+      groups[fretNum] = groups[fretNum] || {};
+      groups[fretNum][finger] = groups[fretNum][finger] || [];
+      groups[fretNum][finger].push((index + 1) as StringNumber);
+    });
+
+    return groups;
+  }
+
+  private processFretFingerGroups(
+    groups: Record<number, Record<number, number[]>>,
+    markers: StringMarker[],
+    barres: Barre[],
+  ): void {
+    Object.entries(groups).forEach(([fretStr, fingers]) => {
       const fret = parseInt(fretStr, 10) as FretNumber;
       Object.entries(fingers).forEach(([fingerStr, strings]) => {
-        const finger = parseInt(fingerStr, 10) as FingerNumber;
-        if (strings.length > 1) {
-          // This finger is used on multiple strings at the same fret—it's a barre
-          strings.sort((a, b) => a - b);
-          const from = strings[0] as StringNumber;
-          const to = strings[strings.length - 1] as StringNumber;
-
-          // Validate string numbers (1–6 for standard guitar)
-          if (from < 1 || from > 6 || to < 1 || to > 6 || from > to) {
-            return; // Skip invalid barres
-          }
-
-          barres.push({
-            from,
-            to,
-            fret,
-          });
-        } else {
-          // Single string, create a regular marker
-          const string = strings[0] as StringNumber;
-          markers.push({
-            string,
-            fret: fret as number,
-            finger,
-          });
-        }
+        this.processFingerGroup(fret, parseInt(fingerStr, 10) as FingerNumber, strings, markers, barres);
       });
     });
+  }
+
+  private processFingerGroup(
+    fret: FretNumber,
+    finger: FingerNumber,
+    strings: number[],
+    markers: StringMarker[],
+    barres: Barre[],
+  ): void {
+    if (strings.length > 1) {
+      this.addBarreIfValid(fret, strings, barres);
+    } else {
+      markers.push({ string: strings[0] as StringNumber, fret: fret as number, finger });
+    }
+  }
+
+  private addBarreIfValid(fret: FretNumber, strings: number[], barres: Barre[]): void {
+    strings.sort((a, b) => a - b);
+    const from = strings[0] as StringNumber;
+    const to = strings[strings.length - 1] as StringNumber;
+
+    // Validate string numbers (1–6 for standard guitar)
+    if (from >= 1 && from <= 6 && to >= 1 && to <= 6 && from <= to) {
+      barres.push({ from, to, fret });
+    }
   }
 
   private renderLayout(layoutConfig: LayoutItem, section: LayoutSection): void {
@@ -599,33 +591,28 @@ class JsPdfRenderer extends Renderer {
   }
 
   private renderClippedText(textValue: string, position: any, availableWidth: number, y: number): void {
-    if (position.ellipsis) {
-      let clippedText = textValue;
-      let textWidth = this.doc.getTextWidth(clippedText);
+    const clippedText = position.ellipsis ?
+      this.clipTextWithEllipsis(textValue, availableWidth) :
+      this.clipText(textValue, availableWidth);
+    const textWidth = this.doc.getTextWidth(clippedText);
+    const x = this.calculateX(position.x, textWidth);
+    this.doc.text(clippedText, x, y);
+  }
 
-      while (textWidth > availableWidth) {
-        clippedText = clippedText.slice(0, -1);
-        textWidth = this.doc.getTextWidth(`${clippedText}...`);
-      }
-
-      if (clippedText !== textValue) {
-        clippedText += '...';
-      }
-
-      const x = this.calculateX(position.x, textWidth);
-      this.doc.text(clippedText, x, y);
-    } else {
-      let clippedText = textValue;
-      let textWidth = this.doc.getTextWidth(clippedText);
-
-      while (textWidth > availableWidth) {
-        clippedText = clippedText.slice(0, -1);
-        textWidth = this.doc.getTextWidth(clippedText);
-      }
-
-      const x = this.calculateX(position.x, textWidth);
-      this.doc.text(clippedText, x, y);
+  private clipTextWithEllipsis(text: string, maxWidth: number): string {
+    let clipped = text;
+    while (this.doc.getTextWidth(`${clipped}...`) > maxWidth && clipped.length > 0) {
+      clipped = clipped.slice(0, -1);
     }
+    return clipped !== text ? `${clipped}...` : text;
+  }
+
+  private clipText(text: string, maxWidth: number): string {
+    let clipped = text;
+    while (this.doc.getTextWidth(clipped) > maxWidth && clipped.length > 0) {
+      clipped = clipped.slice(0, -1);
+    }
+    return clipped;
   }
 
   private renderMultilineText(

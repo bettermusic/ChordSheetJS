@@ -67,86 +67,148 @@ export class ItemProcessor {
    * Process a chord-lyrics pair
    */
   processChordLyricsPair(pair: ChordLyricsPair, nextItemParam: any, line: Line, lyricsOnly = false): MeasuredItem[] {
-    const items: MeasuredItem[] = [];
-    let lyrics = pair.lyrics || '';
-    const nextItem = nextItemParam;
+    const lyricsOnlyResult = this.handleLyricsOnlyMode(pair, nextItemParam, lyricsOnly);
+    if (lyricsOnlyResult) return lyricsOnlyResult;
 
-    // Handle lyricsOnly mode
+    const splitItems = this.splitChordLyricsPair(pair, lyricsOnly);
+    return this.processSplitItems(splitItems, nextItemParam, line, lyricsOnly);
+  }
+
+  private handleLyricsOnlyMode(
+    pair: ChordLyricsPair,
+    nextItem: any,
+    lyricsOnly: boolean,
+  ): MeasuredItem[] | null {
+    if (!lyricsOnly) return null;
+
+    let lyrics = this.removeHyphens(pair.lyrics || '');
+    this.cleanNextItemHyphens(nextItem, () => { lyrics = lyrics.trimEnd(); });
+
+    if (lyrics === '') return [{ item: null, width: 0 }];
+    return null;
+  }
+
+  private cleanNextItemHyphens(nextItem: any, trimCallback: () => void): void {
+    if (!nextItem || !isChordLyricsPair(nextItem)) return;
+
+    const nextPair = nextItem as ChordLyricsPair;
+    const nextLyrics = nextPair.lyrics || '';
+    const hasHyphen = nextLyrics.startsWith(' -') || nextLyrics.startsWith('-');
+    if (!hasHyphen) return;
+
+    trimCallback();
+    nextPair.lyrics = this.removeHyphens(nextLyrics);
+  }
+
+  private processSplitItems(
+    splitItems: (ChordLyricsPair | SoftLineBreak)[],
+    nextItem: any,
+    line: Line,
+    lyricsOnly: boolean,
+  ): MeasuredItem[] {
+    return splitItems
+      .map((splitItem) => this.processSingleSplitItem(splitItem, nextItem, line, lyricsOnly))
+      .filter((item): item is MeasuredItem => item !== null);
+  }
+
+  private processSingleSplitItem(
+    splitItem: ChordLyricsPair | SoftLineBreak,
+    nextItem: any,
+    line: Line,
+    lyricsOnly: boolean,
+  ): MeasuredItem | null {
+    if (splitItem instanceof SoftLineBreak) {
+      return this.processSoftLineBreak(splitItem);
+    }
+    if (splitItem instanceof ChordLyricsPair) {
+      return this.measureChordLyricsPair(splitItem, nextItem, line, lyricsOnly);
+    }
+    return null;
+  }
+
+  private measureChordLyricsPair(
+    splitItem: ChordLyricsPair,
+    nextItem: any,
+    line: Line,
+    lyricsOnly: boolean,
+  ): MeasuredItem | null {
+    const { chords, lyrics } = this.getAdjustedChordsAndLyrics(splitItem, lyricsOnly);
+    if (lyricsOnly && lyrics === '') return { item: null, width: 0 };
+
+    const renderedChords = this.renderChordText(chords, line);
+    const measurements = this.calculateMeasurements(renderedChords, lyrics, nextItem, lyricsOnly);
+
+    return {
+      item: new ChordLyricsPair(chords, lyrics),
+      width: measurements.totalWidth,
+      chordHeight: measurements.chordHeight,
+    };
+  }
+
+  private getAdjustedChordsAndLyrics(
+    splitItem: ChordLyricsPair,
+    lyricsOnly: boolean,
+  ): { chords: string; lyrics: string } {
     if (lyricsOnly) {
-      lyrics = this.removeHyphens(lyrics);
-      if (nextItem && isChordLyricsPair(nextItem)) {
-        const nextLyrics = (nextItem as ChordLyricsPair).lyrics || '';
-        if (nextLyrics.startsWith(' -') || nextLyrics.startsWith('-')) {
-          lyrics = lyrics.trimEnd();
-          (nextItem as ChordLyricsPair).lyrics = this.removeHyphens(nextLyrics);
-        }
-      }
-      if (lyrics === '') {
-        items.push({ item: null, width: 0 });
-        return items;
-      }
+      return { chords: '', lyrics: this.removeHyphens(splitItem.lyrics || '') };
+    }
+    return { chords: splitItem.chords || '', lyrics: splitItem.lyrics || '' };
+  }
+
+  private renderChordText(chords: string, line: Line): string {
+    return renderChord(chords, line, this.song, {
+      renderKey: null,
+      useUnicodeModifier: this.config.useUnicodeModifiers,
+      normalizeChords: this.config.normalizeChords,
+      decapo: this.config.decapo,
+    });
+  }
+
+  private calculateMeasurements(
+    renderedChords: string,
+    lyrics: string,
+    nextItem: any,
+    lyricsOnly: boolean,
+  ): { totalWidth: number; chordHeight: number } {
+    const chordFont = this.config.fonts.chord;
+    const lyricsFont = this.config.fonts.lyrics;
+
+    const chordWidth = renderedChords ? this.measurer.measureTextWidth(renderedChords, chordFont) : 0;
+    const lyricsWidth = lyrics ? this.measurer.measureTextWidth(lyrics, lyricsFont) : 0;
+    const adjustedChordWidth = this.getAdjustedChordWidth(
+      chordWidth,
+      lyricsWidth,
+      renderedChords,
+      nextItem,
+      lyricsOnly,
+    );
+
+    return {
+      totalWidth: Math.max(adjustedChordWidth, lyricsWidth),
+      chordHeight: renderedChords ? this.measurer.measureTextHeight(renderedChords, chordFont) : 0,
+    };
+  }
+
+  private getAdjustedChordWidth(
+    chordWidth: number,
+    lyricsWidth: number,
+    renderedChords: string,
+    nextItem: any,
+    lyricsOnly: boolean,
+  ): number {
+    const nextItemHasChords = nextItem &&
+      isChordLyricsPair(nextItem) &&
+      (nextItem as ChordLyricsPair).chords?.trim() !== '';
+
+    const spaceWidth = this.getSpaceWidth(this.config.fonts.lyrics);
+    const needsSpacing = !lyricsOnly && nextItemHasChords && chordWidth >= (lyricsWidth - spaceWidth);
+
+    if (needsSpacing) {
+      const spacing = this.getChordSpacingAsSpaces();
+      return this.measurer.measureTextWidth(renderedChords + spacing, this.config.fonts.chord);
     }
 
-    // Split the chord-lyrics pair (e.g., on commas)
-    const splitItems = this.splitChordLyricsPair(pair, lyricsOnly);
-
-    splitItems.forEach((splitItem) => {
-      if (splitItem instanceof ChordLyricsPair) {
-        let splitChords = splitItem.chords || '';
-        let splitLyrics = splitItem.lyrics || '';
-
-        if (lyricsOnly) {
-          splitChords = ''; // No chords in lyricsOnly mode
-          splitLyrics = this.removeHyphens(splitLyrics);
-          if (splitLyrics === '') {
-            items.push({ item: null, width: 0 });
-            return;
-          }
-        }
-
-        const nextItemHasChords = nextItem &&
-          isChordLyricsPair(nextItem) &&
-          (nextItem as ChordLyricsPair).chords?.trim() !== '';
-
-        const renderedChords = renderChord(
-          splitChords,
-          line,
-          this.song,
-          {
-            renderKey: null,
-            useUnicodeModifier: this.config.useUnicodeModifiers,
-            normalizeChords: this.config.normalizeChords,
-            decapo: this.config.decapo,
-          },
-        );
-
-        const chordFont = this.config.fonts.chord;
-        const lyricsFont = this.config.fonts.lyrics;
-
-        const chordWidth = renderedChords ? this.measurer.measureTextWidth(renderedChords, chordFont) : 0;
-        const lyricsWidth = splitLyrics ? this.measurer.measureTextWidth(splitLyrics, lyricsFont) : 0;
-        const spaceWidth = this.getSpaceWidth(lyricsFont);
-
-        let adjustedChordWidth = chordWidth;
-        if (!lyricsOnly && nextItemHasChords && chordWidth >= (lyricsWidth - spaceWidth)) {
-          const spacing = this.getChordSpacingAsSpaces();
-          adjustedChordWidth = this.measurer.measureTextWidth(renderedChords + spacing, chordFont);
-        }
-
-        const totalWidth = Math.max(adjustedChordWidth, lyricsWidth);
-        const chordHeight = renderedChords ? this.measurer.measureTextHeight(renderedChords, chordFont) : 0;
-
-        items.push({
-          item: new ChordLyricsPair(splitChords, splitLyrics), // Use original chords without spacing
-          width: totalWidth,
-          chordHeight,
-        });
-      } else if (splitItem instanceof SoftLineBreak) {
-        items.push(this.processSoftLineBreak(splitItem));
-      }
-    });
-
-    return items;
+    return chordWidth;
   }
 
   /**

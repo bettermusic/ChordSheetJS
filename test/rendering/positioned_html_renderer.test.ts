@@ -420,7 +420,7 @@ describe('PositionedHtmlRenderer', () => {
       const originalY = (renderer as any).y;
       (renderer as any).y = 120;
 
-      const renderLinesSpy = jest.spyOn(renderer as any, 'renderLines').mockImplementation(() => {
+      const renderLinesSpy = jest.spyOn(renderer as any, 'renderLineItems').mockImplementation(() => {
         (renderer as any).elements.push(
           {
             x: 20,
@@ -695,6 +695,33 @@ describe('PositionedHtmlRenderer', () => {
       expect(metadata.pages).toBe('4');
       expect(metadata.capoKey).toBeDefined();
       expect(metadata.renderTime).toBe('7.25');
+    });
+  });
+
+  describe('title separator styling', () => {
+    it('renders title separator without underline', () => {
+      const { renderer } = createRenderer();
+      const mockTag = {
+        isSectionDelimiter: () => false,
+        name: 'comment',
+        value: ' > ',
+        label: null,
+        attributes: { __titleSeparator: 'true' },
+      };
+
+      // Call the private method directly
+      (renderer as any).renderTagItem(
+        mockTag,
+        100,
+        200,
+        { column: 1, page: 1 },
+      );
+
+      const { elements } = renderer as any;
+      const separatorElement = elements.find((el: any) => el.content === ' > ');
+
+      expect(separatorElement).toBeDefined();
+      expect(separatorElement.style.underline).toBe(false);
     });
   });
 });

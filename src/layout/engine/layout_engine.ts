@@ -1,4 +1,3 @@
-import ChordLyricsPair from '../../chord_sheet/chord_lyrics_pair';
 import Item from '../../chord_sheet/item';
 import { ItemProcessor } from './item_processor';
 import { LayoutFactory } from './layout_factory';
@@ -236,7 +235,8 @@ export class LayoutEngine {
 
   private handleTitleOnlyMode(params: HandleRepeatedSectionParams): void {
     const titleParagraphs = this.collectTitleParagraphs(params);
-    this.appendTitlesToCachedParagraph(params.cachedParagraph, titleParagraphs);
+    // Note: We intentionally do NOT call appendTitlesToCachedParagraph here
+    // as it would corrupt the cached paragraph for subsequent renders
     params.processedParagraphs.push(this.resolveTitleOnlyParagraph(titleParagraphs));
   }
 
@@ -334,50 +334,6 @@ export class LayoutEngine {
     return consolidated;
   }
 
-  private appendTitlesToCachedParagraph(cachedParagraph: Paragraph, titleParagraphs: Paragraph[]): void {
-    if (cachedParagraph.lines.length === 0 || titleParagraphs.length === 0) {
-      return;
-    }
-
-    const baseLine = cachedParagraph.lines[0];
-    let insertIndex = this.findTitleInsertIndex(baseLine);
-
-    titleParagraphs.forEach((titleParagraph) => {
-      insertIndex = this.appendTitleToLine(baseLine, titleParagraph, insertIndex);
-    });
-    this.ensureSoftBreakBeforeFirstChord(baseLine);
-    this.splitLineForTitleOnly(cachedParagraph, baseLine);
-  }
-
-  private findTitleInsertIndex(line: Line): number {
-    const firstContentIndex = line.items.findIndex((item) => !isTag(item));
-    return firstContentIndex === -1 ? line.items.length : firstContentIndex;
-  }
-
-  private appendTitleToLine(line: Line, titleParagraph: Paragraph, insertIndex: number): number {
-    if (titleParagraph.lines.length === 0) {
-      return insertIndex;
-    }
-
-    const titleLine = titleParagraph.lines[0];
-    if (!titleLine.items.length) {
-      return insertIndex;
-    }
-
-    const separatorItems = this.buildTitleSeparatorItems();
-    line.items.splice(insertIndex, 0, ...separatorItems);
-    let nextIndex = insertIndex + separatorItems.length;
-
-    titleLine.items.forEach((item) => {
-      if (isTag(item)) {
-        line.items.splice(nextIndex, 0, this.cloneItem(item));
-        nextIndex += 1;
-      }
-    });
-
-    return nextIndex;
-  }
-
   private addTitleSeparator(line: Line): void {
     line.items.push(...this.buildTitleSeparatorItems());
   }
@@ -388,70 +344,6 @@ export class LayoutEngine {
       new TitleSeparatorTag() as unknown as Item,
       new SoftLineBreak(' '),
     ] as unknown as Item[];
-  }
-
-  private ensureSoftBreakBeforeFirstChord(line: Line): void {
-    const chordIndex = line.items.findIndex((item) => item instanceof ChordLyricsPair);
-
-    if (chordIndex <= 0) {
-      return;
-    }
-
-    const precedingItem = line.items[chordIndex - 1];
-
-    if (precedingItem instanceof SoftLineBreak) {
-      return;
-    }
-
-    line.items.splice(chordIndex, 0, new SoftLineBreak(' ') as unknown as Item);
-  }
-
-  private splitLineForTitleOnly(paragraph: Paragraph, line: Line): void {
-    const { retainedItems, chordItems } = this.partitionLineItems(line);
-
-    this.trimTrailingSoftBreaks(retainedItems);
-    this.replaceLineItems(line, retainedItems);
-
-    if (chordItems.length === 0) {
-      return;
-    }
-
-    this.insertChordLine(paragraph, line, chordItems);
-  }
-
-  private partitionLineItems(line: Line): { retainedItems: Item[]; chordItems: Item[] } {
-    const retainedItems: Item[] = [];
-    const chordItems: Item[] = [];
-
-    line.items.forEach((item) => {
-      if (item instanceof ChordLyricsPair) {
-        chordItems.push(item);
-      } else {
-        retainedItems.push(item);
-      }
-    });
-
-    return { retainedItems, chordItems };
-  }
-
-  private trimTrailingSoftBreaks(items: Item[]): void {
-    while (items.length > 0 && items[items.length - 1] instanceof SoftLineBreak) {
-      items.pop();
-    }
-  }
-
-  private replaceLineItems(line: Line, items: Item[]): void {
-    line.items.splice(0, line.items.length, ...items);
-  }
-
-  private insertChordLine(paragraph: Paragraph, line: Line, chordItems: Item[]): void {
-    const chordLine = new Line({ type: line.type, items: [] });
-    chordItems.forEach((item) => chordLine.addItem(item));
-
-    const lineIndex = paragraph.lines.indexOf(line);
-    if (lineIndex !== -1) {
-      paragraph.lines.splice(lineIndex + 1, 0, chordLine);
-    }
   }
 
   private createTitleOnlyParagraph(originalParagraph: Paragraph): Paragraph {

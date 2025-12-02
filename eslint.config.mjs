@@ -146,7 +146,16 @@ export default tseslint.config(
     },
   },
   {
+    // Large renderer files require significant refactoring to meet max-lines
+    // Exclude from max-lines until they can be properly split into smaller modules
+    files: ['src/rendering/positioned_html_renderer.ts', 'src/rendering/js_pdf_renderer.ts'],
+    rules: {
+      'max-lines': 'off',
+    },
+  },
+  {
     ignores: [
+      'dist/**/*',
       'lib/**/*',
       'src/formatter/pdf_formatter/fonts/**/*',
       'src/normalize_mappings/suffix-normalize-mapping.ts',

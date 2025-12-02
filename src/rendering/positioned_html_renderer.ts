@@ -326,79 +326,168 @@ class PositionedHtmlRenderer extends Renderer {
     paragraphDiv.appendChild(htmlElement);
   }
 
-  /**
-   * Render lines of content with chords, lyrics, and other elements
-   */
+  /** Render lines of content with chords, lyrics, and other elements */
   protected renderLineItems(lines: LineLayout[]): void {
-    let { currentColumn } = this;
-    let { currentPage } = this;
-
-    lines.forEach((lineLayout) => {
-      const { items, lineHeight, line } = lineLayout;
-
-      if (this.hasColumnBreak(lineLayout)) {
-        this.moveToNextColumn();
-        currentColumn = this.currentColumn;
-        currentPage = this.currentPage;
-        return;
-      }
-
-      if (this.y + lineHeight > this.getColumnBottomY()) {
-        this.moveToNextColumn();
-        currentColumn = this.currentColumn;
-        currentPage = this.currentPage;
-      }
-
-      const yOffset = this.y;
-      const { chordsYOffset, lyricsYOffset } = this.calculateChordLyricYOffsets(items, yOffset);
-
-      let currentX = this.x;
-
-      items.forEach((measuredItem) => {
-        const { item, width } = measuredItem;
-
-        if (item instanceof ChordLyricsPair) {
-          let { chords } = item;
-          const { lyrics } = item;
-
-          if (chords) {
-            chords = this.processChords(chords, line as Line);
-          }
-
-          if (!this.isLyricsOnly() && chords) {
-            const chordBaseline = this.calculateChordBaseline(chordsYOffset, items, chords);
-            this.addTextElement(chords, currentX, chordBaseline, 'chord');
-            this.updatePosition(currentColumn, currentPage);
-          }
-
-          if (lyrics && lyrics.trim() !== '') {
-            this.addTextElement(lyrics, currentX, lyricsYOffset, 'lyrics');
-            this.updatePosition(currentColumn, currentPage);
-          }
-        } else if (item instanceof Tag) {
-          if (item.isSectionDelimiter()) {
-            this.addSectionLabel(item.label, currentX, yOffset);
-            this.updatePosition(currentColumn, currentPage);
-          } else if (isComment(item)) {
-            this.addComment(item.value, currentX, yOffset);
-            this.updatePosition(currentColumn, currentPage);
-          }
-        } else if (item instanceof SoftLineBreak) {
-          this.addTextElement(item.content, currentX, lyricsYOffset, 'lyrics');
-          this.updatePosition(currentColumn, currentPage);
-        }
-
-        currentX += width;
-      });
-
-      this.y += lineHeight;
-      this.x = this.getColumnStartX();
-    });
+    let ctx = { column: this.currentColumn, page: this.currentPage };
+    lines.forEach((lineLayout) => { ctx = this.renderSingleLine(lineLayout, ctx); });
   }
 
-  private updatePosition(currentColumn: number, currentPage: number) {
-    this.elements[this.elements.length - 1].column = currentColumn;
-    this.elements[this.elements.length - 1].page = currentPage;
+  private renderSingleLine(
+    lineLayout: LineLayout,
+    ctx: { column: number; page: number },
+  ): { column: number; page: number } {
+    if (this.hasColumnBreak(lineLayout)) {
+      this.moveToNextColumn();
+      return this.getCurrentContext();
+    }
+
+    const currentCtx = this.handleColumnOverflow(lineLayout.lineHeight, ctx);
+    this.renderLineContent(lineLayout, currentCtx);
+    return currentCtx;
+  }
+
+  private getCurrentContext(): { column: number; page: number } {
+    return { column: this.currentColumn, page: this.currentPage };
+  }
+
+  private handleColumnOverflow(
+    lineHeight: number,
+    ctx: { column: number; page: number },
+  ): { column: number; page: number } {
+    if (this.y + lineHeight > this.getColumnBottomY()) {
+      this.moveToNextColumn();
+      return this.getCurrentContext();
+    }
+    return ctx;
+  }
+
+  private renderLineContent(lineLayout: LineLayout, ctx: { column: number; page: number }): void {
+    const { items, lineHeight, line } = lineLayout;
+    const yOffset = this.y;
+    const { chordsYOffset, lyricsYOffset } = this.calculateChordLyricYOffsets(items, yOffset);
+
+    let currentX = this.x;
+    items.forEach((measuredItem) => {
+      this.renderMeasuredItem(measuredItem, currentX, yOffset, chordsYOffset, lyricsYOffset, items, line, ctx);
+      currentX += measuredItem.width;
+    });
+
+    this.y += lineHeight;
+    this.x = this.getColumnStartX();
+  }
+
+  private renderMeasuredItem(
+    measuredItem: MeasuredItem,
+    currentX: number,
+    yOffset: number,
+    chordsYOffset: number,
+    lyricsYOffset: number,
+    items: MeasuredItem[],
+    line: Line | null,
+    ctx: { column: number; page: number },
+  ): void {
+    const { item } = measuredItem;
+    if (item instanceof ChordLyricsPair) {
+      this.renderChordLyricsPairItem(item, currentX, chordsYOffset, lyricsYOffset, items, line as Line, ctx);
+    } else if (item instanceof Tag) {
+      this.renderTagItem(item, currentX, yOffset, ctx);
+    } else if (item instanceof SoftLineBreak) {
+      this.addTextElement(item.content, currentX, lyricsYOffset, 'lyrics');
+      this.updatePosition(ctx.column, ctx.page);
+    }
+  }
+
+  private renderChordLyricsPairItem(
+    item: ChordLyricsPair,
+    currentX: number,
+    chordsYOffset: number,
+    lyricsYOffset: number,
+    items: MeasuredItem[],
+    line: Line,
+    ctx: { column: number; page: number },
+  ): void {
+    let { chords } = item;
+    const { lyrics } = item;
+    if (chords) chords = this.processChords(chords, line);
+
+    if (!this.isLyricsOnly() && chords) {
+      const chordBaseline = this.calculateChordBaseline(chordsYOffset, items, chords);
+      this.addTextElement(chords, currentX, chordBaseline, 'chord');
+      this.updatePosition(ctx.column, ctx.page);
+    }
+
+    if (lyrics && lyrics.trim() !== '') {
+      this.addTextElement(lyrics, currentX, lyricsYOffset, 'lyrics');
+      this.updatePosition(ctx.column, ctx.page);
+    }
+  }
+
+  private renderTagItem(
+    item: Tag,
+    currentX: number,
+    yOffset: number,
+    ctx: { column: number; page: number },
+  ): void {
+    // Title separator should not have underline
+    const isTitleSeparator = item.attributes.__titleSeparator === 'true';
+
+    if (item.isSectionDelimiter()) {
+      this.addSectionLabel(item.label, currentX, yOffset, { noUnderline: isTitleSeparator });
+      this.updatePosition(ctx.column, ctx.page);
+    } else if (isComment(item)) {
+      this.addComment(item.value, currentX, yOffset, { noUnderline: isTitleSeparator });
+      this.updatePosition(ctx.column, ctx.page);
+    }
+  }
+
+  private updatePosition(column: number, page: number) {
+    const lastElement = this.elements[this.elements.length - 1];
+    lastElement.column = column;
+    lastElement.page = page;
+  }
+
+  protected addSectionLabel(
+    label: string,
+    x: number,
+    y: number,
+    options: { noUnderline?: boolean } = {},
+  ): void {
+    this.addTextElementWithOptions(label, x, y, 'sectionLabel', options);
+  }
+
+  protected addComment(
+    comment: string,
+    x: number,
+    y: number,
+    options: { noUnderline?: boolean } = {},
+  ): void {
+    this.addTextElementWithOptions(comment, x, y, 'comment', options);
+  }
+
+  private addTextElementWithOptions(
+    text: string,
+    x: number,
+    y: number,
+    type: string,
+    options: { noUnderline?: boolean } = {},
+  ): void {
+    const font = this.getFontForType(type);
+    const { width, height } = this.measureText(text, font);
+
+    // Create a modified style without underline if requested
+    const style = options.noUnderline ? { ...font, underline: false } : font;
+
+    this.elements.push({
+      x,
+      y,
+      width,
+      height,
+      content: text,
+      type,
+      style,
+      page: this.currentPage,
+      column: this.currentColumn,
+    });
   }
 
   /**
@@ -707,9 +796,7 @@ class PositionedHtmlRenderer extends Renderer {
     }
   }
 
-  /**
-   * Renders clipped text with optional ellipsis
-   */
+  /** Renders clipped text with optional ellipsis */
   private renderClippedText(
     textValue: string,
     position: any,
@@ -717,23 +804,38 @@ class PositionedHtmlRenderer extends Renderer {
     y: number,
     style: FontConfiguration,
   ): void {
+    const textElement = this.createClippedTextElement(textValue, position, availableWidth, style);
+    const x = this.calculateX(position.x, availableWidth);
+    this.doc.addElement(textElement, x, y);
+  }
+
+  private createClippedTextElement(
+    textValue: string,
+    position: any,
+    availableWidth: number,
+    style: FontConfiguration,
+  ): HTMLElement {
     const textElement = document.createElement('div');
     const prefix = this.configuration.cssClassPrefix || 'chord-sheet-';
     textElement.className = `${prefix}header-text`;
     this.applyFontStyle(textElement, style);
 
     if (position.ellipsis) {
-      textElement.style.whiteSpace = 'nowrap';
-      textElement.style.overflow = 'hidden';
-      textElement.style.textOverflow = 'ellipsis';
-      textElement.style.width = `${availableWidth}px`;
+      this.applyEllipsisStyle(textElement, availableWidth);
       textElement.textContent = textValue;
     } else {
       textElement.textContent = this.clipText(textValue, availableWidth, style);
     }
+    return textElement;
+  }
 
-    const x = this.calculateX(position.x, availableWidth);
-    this.doc.addElement(textElement, x, y);
+  private applyEllipsisStyle(el: HTMLElement, width: number): void {
+    Object.assign(el.style, {
+      whiteSpace: 'nowrap',
+      overflow: 'hidden',
+      textOverflow: 'ellipsis',
+      width: `${width}px`,
+    });
   }
 
   clipText(text: string, availableWidth: number, style: FontConfiguration): string {
