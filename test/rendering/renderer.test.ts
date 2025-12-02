@@ -1,4 +1,5 @@
 import ChordLyricsPair from '../../src/chord_sheet/chord_lyrics_pair';
+import Dimensions from '../../src/layout/engine/dimensions';
 import Line from '../../src/chord_sheet/line';
 import Song from '../../src/chord_sheet/song';
 import Tag from '../../src/chord_sheet/tag';
@@ -113,28 +114,36 @@ describe('Renderer base class', () => {
       return this.config;
     }
 
-    protected override getPageWidth(): number {
-      return this.config.page.width;
+    protected override get dimensions(): Dimensions {
+      return new Dimensions(
+        this.config.page.width,
+        this.config.page.height,
+        {
+          global: { margins: this.config.margins },
+          header: { height: this.config.headerHeight, content: [] },
+          footer: { height: this.config.footerHeight, content: [] },
+          sections: {
+            global: {
+              columnWidth: 200,
+              columnCount: this.config.columns.count,
+              columnSpacing: this.config.columns.spacing,
+              chordLyricSpacing: this.config.chordLyricSpacing,
+              linePadding: 0,
+              chordSpacing: 0,
+              paragraphSpacing: this.config.paragraphSpacing,
+            },
+            base: {},
+          },
+        },
+        {
+          columnCount: this.config.columns.count,
+          columnSpacing: this.config.columns.spacing,
+        },
+      );
     }
 
-    protected override getPageHeight(): number {
-      return this.config.page.height;
-    }
-
-    protected override getLeftMargin(): number {
-      return this.config.margins.left;
-    }
-
-    protected override getRightMargin(): number {
-      return this.config.margins.right;
-    }
-
-    protected override getTopMargin(): number {
-      return this.config.margins.top;
-    }
-
-    protected override getBottomMargin(): number {
-      return this.config.margins.bottom;
+    protected override getDocPageSize(): { width: number; height: number } {
+      return this.config.page;
     }
 
     protected override getHeaderHeight(): number {

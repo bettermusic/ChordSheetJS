@@ -1,5 +1,5 @@
-import { DomMeasurer } from '../layout/measurement';
-import { FontConfiguration } from '../formatter/configuration';
+import { DomMeasurer } from '../../layout/measurement';
+import { FontConfiguration } from '../../formatter/configuration';
 
 declare const document: any;
 declare type HTMLElement = any;
