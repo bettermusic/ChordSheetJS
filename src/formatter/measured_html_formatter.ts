@@ -1,7 +1,7 @@
 import { DomMeasurer } from '../layout/measurement';
 import { MeasuredHtmlFormatterConfiguration } from './configuration';
 import MeasurementBasedFormatter from './measurement_based_formatter';
-import PositionedHtmlRenderer from '../rendering/positioned_html_renderer';
+import PositionedHtmlRenderer from '../rendering/html/positioned_html_renderer';
 import Song from '../chord_sheet/song';
 import { getMeasuredHtmlDefaultConfig } from './configuration/default_config_manager';
 import { LayoutConfig, LayoutEngine } from '../layout/engine';

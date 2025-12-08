@@ -1,5 +1,5 @@
 import { FontConfiguration } from '../../src/formatter/configuration';
-import HtmlDocWrapper from '../../src/rendering/html_doc_wrapper';
+import HtmlDocWrapper from '../../src/rendering/html/html_doc_wrapper';
 
 interface MeasurerMocks {
   measureText: jest.Mock;

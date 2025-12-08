@@ -147,6 +147,7 @@ export default tseslint.config(
   },
   {
     ignores: [
+      'dist/**/*',
       'lib/**/*',
       'src/formatter/pdf_formatter/fonts/**/*',
       'src/normalize_mappings/suffix-normalize-mapping.ts',

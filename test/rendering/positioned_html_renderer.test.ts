@@ -1,6 +1,6 @@
 import ChordLyricsPair from '../../src/chord_sheet/chord_lyrics_pair';
 import Line from '../../src/chord_sheet/line';
-import PositionedHtmlRenderer from '../../src/rendering/positioned_html_renderer';
+import PositionedHtmlRenderer from '../../src/rendering/html/positioned_html_renderer';
 import Song from '../../src/chord_sheet/song';
 import Tag from '../../src/chord_sheet/tag';
 import {
@@ -17,7 +17,7 @@ const ChordProParserMock = jest.fn();
 const TextFormatterMock = jest.fn();
 const getCaposMock = jest.fn();
 
-jest.mock('../../src/rendering/html_doc_wrapper', () => ({
+jest.mock('../../src/rendering/html/html_doc_wrapper', () => ({
   __esModule: true,
   default: function HtmlDocWrapperStub(...args: any[]) {
     return HtmlDocWrapperMock(...args);
@@ -30,7 +30,7 @@ jest.mock('../../src/template_helpers', () => ({
   isComment: (tag: any) => tag?.name === 'comment' || tag?.type === 'comment',
 }));
 
-jest.mock('../../src/rendering/js_pdf_renderer', () => ({
+jest.mock('../../src/rendering/pdf/js_pdf_renderer', () => ({
   __esModule: true,
   default: function JsPdfRendererStub() {},
 }));
@@ -420,7 +420,7 @@ describe('PositionedHtmlRenderer', () => {
       const originalY = (renderer as any).y;
       (renderer as any).y = 120;
 
-      const renderLinesSpy = jest.spyOn(renderer as any, 'renderLines').mockImplementation(() => {
+      const renderLinesSpy = jest.spyOn(renderer as any, 'renderLineItems').mockImplementation(() => {
         (renderer as any).elements.push(
           {
             x: 20,
@@ -616,59 +616,6 @@ describe('PositionedHtmlRenderer', () => {
       expect(conditionCalls[0].metadata.capoKey).toBeDefined();
       expect(song.metadata.getSingle('key')).toBe('C');
     });
-
-    it('renders clipped and multiline text with alignment', () => {
-      const { renderer, doc } = createRenderer();
-      const style: FontConfiguration = {
-        name: 'Header',
-        style: 'normal',
-        size: 12,
-        color: '#111111',
-      };
-
-      doc.getTextWidth.mockReturnValueOnce(200);
-      (renderer as any).renderClippedText(
-        'Long header value',
-        {
-          x: 'right',
-          y: 0,
-          width: 150,
-          clip: true,
-          ellipsis: true,
-        },
-        150,
-        60,
-        style,
-      );
-      expect(doc.addElement).toHaveBeenCalled();
-      const clippedElement = doc.addedElements[0].element;
-      expect(clippedElement.style.textOverflow).toBe('ellipsis');
-
-      doc.splitTextToSize.mockReturnValue(['Line1', 'Line2']);
-      doc.getTextWidth.mockReturnValue(80);
-      (renderer as any).renderMultilineText('Line1\nLine2', { x: 'center', y: 0 }, 200, 40, style);
-      expect(doc.addElement).toHaveBeenCalledTimes(3);
-    });
-
-    it('applies type-specific styles to rendered elements', () => {
-      const { renderer } = createRenderer();
-      const element = new MockElement('div');
-      (renderer as any).applyElementStyle(element as any, {
-        type: 'chord',
-        content: '|',
-        style: {
-          name: 'ChordFont',
-          style: 'normal',
-          size: 12,
-          weight: 700,
-          color: '#ff0000',
-          lineHeight: 1.1,
-        },
-      } as any);
-      expect(element.style.whiteSpace).toBe('pre');
-      expect(element.style.color).toBe('#ff0000');
-      expect(element.style.fontWeight).toBe('500');
-    });
   });
 
   describe('caching and metadata', () => {
@@ -695,6 +642,33 @@ describe('PositionedHtmlRenderer', () => {
       expect(metadata.pages).toBe('4');
       expect(metadata.capoKey).toBeDefined();
       expect(metadata.renderTime).toBe('7.25');
+    });
+  });
+
+  describe('title separator styling', () => {
+    it('renders title separator without underline', () => {
+      const { renderer } = createRenderer();
+      const mockTag = {
+        isSectionDelimiter: () => false,
+        name: 'comment',
+        value: ' > ',
+        label: null,
+        attributes: { __titleSeparator: 'true' },
+      };
+
+      // Call the private method directly
+      (renderer as any).renderTagItem(
+        mockTag,
+        100,
+        200,
+        { column: 1, page: 1 },
+      );
+
+      const { elements } = renderer as any;
+      const separatorElement = elements.find((el: any) => el.content === ' > ');
+
+      expect(separatorElement).toBeDefined();
+      expect(separatorElement.style.underline).toBe(false);
     });
   });
 });

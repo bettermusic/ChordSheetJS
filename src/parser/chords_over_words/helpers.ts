@@ -64,46 +64,64 @@ function chordProperties(chord: Chord): ChordProperties {
   return properties;
 }
 
+function getChordData(chord: Chord) {
+  return (chord.type === 'chord') ? { chord: chordProperties(chord) } : { chords: chord.value };
+}
+
+function buildSoftLineBreakResult(
+  chordData: ReturnType<typeof getChordData>,
+  firstWord: string,
+  rest: string | null,
+): (SerializedChordLyricsPair | SerializedSoftLineBreak)[] {
+  const cleanFirstWord = firstWord.replace(/\\\s*$/, '');
+  const result: (SerializedChordLyricsPair | SerializedSoftLineBreak)[] = [
+    { ...chordData, type: 'chordLyricsPair', lyrics: cleanFirstWord } as SerializedChordLyricsPair,
+    { type: 'softLineBreak', content: ' ' } as SerializedSoftLineBreak,
+  ];
+
+  if (rest) {
+    result.push(...applySoftLineBreaks(rest).filter((x) => x !== null));
+  }
+
+  return result;
+}
+
+function buildChordLyricsPairForChord(
+  chord: Chord,
+  nextChord: Chord | undefined,
+  lyrics: string,
+  chopFirstWord: boolean,
+): (SerializedChordLyricsPair | SerializedSoftLineBreak)[] | SerializedChordLyricsPair {
+  const start = chord.column - 1;
+  const end = nextChord ? nextChord.column - 1 : lyrics.length;
+  const pairLyrics = lyrics.substring(start, end);
+  const [firstWord, rest] = chopFirstWord ? chopFirstWordFunc(pairLyrics) : [pairLyrics, null];
+  const chordData = getChordData(chord);
+
+  const hasSoftLineBreakInFirst = firstWord && /\\\s*$/.test(firstWord);
+
+  if (hasSoftLineBreakInFirst) {
+    return buildSoftLineBreakResult(chordData, firstWord, rest);
+  }
+
+  if (rest) {
+    return [
+      { ...chordData, type: 'chordLyricsPair', lyrics: `${firstWord} ` } as SerializedChordLyricsPair,
+      ...applySoftLineBreaks(rest),
+    ].filter((x) => x !== null);
+  }
+
+  return { ...chordData, type: 'chordLyricsPair', lyrics: firstWord } as SerializedChordLyricsPair;
+}
+
 function constructChordLyricsPairs(
   chords: Chord[],
   lyrics: string,
   chopFirstWord: boolean,
 ): (SerializedChordLyricsPair | SerializedSoftLineBreak)[] {
-  return chords.map((chord, i) => {
-    const nextChord = chords[i + 1];
-    const start = chord.column - 1;
-    const end = nextChord ? nextChord.column - 1 : lyrics.length;
-    const pairLyrics = lyrics.substring(start, end);
-    const [firstWord, rest] = chopFirstWord ? chopFirstWordFunc(pairLyrics) : [pairLyrics, null];
-    const chordData = (chord.type === 'chord') ? { chord: chordProperties(chord) } : { chords: chord.value };
-
-    // Check if firstWord contains a soft line break pattern
-    const hasSoftLineBreakInFirst = firstWord && /\\\s*$/.test(firstWord);
-
-    if (hasSoftLineBreakInFirst) {
-      // Remove the backslash and any trailing whitespace from firstWord
-      const cleanFirstWord = firstWord.replace(/\\\s*$/, '');
-      const result: (SerializedChordLyricsPair | SerializedSoftLineBreak)[] = [
-        { ...chordData, type: 'chordLyricsPair', lyrics: cleanFirstWord } as SerializedChordLyricsPair,
-        { type: 'softLineBreak', content: ' ' } as SerializedSoftLineBreak,
-      ];
-
-      if (rest) {
-        result.push(...applySoftLineBreaks(rest).filter((x) => x !== null));
-      }
-
-      return result;
-    }
-
-    if (rest) {
-      return [
-        { ...chordData, type: 'chordLyricsPair', lyrics: `${firstWord} ` } as SerializedChordLyricsPair,
-        ...applySoftLineBreaks(rest),
-      ].filter((x) => x !== null);
-    }
-
-    return { ...chordData, type: 'chordLyricsPair', lyrics: firstWord } as SerializedChordLyricsPair;
-  }).flat();
+  return chords
+    .map((chord, i) => buildChordLyricsPairForChord(chord, chords[i + 1], lyrics, chopFirstWord))
+    .flat();
 }
 
 function pairChordsWithLyrics(

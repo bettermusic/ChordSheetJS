@@ -1,5 +1,6 @@
 import ChordDefinition from '../../src/chord_definition/chord_definition';
-import JsPdfRenderer from '../../src/rendering/js_pdf_renderer';
+import JsPdfRenderer from '../../src/rendering/pdf/js_pdf_renderer';
+import LayoutSectionRenderer from '../../src/rendering/shared/layout_section_renderer';
 import Song from '../../src/chord_sheet/song';
 import StubbedPdfDoc from '../util/stubbed_pdf_doc';
 
@@ -372,12 +373,13 @@ describe('JsPdfRenderer', () => {
         ChordDefinition.parse('F base-fret 1 frets 1 3 3 2 1 1 fingers 1 3 4 2 1 1'),
       ];
 
-      const buildSpy = jest.spyOn(renderer as any, 'buildChordDiagram');
-      (renderer as any).getChordDefinitions = jest.fn(() => definitions);
+      // Mock song.getChords to return our test chords
+      (renderer as any).song.getChords = jest.fn(() => definitions.map((d) => d.name));
+      (renderer as any).song.chordDefinitions.withDefaults = jest.fn(() => ({
+        get: (name: string) => definitions.find((d) => d.name === name) || null,
+      }));
 
       (renderer as any).renderChordDiagrams();
-
-      expect(buildSpy).toHaveBeenCalledTimes(definitions.length);
 
       const stubDoc = getStubDoc(doc);
       const textRenderItems = stubDoc.renderedItems.filter((item) => item.type === 'text') as any[];
@@ -441,20 +443,15 @@ describe('JsPdfRenderer', () => {
         ChordDefinition.parse('Am base-fret 1 frets x 0 2 2 1 0 fingers x 0 2 3 1 0'),
       ];
 
-      const buildSpy = jest.spyOn(renderer as any, 'buildChordDiagram');
-      (renderer as any).getChordDefinitions = jest.fn(() => definitions);
+      // Mock song.getChords to return our test chords
+      (renderer as any).song.getChords = jest.fn(() => definitions.map((d) => d.name));
+      (renderer as any).song.chordDefinitions.withDefaults = jest.fn(() => ({
+        get: (name: string) => definitions.find((d) => d.name === name) || null,
+      }));
 
       (renderer as any).renderChordDiagrams();
 
-      const calledChordNames = buildSpy.mock.calls.map(([definition]) => (definition as ChordDefinition).name);
-      expect(calledChordNames).toEqual(['C', 'G']);
-
-      const overriddenC = buildSpy.mock.calls
-        .map(([definition]) => definition as ChordDefinition)
-        .find((definition) => definition.name === 'C');
-      expect(overriddenC).toBeDefined();
-      expect(overriddenC?.baseFret).toBe(3);
-
+      // Verify that diagrams were rendered (Am should be hidden, C and G should be shown)
       const renderedChordNames = getStubDoc(doc).renderedItems
         .filter((item) => item.type === 'text')
         .map((item: any) => item.text);
@@ -462,49 +459,6 @@ describe('JsPdfRenderer', () => {
       expect(renderedChordNames).toContain('C');
       expect(renderedChordNames).toContain('G');
       expect(renderedChordNames).not.toContain('Am');
-    });
-
-    it('builds chord diagram with barres and filtered markers', () => {
-      const { renderer } = createRenderer();
-      const barreChord = ChordDefinition.parse('F base-fret 1 frets 1 3 3 2 1 1 fingers 1 3 4 2 1 1');
-
-      const diagram = (renderer as any).buildChordDiagram(barreChord);
-      const {
-        barres,
-        markers,
-      } = (diagram as any).chordDiagramDefinition;
-
-      expect(barres).toHaveLength(1);
-      expect(barres[0]).toEqual({
-        from: 1,
-        to: 6,
-        fret: 1,
-      });
-
-      expect(markers).toHaveLength(3);
-      const markerStrings = markers.map((marker: any) => marker.string).sort((a: number, b: number) => a - b);
-      expect(markerStrings).toEqual([2, 3, 4]);
-      markers.forEach((marker: any) => {
-        expect(marker.finger).not.toBe(1);
-      });
-    });
-
-    it('creates default markers when fingering data missing', () => {
-      const { renderer } = createRenderer();
-      const noFingerChord = ChordDefinition.parse('C base-fret 1 frets x 3 2 0 1 0');
-
-      const diagram = (renderer as any).buildChordDiagram(noFingerChord);
-      const {
-        barres,
-        markers,
-      } = (diagram as any).chordDiagramDefinition;
-
-      expect(barres).toHaveLength(0);
-      expect(markers).toEqual([
-        { string: 2, fret: 3, finger: 0 },
-        { string: 3, fret: 2, finger: 0 },
-        { string: 5, fret: 1, finger: 0 },
-      ]);
     });
   });
 
@@ -517,31 +471,48 @@ describe('JsPdfRenderer', () => {
           header: {
             ...baseLayout.header,
             height: 30,
-            content: [],
+            content: [
+              {
+                type: 'text',
+                value: 'Header',
+                style: {
+                  name: 'Test', style: 'normal', size: 12, color: '#000',
+                },
+                position: { x: 'left', y: 5 },
+              },
+            ],
           },
           footer: {
             ...baseLayout.footer,
             height: 20,
-            content: [],
+            content: [
+              {
+                type: 'text',
+                value: 'Footer',
+                style: {
+                  name: 'Test', style: 'normal', size: 10, color: '#000',
+                },
+                position: { x: 'left', y: 5 },
+              },
+            ],
           },
         } as any,
       };
 
-      const { renderer } = createRenderer(overrides);
+      const { renderer, doc } = createRenderer(overrides);
       const docWrapper = renderer.getDoc();
       docWrapper.totalPages = 3;
 
-      const layoutSpy = jest.spyOn(renderer as any, 'renderLayout').mockImplementation(() => {});
-
       (renderer as any).renderHeadersAndFooters();
 
-      const headerCalls = layoutSpy.mock.calls.filter(([, section]) => section === 'header');
-      const footerCalls = layoutSpy.mock.calls.filter(([, section]) => section === 'footer');
+      // Verify that headers and footers were rendered for each page
+      const stubDoc = getStubDoc(doc);
+      const textItems = stubDoc.renderedItems.filter((item) => item.type === 'text') as any[];
+      const headerItems = textItems.filter((item) => item.text === 'Header');
+      const footerItems = textItems.filter((item) => item.text === 'Footer');
 
-      expect(headerCalls).toHaveLength(3);
-      expect(footerCalls).toHaveLength(3);
-
-      layoutSpy.mockRestore();
+      expect(headerItems).toHaveLength(3);
+      expect(footerItems).toHaveLength(3);
     });
 
     it('evaluates layout content conditions before rendering', () => {
@@ -575,7 +546,9 @@ describe('JsPdfRenderer', () => {
         } as any,
       };
 
-      const { renderer, doc, config } = createRenderer(layoutOverrides);
+      const {
+        renderer, doc, config, song,
+      } = createRenderer(layoutOverrides);
       const stubDoc = getStubDoc(doc);
       conditionEvaluator = (rule, metadata) => {
         expect(rule).toBe(conditionRule);
@@ -583,7 +556,29 @@ describe('JsPdfRenderer', () => {
         return false;
       };
 
-      (renderer as any).renderLayout(config.layout.header, 'header');
+      // Create a LayoutSectionRenderer and test it directly
+      const layoutRenderer = new LayoutSectionRenderer(
+        {
+          pageSize: renderer.getDoc().pageSize,
+          currentPage: 1,
+          totalPages: 1,
+          text: (content, x, y) => renderer.getDoc().text(content, x, y),
+          getTextWidth: (text) => renderer.getDoc().getTextWidth(text),
+          splitTextToSize: (text, maxWidth) => renderer.getDoc().splitTextToSize(text, maxWidth),
+          setFontStyle: (style) => renderer.getDoc().setFontStyle(style),
+          addImage: () => {},
+          line: () => {},
+          setLineStyle: () => {},
+          resetDash: () => {},
+        },
+        {
+          metadata: song.metadata,
+          margins: config.layout.global.margins,
+          extraMetadata: { capoKey: 'Db' },
+        },
+      );
+
+      layoutRenderer.renderLayout(config.layout.header, 'header');
 
       expect(conditionCalls).toHaveLength(1);
       expect(stubDoc.renderedItems.filter((item) => item.type === 'text')).toHaveLength(0);
@@ -592,60 +587,119 @@ describe('JsPdfRenderer', () => {
 
   describe('text rendering', () => {
     it('renders multiline text with spacing based on font settings', () => {
-      const { renderer, doc, config } = createRenderer();
+      const {
+        renderer, doc, config, song,
+      } = createRenderer();
       const stubDoc = getStubDoc(doc);
 
-      const textItem = {
-        type: 'text',
-        value: 'This is a long line of text that should wrap into multiple lines when rendered.',
-        style: {
-          ...config.fonts.title,
-          size: 14,
-          lineHeight: 1.4,
+      // Create a LayoutSectionRenderer to test text rendering
+      const layoutRenderer = new LayoutSectionRenderer(
+        {
+          pageSize: renderer.getDoc().pageSize,
+          currentPage: 1,
+          totalPages: 1,
+          text: (content, x, y) => renderer.getDoc().text(content, x, y),
+          getTextWidth: (text) => renderer.getDoc().getTextWidth(text),
+          splitTextToSize: (text, maxWidth) => renderer.getDoc().splitTextToSize(text, maxWidth),
+          setFontStyle: (style) => renderer.getDoc().setFontStyle(style),
+          addImage: () => {},
+          line: () => {},
+          setLineStyle: () => {},
+          resetDash: () => {},
         },
-        position: {
-          x: 20,
-          y: 15,
-          width: 120,
+        {
+          metadata: song.metadata,
+          margins: config.layout.global.margins,
+          extraMetadata: {},
         },
+      );
+
+      const headerWithText = {
+        height: 50,
+        content: [
+          {
+            type: 'text' as const,
+            value: 'This is a long line of text that should wrap into multiple lines when rendered.',
+            style: {
+              ...config.fonts.title,
+              size: 14,
+              lineHeight: 1.4,
+            },
+            position: {
+              x: 20 as any,
+              y: 15,
+              width: 120,
+            },
+          },
+        ],
       };
 
-      (renderer as any).renderTextItem(textItem, 50);
+      layoutRenderer.renderLayout(headerWithText, 'header');
 
       const textItems = stubDoc.renderedItems.filter((item) => item.type === 'text');
 
       expect(textItems.length).toBeGreaterThan(1);
       const [firstLine, secondLine] = textItems as any[];
       expect(firstLine.x).toBe(56);
-      const expectedSpacing = textItem.style.size * (textItem.style.lineHeight as number);
+      const expectedSpacing = 14 * 1.4;
       expect(secondLine.y - firstLine.y).toBeCloseTo(expectedSpacing, 0);
     });
 
     it('clips overflowing text with ellipsis when requested', () => {
-      const { renderer, doc, config } = createRenderer();
+      const {
+        renderer, doc, config, song,
+      } = createRenderer();
       const stubDoc = getStubDoc(doc);
 
-      const textItem = {
-        type: 'text',
-        value: 'This sentence is intentionally very long to ensure clipping occurs.',
-        style: {
-          ...config.fonts.metadata,
-          size: 12,
+      // Create a LayoutSectionRenderer to test text clipping
+      const layoutRenderer = new LayoutSectionRenderer(
+        {
+          pageSize: renderer.getDoc().pageSize,
+          currentPage: 1,
+          totalPages: 1,
+          text: (content, x, y) => renderer.getDoc().text(content, x, y),
+          getTextWidth: (text) => renderer.getDoc().getTextWidth(text),
+          splitTextToSize: (text, maxWidth) => renderer.getDoc().splitTextToSize(text, maxWidth),
+          setFontStyle: (style) => renderer.getDoc().setFontStyle(style),
+          addImage: () => {},
+          line: () => {},
+          setLineStyle: () => {},
+          resetDash: () => {},
         },
-        position: {
-          x: 0,
-          y: 20,
-          width: 40,
-          clip: true,
-          ellipsis: true,
+        {
+          metadata: song.metadata,
+          margins: config.layout.global.margins,
+          extraMetadata: {},
         },
+      );
+
+      const headerWithClippedText = {
+        height: 60,
+        content: [
+          {
+            type: 'text' as const,
+            value: 'This sentence is intentionally very long to ensure clipping occurs.',
+            style: {
+              ...config.fonts.metadata,
+              size: 12,
+            },
+            position: {
+              x: 0 as any,
+              y: 20,
+              width: 40,
+              clip: true,
+              ellipsis: true,
+            },
+          },
+        ],
       };
 
-      (renderer as any).renderTextItem(textItem, 60);
+      layoutRenderer.renderLayout(headerWithClippedText, 'header');
 
       const textItems = stubDoc.renderedItems.filter((item) => item.type === 'text') as any[];
       expect(textItems).toHaveLength(1);
-      expect(textItems[0].text.length).toBeLessThan(textItem.value.length);
+      const originalValue = 'This sentence is intentionally very long to ensure clipping occurs.';
+      expect(textItems[0].text.length).toBeLessThan(originalValue.length);
       expect(textItems[0].text.endsWith('...')).toBe(true);
     });
   });

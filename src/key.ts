@@ -352,71 +352,41 @@ class Key implements KeyProperties {
 
   toChordSymbol(key: Key | string | null, referenceKeyWasMinor = false): Key {
     if (this.isChordSymbol()) return this.clone();
-
-    const { modifier } = this;
-    this.ensureGrade();
-
-    const keyObj = Key.wrapOrFail(key);
-
-    if ((this.isNumeral() || this.isNumeric()) && referenceKeyWasMinor) {
-      // In minor keys, degree 6 with 'm' quality maps to the tonic (i)
-      // 8th semitone is the 6th degree of the relative minor
-      if (this.grade === 8) {
-        return keyObj.relativeMinor;
-      }
-      if (this.grade === 7) {
-        return keyObj.relativeMinor.changeGrade(-1);
-      }
-      if (this.grade === 9) {
-        return keyObj.relativeMinor.changeGrade(+1);
-      }
-    }
-
-    const chordSymbol = this.set({
-      referenceKeyGrade: Key.shiftGrade(this.effectiveGrade + keyObj.effectiveGrade),
-      grade: 0,
-      type: SYMBOL,
-      modifier: null,
-      preferredModifier: modifier || keyObj.modifier,
-    });
-
-    const normalized = chordSymbol.normalizeEnharmonics(keyObj);
-    return modifier ? normalized.set({ preferredModifier: modifier, modifier: null }) : normalized;
+    return this.convertToChordType(key, SYMBOL, referenceKeyWasMinor);
   }
 
   toChordSolfege(key: Key | string | null, referenceKeyWasMinor = false): Key {
     if (this.isChordSolfege()) return this.clone();
+    return this.convertToChordType(key, SOLFEGE, referenceKeyWasMinor);
+  }
 
+  private convertToChordType(key: Key | string | null, type: ChordType, referenceKeyWasMinor: boolean): Key {
     const { modifier } = this;
-
     this.ensureGrade();
-
     const keyObj = Key.wrapOrFail(key);
 
-    if ((this.isNumeral() || this.isNumeric()) && referenceKeyWasMinor) {
-      // In minor keys, degree 6 with 'm' quality maps to the tonic (i)
-      // 8th semitone is the 6th degree of the relative minor
-      if (this.grade === 8) {
-        return keyObj.relativeMinor;
-      }
-      if (this.grade === 7) {
-        return keyObj.relativeMinor.transposeDown();
-      }
-      if (this.grade === 9) {
-        return keyObj.relativeMinor.transposeUp();
-      }
-    }
+    const minorResult = this.handleMinorKeyConversion(keyObj, referenceKeyWasMinor);
+    if (minorResult) return minorResult;
 
-    const chordSolfege = this.set({
+    const converted = this.set({
       referenceKeyGrade: Key.shiftGrade(this.effectiveGrade + keyObj.effectiveGrade),
       grade: 0,
-      type: SOLFEGE,
+      type,
       modifier: null,
       preferredModifier: modifier || keyObj.modifier,
     });
 
-    const normalized = chordSolfege.normalizeEnharmonics(keyObj);
+    const normalized = converted.normalizeEnharmonics(keyObj);
     return modifier ? normalized.set({ preferredModifier: modifier, modifier: null }) : normalized;
+  }
+
+  private handleMinorKeyConversion(keyObj: Key, referenceKeyWasMinor: boolean): Key | null {
+    if (!(this.isNumeral() || this.isNumeric()) || !referenceKeyWasMinor) return null;
+    // In minor keys, degree 6 with 'm' quality maps to the tonic (i)
+    if (this.grade === 8) return keyObj.relativeMinor;
+    if (this.grade === 7) return keyObj.relativeMinor.changeGrade(-1);
+    if (this.grade === 9) return keyObj.relativeMinor.changeGrade(+1);
+    return null;
   }
 
   toChordSymbolString(key: Key): string {
@@ -656,33 +626,21 @@ class Key implements KeyProperties {
   }
 
   canBeFlat() {
-    if (this.number !== null) {
-      return !NO_FLAT_NUMBERS.includes(this.number);
-    }
-
-    return !NO_FLAT_GRADES.includes(this.effectiveGrade);
+    const list = this.number !== null ? NO_FLAT_NUMBERS : NO_FLAT_GRADES;
+    const value = this.number ?? this.effectiveGrade;
+    return !list.includes(value);
   }
 
   canBeSharp() {
-    if (this.number !== null) {
-      return !NO_SHARP_NUMBERS.includes(this.number);
-    }
-
-    return !NO_SHARP_GRADES.includes(this.effectiveGrade);
+    const list = this.number !== null ? NO_SHARP_NUMBERS : NO_SHARP_GRADES;
+    const value = this.number ?? this.effectiveGrade;
+    return !list.includes(value);
   }
 
-  setGrade(newGrade: number): Key {
-    return this.set({
-      grade: Key.shiftGrade(newGrade),
-    });
-  }
+  setGrade(newGrade: number): Key { return this.set({ grade: Key.shiftGrade(newGrade) }); }
 
-  static shiftGrade(grade: number) {
-    if (grade < 0) {
-      return this.shiftGrade(grade + 12);
-    }
-
-    return grade % 12;
+  static shiftGrade(grade: number): number {
+    return grade < 0 ? this.shiftGrade(grade + 12) : grade % 12;
   }
 
   useModifier(newModifier: Modifier | null): Key {

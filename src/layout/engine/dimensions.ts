@@ -74,7 +74,12 @@ class Dimensions {
     return 1;
   }
 
-  private findMaxColumnsWithinBounds(availableWidth: number, columnSpacing: number, minColumnWidth: number, maxColumnWidth: number) {
+  private findMaxColumnsWithinBounds(
+    availableWidth: number,
+    columnSpacing: number,
+    minColumnWidth: number,
+    maxColumnWidth: number,
+  ) {
     // Start with the minimum number of columns that respect minColumnWidth
     const maxPossibleColumns = Math.floor(
       (availableWidth + columnSpacing) / (minColumnWidth + columnSpacing),
@@ -82,27 +87,45 @@ class Dimensions {
 
     // Test each possible column count to find the best fit
     for (let columnCount = 1; columnCount <= maxPossibleColumns; columnCount += 1) {
-      const totalSpacing = (columnCount - 1) * columnSpacing;
-      const columnWidth = (availableWidth - totalSpacing) / columnCount;
-
-      // If this column width fits within our constraints, it's valid
-      if (columnWidth >= minColumnWidth && columnWidth <= maxColumnWidth) {
-        // Check if the next column count would still be valid
-        const nextColumnCount = columnCount + 1;
-        const nextTotalSpacing = (nextColumnCount - 1) * columnSpacing;
-        const nextColumnWidth = (availableWidth - nextTotalSpacing) / nextColumnCount;
-
-        // If the next column count would be too narrow, use current count
-        if (nextColumnWidth < minColumnWidth) {
-          return columnCount;
-        }
-      } else if (columnWidth < minColumnWidth) {
-        // This and higher column counts will be too narrow
-        return Math.max(1, columnCount - 1);
-      }
+      const result = this.evaluateColumnCount(
+        columnCount,
+        availableWidth,
+        columnSpacing,
+        minColumnWidth,
+        maxColumnWidth,
+      );
+      if (result !== null) return result;
     }
 
     return Math.max(1, maxPossibleColumns);
+  }
+
+  private evaluateColumnCount(
+    columnCount: number,
+    availableWidth: number,
+    columnSpacing: number,
+    minColumnWidth: number,
+    maxColumnWidth: number,
+  ): number | null {
+    const totalSpacing = (columnCount - 1) * columnSpacing;
+    const columnWidth = (availableWidth - totalSpacing) / columnCount;
+
+    // If column width is below minimum, this and higher counts are too narrow
+    if (columnWidth < minColumnWidth) {
+      return Math.max(1, columnCount - 1);
+    }
+
+    // If this column width fits within our constraints, check if we should stop here
+    if (columnWidth >= minColumnWidth && columnWidth <= maxColumnWidth) {
+      const nextColumnCount = columnCount + 1;
+      const nextTotalSpacing = (nextColumnCount - 1) * columnSpacing;
+      const nextColumnWidth = (availableWidth - nextTotalSpacing) / nextColumnCount;
+
+      // If the next column count would be too narrow, use current count
+      if (nextColumnWidth < minColumnWidth) return columnCount;
+    }
+
+    return null;
   }
 
   private fitMaxColumnsWithMinWidth(availableWidth: number, columnSpacing: number, minColumnWidth: number) {
@@ -143,30 +166,39 @@ class Dimensions {
     maxColumnWidth?: number,
     minColumnWidth?: number,
   ): number {
-    // Single columns use full width regardless of constraints
-    if (columnCount <= 1) {
-      return baseColumnSpacing;
-    }
-
-    // When only minColumnWidth is specified, keep base spacing and let columns expand
-    if (minColumnWidth && !maxColumnWidth) {
+    // Single columns or only minColumnWidth specified: use base spacing
+    if (columnCount <= 1 || (minColumnWidth && !maxColumnWidth)) {
       return baseColumnSpacing;
     }
 
     // When maxColumnWidth is specified, adjust spacing if columns would be too wide
     if (maxColumnWidth) {
-      // Calculate what the column width would be with base spacing
-      const baseTotalSpacing = (columnCount - 1) * baseColumnSpacing;
-      const baseColumnWidth = (availableWidth - baseTotalSpacing) / columnCount;
+      return this.calculateAdjustedSpacing(
+        columnCount,
+        availableWidth,
+        baseColumnSpacing,
+        maxColumnWidth,
+      );
+    }
 
-      // If columns would be larger than maxColumnWidth, add the difference to spacing
-      if (baseColumnWidth > maxColumnWidth) {
-        const excessWidth = baseColumnWidth - maxColumnWidth;
-        const totalExcessWidth = excessWidth * columnCount;
-        const additionalSpacingPerGap = totalExcessWidth / (columnCount - 1);
+    return baseColumnSpacing;
+  }
 
-        return baseColumnSpacing + additionalSpacingPerGap;
-      }
+  private calculateAdjustedSpacing(
+    columnCount: number,
+    availableWidth: number,
+    baseColumnSpacing: number,
+    maxColumnWidth: number,
+  ): number {
+    const baseTotalSpacing = (columnCount - 1) * baseColumnSpacing;
+    const baseColumnWidth = (availableWidth - baseTotalSpacing) / columnCount;
+
+    // If columns would be larger than maxColumnWidth, add the difference to spacing
+    if (baseColumnWidth > maxColumnWidth) {
+      const excessWidth = baseColumnWidth - maxColumnWidth;
+      const totalExcessWidth = excessWidth * columnCount;
+      const additionalSpacingPerGap = totalExcessWidth / (columnCount - 1);
+      return baseColumnSpacing + additionalSpacingPerGap;
     }
 
     return baseColumnSpacing;

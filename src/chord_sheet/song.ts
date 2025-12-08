@@ -55,81 +55,44 @@ class Song extends MetadataAccessors {
     }
   }
 
-  /**
-   * Returns the song lines, skipping the leading empty lines (empty as in not rendering any content). This is useful
-   * if you want to skip the "header lines": the lines that only contain meta data.
-   * @returns {Line[]} The song body lines
-   */
+  /** Returns song lines, skipping leading empty/meta-only lines. @returns {Line[]} */
   get bodyLines(): Line[] {
-    if (!this._bodyLines) {
-      this._bodyLines = this.selectRenderableItems(this.lines) as Line[];
-    }
-
+    this._bodyLines ??= this.selectRenderableItems(this.lines) as Line[];
     return this._bodyLines;
   }
 
-  /**
-   * Returns the song paragraphs, skipping the paragraphs that only contain empty lines
-   * (empty as in not rendering any content)
-   * @see {@link bodyLines}
-   * @returns {Paragraph[]}
-   */
+  /** Returns song paragraphs, skipping paragraphs with only empty lines. @returns {Paragraph[]} */
   get bodyParagraphs(): Paragraph[] {
-    if (!this._bodyParagraphs) {
-      this._bodyParagraphs = this.selectRenderableItems(this.paragraphs) as Paragraph[];
-    }
-
+    this._bodyParagraphs ??= this.selectRenderableItems(this.paragraphs) as Paragraph[];
     return this._bodyParagraphs;
   }
 
   get renderParagraphs(): Paragraph[] {
-    if (!this._renderParagraphs) {
-      return this.bodyParagraphs;
-    }
-    return this._renderParagraphs;
+    return this._renderParagraphs ?? this.bodyParagraphs;
   }
 
-  set renderParagraphs(paragraphs: Paragraph[]) {
-    this._renderParagraphs = paragraphs;
-  }
+  set renderParagraphs(paragraphs: Paragraph[]) { this._renderParagraphs = paragraphs; }
 
   selectRenderableItems(items: (Line | Paragraph)[]): (Line | Paragraph)[] {
     const copy = [...items];
-
-    while (copy.length && !copy[0].hasRenderableItems()) {
-      copy.shift();
-    }
-
+    while (copy.length && !copy[0].hasRenderableItems()) copy.shift();
     return copy;
   }
 
-  /**
-   * The {@link Paragraph} items of which the song consists
-   * @member {Paragraph[]}
-   */
-  get paragraphs(): Paragraph[] {
-    return this.linesToParagraphs(this.lines);
-  }
+  /** The {@link Paragraph} items of which the song consists @member {Paragraph[]} */
+  get paragraphs(): Paragraph[] { return this.linesToParagraphs(this.lines); }
 
-  /**
-   * The body paragraphs of the song, with any `{chorus}` tag expanded into the targeted chorus
-   * @type {Paragraph[]}
-   */
+  /** The body paragraphs with any `{chorus}` tag expanded into the targeted chorus */
   get expandedBodyParagraphs(): Paragraph[] {
-    return this.selectRenderableItems(
-      this.linesToParagraphs(
-        this.lines.flatMap((line: Line) => LineExpander.expand(line, this)),
-      ),
-    ) as Paragraph[];
+    const expandedLines = this.lines.flatMap((line: Line) => LineExpander.expand(line, this));
+    return this.selectRenderableItems(this.linesToParagraphs(expandedLines)) as Paragraph[];
   }
 
   linesToParagraphs(lines: Line[]): Paragraph[] {
     let currentParagraph = new Paragraph();
     const paragraphs = [currentParagraph];
-
     lines.forEach((line, index) => {
       const nextLine: Line | null = lines[index + 1] || null;
-
       if (line.isEmpty() || (line.isSectionEnd() && nextLine && !nextLine.isEmpty())) {
         currentParagraph = new Paragraph();
         paragraphs.push(currentParagraph);
@@ -137,14 +100,10 @@ class Song extends MetadataAccessors {
         currentParagraph.addLine(line);
       }
     });
-
     return paragraphs;
   }
 
-  /**
-   * Returns a deep clone of the song
-   * @returns {Song} The cloned song
-   */
+  /** Returns a deep clone of the song @returns {Song} */
   clone(): Song {
     const clone = new Song();
     clone.warnings = [...this.warnings];
@@ -228,50 +187,59 @@ class Song extends MetadataAccessors {
   }
 
   private insertDirectives(metadata: Record<string, string | string[] | null>, { after = null } = {}): void {
-    const insertIndex = this.lines.findIndex((line) => (
-      line.items.some((item) => (
-        !(item instanceof Tag) ||
-        (after && item.name === after) ||
-        (item instanceof Tag && item.isComment()) ||
-        (item instanceof Tag && item.isSectionDelimiter())
-      ))
+    const insertIndex = this.findInsertIndex(after);
+    const finalInsertIndex = this.adjustInsertIndex(insertIndex);
+    const newLines = this.createMetadataLines(metadata);
+    const linesToInsert = this.prepareLinesToInsert(newLines, insertIndex, finalInsertIndex);
+    this.spliceLines(finalInsertIndex, linesToInsert);
+  }
+
+  private findInsertIndex(after: string | null): number {
+    return this.lines.findIndex((line) => (
+      line.items.some((item) => this.isInsertionPoint(item, after))
     ));
+  }
 
-    // Go back from insertIndex to find the last non-empty line, then insert after it
-    let finalInsertIndex = insertIndex;
-    if (insertIndex > 0) {
-      for (let i = insertIndex - 1; i >= 0; i -= 1) {
-        if (!this.lines[i].isEmpty()) {
-          finalInsertIndex = i + 1;
-          break;
-        }
-        if (i === 0) {
-          finalInsertIndex = 0;
-        }
-      }
+  private isInsertionPoint(item: Item, after: string | null): boolean {
+    if (!(item instanceof Tag)) return true;
+    if (after && item.name === after) return true;
+    return item.isComment() || item.isSectionDelimiter();
+  }
+
+  private adjustInsertIndex(insertIndex: number): number {
+    if (insertIndex <= 0) return insertIndex;
+
+    for (let i = insertIndex - 1; i >= 0; i -= 1) {
+      if (!this.lines[i].isEmpty()) return i + 1;
     }
+    return 0;
+  }
 
-    const newLines = Object.keys(metadata).flatMap((name) => {
+  private createMetadataLines(metadata: Record<string, string | string[] | null>): Line[] {
+    return Object.keys(metadata).flatMap((name) => {
       const values = [metadata[name]].flat();
-
-      return values.flatMap((value) => {
+      return values.map((value) => {
         const line = new Line();
         line.addTag(name, value);
         return line;
       });
     });
+  }
 
-    // Check if we need to add an empty line
+  private prepareLinesToInsert(newLines: Line[], insertIndex: number, finalInsertIndex: number): Line[] {
     const linesToInsert = [...newLines];
     const hasEmptyLineBetween = insertIndex > finalInsertIndex &&
       this.lines.slice(finalInsertIndex, insertIndex).some((line) => line.isEmpty());
 
     if (!hasEmptyLineBetween && newLines.length > 0) {
-      linesToInsert.push(new Line()); // Add empty line after the directives
+      linesToInsert.push(new Line());
     }
+    return linesToInsert;
+  }
 
+  private spliceLines(index: number, linesToInsert: Line[]): void {
     const { lines } = this;
-    this.lines = [...lines.slice(0, finalInsertIndex), ...linesToInsert, ...lines.slice(finalInsertIndex)];
+    this.lines = [...lines.slice(0, index), ...linesToInsert, ...lines.slice(index)];
   }
 
   /**

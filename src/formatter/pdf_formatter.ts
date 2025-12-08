@@ -3,7 +3,7 @@ import JsPDF from 'jspdf';
 
 import DocWrapper from './pdf_formatter/doc_wrapper';
 import { JsPdfMeasurer } from '../index';
-import JsPdfRenderer from '../rendering/js_pdf_renderer';
+import JsPdfRenderer from '../rendering/pdf/js_pdf_renderer';
 import MeasurementBasedFormatter from './measurement_based_formatter';
 import { PDFFormatterConfiguration } from './configuration';
 import { PdfConstructor } from './pdf_formatter/types';

@@ -1,9 +1,15 @@
-import { FontConfiguration } from '../formatter/configuration';
+import Dimensions from '../layout/engine/dimensions';
 import Line from '../chord_sheet/line';
 import Song from '../chord_sheet/song';
 import { ChordLyricsPair, SoftLineBreak, Tag } from '../index';
 import { LineLayout, MeasuredItem } from '../layout/engine';
 import { isColumnBreak, isComment, renderChord } from '../template_helpers';
+
+import {
+  FontConfiguration,
+  LayoutItem,
+  MeasurementBasedFormatterConfiguration,
+} from '../formatter/configuration';
 
 /**
  * Interface representing paragraph layouts from the layout engine
@@ -471,85 +477,164 @@ abstract class Renderer {
   protected abstract finalizeRendering(): void;
 
   //
-  // CONFIGURATION GETTERS - Must be implemented by concrete renderers
+  // ABSTRACT ACCESSORS - Must be provided by concrete renderers
   //
 
-  protected abstract getConfiguration(): any;
+  /**
+   * Get the renderer configuration
+   */
+  protected abstract getConfiguration(): MeasurementBasedFormatterConfiguration | any;
+
+  /**
+   * Get the dimensions object for layout calculations
+   */
+  protected abstract get dimensions(): Dimensions;
+
+  /**
+   * Get the page size from the document wrapper
+   */
+  protected abstract getDocPageSize(): { width: number; height: number };
+
+  /**
+   * Get the layout configuration
+   */
+  protected getLayout(): MeasurementBasedFormatterConfiguration['layout'] {
+    return this.getConfiguration().layout;
+  }
+
+  /**
+   * Get the header configuration
+   */
+  protected getHeaderConfig(): LayoutItem | undefined {
+    return this.getLayout().header;
+  }
+
+  /**
+   * Get the footer configuration
+   */
+  protected getFooterConfig(): LayoutItem | undefined {
+    return this.getLayout().footer;
+  }
+
+  //
+  // CONFIGURATION GETTERS - Common implementations using dimensions
+  //
 
   /**
    * Get the page width
    */
-  protected abstract getPageWidth(): number;
+  protected getPageWidth(): number {
+    return this.getDocPageSize().width;
+  }
 
   /**
    * Get the page height
    */
-  protected abstract getPageHeight(): number;
+  protected getPageHeight(): number {
+    return this.getDocPageSize().height;
+  }
 
   /**
    * Get the left margin
    */
-  protected abstract getLeftMargin(): number;
+  protected getLeftMargin(): number {
+    return this.dimensions.margins.left;
+  }
 
   /**
    * Get the right margin
    */
-  protected abstract getRightMargin(): number;
+  protected getRightMargin(): number {
+    return this.dimensions.margins.right;
+  }
 
   /**
    * Get the top margin
    */
-  protected abstract getTopMargin(): number;
+  protected getTopMargin(): number {
+    return this.dimensions.margins.top;
+  }
 
   /**
    * Get the bottom margin
    */
-  protected abstract getBottomMargin(): number;
+  protected getBottomMargin(): number {
+    return this.dimensions.margins.bottom;
+  }
 
   /**
    * Get the header height
    */
-  protected abstract getHeaderHeight(): number;
+  protected getHeaderHeight(): number {
+    return this.getHeaderConfig()?.height ?? 0;
+  }
 
   /**
    * Get the footer height
    */
-  protected abstract getFooterHeight(): number;
+  protected getFooterHeight(): number {
+    return this.getFooterConfig()?.height ?? 0;
+  }
 
   /**
    * Get the column count
    */
-  protected abstract getColumnCount(): number;
+  protected getColumnCount(): number {
+    return this.dimensions.effectiveColumnCount;
+  }
+
+  /**
+   * Get the sections configuration with defaults
+   */
+  protected getSectionsConfig() {
+    const { sections } = this.getLayout();
+    if (!sections) {
+      throw new Error('Configuration must include sections');
+    }
+    return sections;
+  }
 
   /**
    * Get the column spacing
    */
-  protected abstract getColumnSpacing(): number;
+  protected getColumnSpacing(): number {
+    return this.getSectionsConfig().global.columnSpacing;
+  }
 
   /**
    * Get the chord-to-lyrics spacing
    */
-  protected abstract getChordLyricSpacing(): number;
+  protected getChordLyricSpacing(): number {
+    return this.getSectionsConfig().global.chordLyricSpacing;
+  }
 
   /**
    * Get the paragraph spacing
    */
-  protected abstract getParagraphSpacing(): number;
+  protected getParagraphSpacing(): number {
+    return this.getSectionsConfig().global.paragraphSpacing || 0;
+  }
 
   /**
    * Whether to use Unicode modifiers for chord rendering
    */
-  protected abstract useUnicodeModifiers(): boolean;
+  protected useUnicodeModifiers(): boolean {
+    return this.getConfiguration().useUnicodeModifiers;
+  }
 
   /**
    * Whether to normalize chords
    */
-  protected abstract normalizeChords(): boolean;
+  protected normalizeChords(): boolean {
+    return this.getConfiguration().normalizeChords;
+  }
 
   /**
    * Whether to render lyrics only (no chords)
    */
-  protected abstract isLyricsOnly(): boolean;
+  protected isLyricsOnly(): boolean {
+    return !!this.getSectionsConfig()?.base?.display?.lyricsOnly;
+  }
 }
 
 export default Renderer;

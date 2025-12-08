@@ -86,30 +86,18 @@ class Chord implements ChordProperties {
    * @returns {Chord} the chord symbol
    */
   toChordSymbol(referenceKey: Key | string | null = null): Chord {
-    if (this.isChordSymbol()) {
-      return this.clone();
-    }
+    if (this.isChordSymbol()) return this.clone();
 
-    let keyObj: Key | null = Key.wrap(referenceKey);
-    const referenceIsMinor = (keyObj && keyObj.isMinor()) || false;
+    const { keyObj, referenceIsMinor } = this.prepareKeyForConversion(referenceKey);
 
-    if (keyObj && keyObj.isMinor()) {
-      keyObj = keyObj.relativeMajor;
-    }
-
-    let chordSymbolChord = new Chord({
-      suffix: this.suffix ? normalizeChordSuffix(this.suffix) : null,
+    const chordSymbolChord = new Chord({
+      suffix: this.normalizedSuffix,
       root: this.root?.toChordSymbol(keyObj, referenceIsMinor) || null,
       bass: this.bass?.toChordSymbol(keyObj, referenceIsMinor) || null,
-      ...(this.optional ? { optional: true } : {}),
+      optional: this.optional,
     });
 
-    if (this.root?.isMinor()) {
-      chordSymbolChord = chordSymbolChord.makeMinor();
-    }
-
-    chordSymbolChord = chordSymbolChord.normalize(keyObj);
-    return chordSymbolChord;
+    return this.finalizeConvertedChord(chordSymbolChord, keyObj);
   }
 
   /**
@@ -142,29 +130,18 @@ class Chord implements ChordProperties {
    * @returns {Chord} the chord solfege
    */
   toChordSolfege(referenceKey: Key | string | null = null): Chord {
-    if (this.isChordSolfege()) {
-      return this.clone();
-    }
+    if (this.isChordSolfege()) return this.clone();
 
-    let keyObj = Key.wrap(referenceKey);
+    const { keyObj } = this.prepareKeyForConversion(referenceKey);
 
-    if (keyObj && keyObj.isMinor()) {
-      keyObj = keyObj.relativeMajor;
-    }
-
-    let chordSolfegeChord = new Chord({
-      suffix: this.suffix ? normalizeChordSuffix(this.suffix) : null,
+    const chordSolfegeChord = new Chord({
+      suffix: this.normalizedSuffix,
       root: this.root?.toChordSolfege(keyObj) || null,
       bass: this.bass?.toChordSolfege(keyObj) || null,
-      ...(this.optional ? { optional: true } : {}),
+      optional: this.optional,
     });
 
-    if (this.root?.isMinor()) {
-      chordSolfegeChord = chordSolfegeChord.makeMinor();
-    }
-
-    chordSolfegeChord = chordSolfegeChord.normalize(referenceKey);
-    return chordSolfegeChord;
+    return this.finalizeConvertedChord(chordSolfegeChord, referenceKey);
   }
 
   /**
@@ -496,6 +473,25 @@ class Chord implements ChordProperties {
       root: this.root ? transformFunc(this.root) : null,
       bass: this.bass ? transformFunc(this.bass) : null,
     });
+  }
+
+  private get normalizedSuffix(): string | null {
+    return this.suffix ? normalizeChordSuffix(this.suffix) : null;
+  }
+
+  private prepareKeyForConversion(
+    referenceKey: Key | string | null,
+  ): { keyObj: Key | null; referenceIsMinor: boolean } {
+    const wrappedKey = Key.wrap(referenceKey);
+    const referenceIsMinor = wrappedKey?.isMinor() || false;
+    const keyObj = referenceIsMinor ? wrappedKey?.relativeMajor || null : wrappedKey;
+    return { keyObj, referenceIsMinor };
+  }
+
+  private finalizeConvertedChord(chord: Chord, normalizeKey: Key | string | null): Chord {
+    let result = chord;
+    if (this.root?.isMinor()) result = result.makeMinor();
+    return result.normalize(normalizeKey);
   }
 }
 
