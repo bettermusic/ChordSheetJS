@@ -42,25 +42,25 @@ export class FormatterControls extends HTMLElement {
           padding: 8px;
           box-sizing: border-box;
         }
-        
+
         .controls-container {
           display: flex;
           align-items: center;
           gap: 16px;
         }
-        
+
         .control-group {
           display: flex;
           align-items: center;
           gap: 8px;
         }
-        
+
         label {
           font-weight: bold;
           margin-right: 4px;
           white-space: nowrap;
         }
-        
+
         select {
           padding: 4px 8px;
           border: 1px solid #ccc;
@@ -69,7 +69,7 @@ export class FormatterControls extends HTMLElement {
           font-size: 14px;
         }
       </style>
-      
+
       <div class="controls-container">
         <div class="control-group">
           <label>Formatter:</label>

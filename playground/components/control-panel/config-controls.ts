@@ -42,20 +42,20 @@ export class ConfigControls extends HTMLElement {
           font-family: Arial, sans-serif;
           gap: 8px;
         }
-        
+
         .config-controls-container {
           display: flex;
           align-items: center;
           gap: 8px;
           width: 100%;
         }
-        
+
         .config-label {
           font-size: 14px;
           font-weight: bold;
           white-space: nowrap;
         }
-        
+
         select {
           padding: 4px 8px;
           border: 1px solid #ccc;
@@ -64,7 +64,7 @@ export class ConfigControls extends HTMLElement {
           font-size: 14px;
           flex: 1;
         }
-        
+
         button {
           padding: 4px 8px;
           border: none;
@@ -75,33 +75,33 @@ export class ConfigControls extends HTMLElement {
           align-items: center;
           gap: 4px;
         }
-        
+
         button.valid {
           background-color: #4CAF50;
           color: white;
         }
-        
+
         button.invalid {
           background-color: #f44336;
           color: white;
         }
-        
+
         button.valid:hover {
           background-color: #45a049;
         }
-        
+
         button.invalid:hover {
           background-color: #d32f2f;
         }
       </style>
-      
+
       <div class="config-controls-container">
         <span class="config-label">Preset:</span>
         <select id="preset-selector">
           <option value="current">Current Configuration</option>
           <!-- Presets will be added dynamically -->
         </select>
-        
+
         <button id="apply-button" class="valid">Config Applied</button>
       </div>
     `;

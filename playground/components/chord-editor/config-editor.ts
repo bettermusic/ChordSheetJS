@@ -56,24 +56,24 @@ export class ConfigEditor extends HTMLElement {
           width: 100%;
           overflow: hidden;
         }
-        
+
         .editor-container {
           flex: 1;
           overflow: hidden;
         }
-        
+
         /* Style overrides for CodeMirror */
         .editor-container .cm-editor {
           height: 100%;
           width: 100%;
         }
-        
+
         .editor-container .cm-scroller {
           overflow: auto;
           height: 100%;
         }
       </style>
-      
+
       <div class="editor-container"></div>
     `;
 

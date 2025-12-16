@@ -35,14 +35,14 @@ export class ChordPlaygroundApp extends HTMLElement {
           height: 100vh;
           box-sizing: border-box;
         }
-        
+
         .app-container {
           display: grid;
           grid-template-columns: 1fr 1fr;
           height: 100%;
           overflow: hidden;
         }
-        
+
         .left-panel {
           display: flex;
           flex-direction: column;
@@ -50,7 +50,7 @@ export class ChordPlaygroundApp extends HTMLElement {
           height: 100%;
           overflow: hidden;
         }
-        
+
         .editor-section {
           display: flex;
           flex-direction: column;
@@ -58,24 +58,24 @@ export class ChordPlaygroundApp extends HTMLElement {
           overflow: hidden;
           border-bottom: 1px solid #ddd;
         }
-        
+
         .config-section {
           display: flex;
           flex-direction: column;
           height: 30%;
           overflow: hidden;
         }
-        
+
         .editor-controls {
           border-bottom: 1px solid #ddd;
           background-color: #f5f5f5;
         }
-        
+
         .editor-container {
           flex: 1;
           overflow: hidden;
         }
-        
+
         .config-header {
           display: flex;
           justify-content: space-between;
@@ -84,35 +84,35 @@ export class ChordPlaygroundApp extends HTMLElement {
           background-color: #f5f5f5;
           border-bottom: 1px solid #ddd;
         }
-        
+
         .config-controls-wrapper {
           background-color: #f8f8f8;
           border-bottom: 1px solid #ddd;
         }
-        
+
         .config-container {
           flex: 1;
           overflow: hidden;
         }
-        
+
         .right-panel {
           display: flex;
           flex-direction: column;
           height: 100%;
           overflow: hidden;
         }
-        
+
         .formatter-controls {
           border-bottom: 1px solid #ddd;
           background-color: #f5f5f5;
         }
-        
+
         .display-container {
           flex: 1;
           overflow: auto;
         }
       </style>
-      
+
       <div class="app-container">
         <!-- Left Panel with Editor and Config -->
         <div class="left-panel">
@@ -124,7 +124,7 @@ export class ChordPlaygroundApp extends HTMLElement {
               <chord-editor></chord-editor>
             </div>
           </div>
-          
+
           <div class="config-section">
             <div class="config-header">
               <span>Configuration Editor</span>
@@ -135,7 +135,7 @@ export class ChordPlaygroundApp extends HTMLElement {
             </div>
           </div>
         </div>
-        
+
         <!-- Right Panel with Format Controls and Display -->
         <div class="right-panel">
           <div class="formatter-controls">

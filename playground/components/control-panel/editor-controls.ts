@@ -44,25 +44,25 @@ export class EditorControls extends HTMLElement {
           padding: 8px;
           box-sizing: border-box;
         }
-        
+
         .controls-container {
           display: flex;
           align-items: center;
           gap: 16px;
         }
-        
+
         .control-group {
           display: flex;
           align-items: center;
           gap: 8px;
         }
-        
+
         label {
           font-weight: bold;
           margin-right: 4px;
           white-space: nowrap;
         }
-        
+
         select {
           padding: 4px 8px;
           border: 1px solid #ccc;
@@ -72,13 +72,13 @@ export class EditorControls extends HTMLElement {
           min-width: 40px;
           max-width: 120px;
         }
-        
+
         select:disabled {
           background-color: #f5f5f5;
           opacity: 0.7;
         }
       </style>
-      
+
       <div class="controls-container">
         <div class="control-group">
           <label>File:</label>
@@ -90,8 +90,8 @@ export class EditorControls extends HTMLElement {
           <label>Parser:</label>
           <select id="parser-selector">
             <option value="chordpro" ${editorState.editorMode === 'chordpro' ? 'selected' : ''}>ChordPro Parser</option>
-            <option 
-              value="chords_over_words" 
+            <option
+              value="chords_over_words"
               ${editorState.editorMode === 'chords_over_words' ? 'selected' : ''}
             >Chords Over Words Parser</option>
           </select>
@@ -102,7 +102,7 @@ export class EditorControls extends HTMLElement {
             ${this.renderKeyOptions()}
           </select>
         </div>
-        
+
         <div class="control-group">
           <label>Capo:</label>
           <select id="capo-selector">

@@ -70,7 +70,7 @@ export class FormatterDisplay extends HTMLElement {
           height: 100%;
           width: 100%;
         }
-        
+
         .text-content {
           white-space: pre-wrap;
         }
