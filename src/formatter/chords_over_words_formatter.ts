@@ -55,7 +55,7 @@ class ChordsOverWordsFormatter extends Formatter {
         if (Array.isArray(value)) {
           return `${key}: ${value.join(',')}`;
         }
-        if (typeof value === 'undefined' || value === null) {
+        if (typeof value === 'undefined' || value === null || value === '') {
           return `${key}:`;
         }
         return `${key}: ${value}`;
