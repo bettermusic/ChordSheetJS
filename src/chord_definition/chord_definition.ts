@@ -1,5 +1,20 @@
-import { Fret } from '../constants';
 import { parse } from '../parser/chord_definition/peg_parser';
+
+import {
+  Fret,
+  NonSoundingString,
+  OpenFret,
+  nonSoundingString,
+  openFret,
+} from '../constants';
+
+export function isOpenFret(fret: Fret): fret is OpenFret {
+  return fret === openFret;
+}
+
+export function isNonSoundingString(fret: Fret): fret is NonSoundingString {
+  return nonSoundingString.includes(fret as NonSoundingString);
+}
 
 /**
  * Represents a chord definition.

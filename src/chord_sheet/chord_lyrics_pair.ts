@@ -49,6 +49,10 @@ class ChordLyricsPair {
     return true;
   }
 
+  hasLyrics(): boolean {
+    return !!(this.lyrics && this.lyrics.trim().length > 0);
+  }
+
   /**
    * Returns a deep copy of the ChordLyricsPair, useful when programmatically transforming a song
    * @returns {ChordLyricsPair}
