@@ -277,6 +277,9 @@ class Tag extends AstComponent {
     return INLINE_FONT_TAGS.includes(this.name);
   }
 
+  /**
+   * Checks whether the tag is a comment tag ({comment} or {c}).
+   */
   isComment(): boolean {
     return this.name === COMMENT || this.name === COMMENT_SHORT;
   }

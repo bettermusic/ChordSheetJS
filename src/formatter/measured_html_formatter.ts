@@ -9,14 +9,14 @@ import { LayoutConfig, LayoutEngine } from '../layout/engine';
 declare type HTMLElement = any;
 
 /**
- * HtmlFormatter formats a song into HTML with absolute positioning
+ * MeasuredHtmlFormatter formats a song into HTML with absolute positioning.
  */
 class MeasuredHtmlFormatter extends MeasurementBasedFormatter<MeasuredHtmlFormatterConfiguration> {
   private song: Song = new Song();
 
   private renderer: PositionedHtmlRenderer | null = null;
 
-  private container: HTMLElement;
+  private readonly container: HTMLElement;
 
   /**
    * Creates a new HTML formatter
@@ -35,8 +35,8 @@ class MeasuredHtmlFormatter extends MeasurementBasedFormatter<MeasuredHtmlFormat
   }
 
   /**
-   * Formats a song into HTML with absolute positioning
-   * @param {Song} song The song to format
+   * Formats a song into HTML with absolute positioning.
+   * @param song - The song to format.
    */
   format(song: Song): void {
     this.song = song;

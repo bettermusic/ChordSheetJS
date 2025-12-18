@@ -49,6 +49,9 @@ class ChordLyricsPair {
     return true;
   }
 
+  /**
+   * Indicates whether the ChordLyricsPair has non-empty lyrics.
+   */
   hasLyrics(): boolean {
     return !!(this.lyrics && this.lyrics.trim().length > 0);
   }

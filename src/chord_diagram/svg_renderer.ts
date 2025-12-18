@@ -4,6 +4,9 @@ import {
 
 type ViewBox = [number, number, number, number];
 
+/**
+ * Renderer implementation for drawing chord diagrams as SVG markup.
+ */
 class SVGRenderer implements Renderer {
   content = '';
 

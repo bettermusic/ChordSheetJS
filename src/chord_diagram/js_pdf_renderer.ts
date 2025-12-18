@@ -8,6 +8,9 @@ import { ChordDiagramFontConfigurations, FontConfiguration } from '../formatter/
 const defaultWidth = 150;
 const defaultHeight = 270;
 
+/**
+ * Renderer implementation for drawing chord diagrams to a jsPDF document.
+ */
 class JsPDFRenderer implements Renderer {
   doc: DocWrapper;
 
@@ -48,18 +51,6 @@ class JsPDFRenderer implements Renderer {
 
   static calculateHeight(width: number): number {
     return defaultHeight * (width / defaultWidth);
-  }
-
-  scale(number: number) {
-    return number * this.#scale;
-  }
-
-  tx(x: number) {
-    return this.#x + this.scale(x);
-  }
-
-  ty(y: number) {
-    return this.#y + this.scale(y);
   }
 
   circle({
@@ -113,15 +104,23 @@ class JsPDFRenderer implements Renderer {
     });
   }
 
-  withFontSize(fontSize: number, callback: () => void) {
-    this.doc.withFontSize(this.scale(fontSize), callback);
+  private scale(number: number) {
+    return number * this.#scale;
   }
 
-  withFontConfiguration(fontStyle: FontConfiguration, callback: () => void) {
+  private tx(x: number) {
+    return this.#x + this.scale(x);
+  }
+
+  private ty(y: number) {
+    return this.#y + this.scale(y);
+  }
+
+  private withFontConfiguration(fontStyle: FontConfiguration, callback: () => void) {
     this.doc.withFontConfiguration(fontStyle, callback);
   }
 
-  withLineWidth(lineWidth: number, callback: () => void) {
+  private withLineWidth(lineWidth: number, callback: () => void) {
     this.doc.withLineWidth(this.scale(lineWidth), callback);
   }
 }

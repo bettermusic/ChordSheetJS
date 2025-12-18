@@ -10,8 +10,8 @@ abstract class MeasurementBasedFormatter<
   T extends MeasurementBasedFormatterConfiguration = MeasurementBasedFormatterConfiguration
 > extends Formatter<T> {
   /**
-   * Instantiate a measurement-based formatter
-   * @param {DeepPartial<T>} [configuration={}] The formatter configuration
+   * Instantiate a measurement-based formatter.
+   * @param configuration - The formatter configuration.
    */
   constructor(configuration: DeepPartial<T> = {} as DeepPartial<T>) {
     super(configuration);

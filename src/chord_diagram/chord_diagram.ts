@@ -1,53 +1,103 @@
 import { Renderer } from './renderer';
 import { FingerNumber, FretNumber, StringNumber } from '../constants';
 
+/**
+ * Represents a barre (bar) in a chord diagram, where one finger presses multiple strings at the same fret.
+ */
 export interface Barre {
+  /** The starting string number (lowest). */
   from: StringNumber;
+  /** The ending string number (highest). */
   to: StringNumber;
+  /** The fret position of the barre. */
   fret: FretNumber;
 }
 
 type StringList = StringNumber[];
+
+/**
+ * Represents a finger position marker on a specific string and fret in a chord diagram.
+ */
 export interface StringMarker {
+  /** The string number where the finger is placed. */
   string: StringNumber;
+  /** The fret number where the finger is placed. */
   fret: FretNumber;
+  /** Optional finger number (1-4) used to press this position. */
   finger?: FingerNumber;
 }
 
+/**
+ * Defines the structure of a chord diagram, including finger positions, barres, and string states.
+ */
 export interface ChordDiagramDefinition {
+  /** Array of barres in the chord. */
   barres: Barre[];
+  /** The chord name displayed as the diagram title. */
   chord: string;
+  /** Number of frets to display in the diagram. */
   fretCount: number;
+  /** Array of finger position markers. */
   markers: StringMarker[];
+  /** String numbers that are played open (unfingered). */
   openStrings: StringList;
+  /** Total number of strings on the instrument. */
   stringCount: number;
+  /** String numbers that are muted/not played. */
   unusedStrings: StringList;
+  /** The starting fret position (1 for standard position, higher for transposed chords). */
   baseFret: number;
 }
 
+/**
+ * Configuration options for rendering a chord diagram, controlling dimensions, colors, and visual styling.
+ */
 export interface ChordDiagramRenderingConfig {
+  /** Vertical position of the chord title. */
   titleY: number;
+  /** Width of the guitar neck area. */
   neckWidth: number;
+  /** Height of the guitar neck area. */
   neckHeight: number;
+  /** Thickness of the nut (top bar) at the first fret. */
   nutThickness: number;
+  /** Color of the nut. */
   nutColor: number|string;
+  /** Thickness of regular fret bars. */
   fretThickness: number;
+  /** Color of the fret lines. */
   fretColor: number|string;
+  /** Color of the strings. */
   stringColor: number|string;
+  /** Size of open/muted string indicators above the nut. */
   stringIndicatorSize: number;
+  /** Size of finger position markers on the fretboard. */
   fingerIndicatorSize: number;
+  /** Vertical offset adjustment for finger indicators. */
   fingerIndicatorOffset: number;
+  /** Thickness of the string lines. */
   stringThickness: number;
+  /** Thickness of the fret lines. */
   fretLineThickness: number;
+  /** Line thickness for open string (circle) indicators. */
   openStringIndicatorThickness: number;
+  /** Line thickness for muted string (X) indicators. */
   unusedStringIndicatorThickness: number;
+  /** Line thickness for finger position markers. */
   markerThickness: number;
+  /** Line thickness for barre indicators. */
   barreThickness: number;
+  /** Font size for the chord title. */
   titleFontSize: number;
+  /** Font size for the base fret number (when transposed). */
   baseFretFontSize: number;
+  /** Font size for finger numbers below the diagram. */
   fingerNumberFontSize: number;
+  /** Whether to display finger numbers below the diagram. */
   showFingerNumbers: boolean;
+  /** Horizontal spacing between multiple diagrams. */
   diagramSpacing: number;
+  /** Maximum number of diagrams per row (optional). */
   maxDiagramsPerRow?: number|null;
 }
 
@@ -62,6 +112,9 @@ const defaultChordDiagramDefinition: ChordDiagramDefinition = {
   baseFret: 0,
 };
 
+/**
+ * Default configuration values for rendering chord diagrams.
+ */
 export const DefaultChordDiagramRenderingConfig: ChordDiagramRenderingConfig = {
   titleY: 28,
   neckWidth: 120,
@@ -91,6 +144,12 @@ function repeat(count: number, callback: (i: number) => void): void {
   Array.from({ length: count }).forEach((_, i) => callback(i));
 }
 
+/**
+ * Renders a visual chord diagram for guitar or similar stringed instruments.
+ *
+ * A chord diagram displays finger positions, barres, open strings, and muted strings
+ * on a graphical representation of the instrument's fretboard.
+ */
 class ChordDiagram {
   chordDiagramDefinition: ChordDiagramDefinition;
 

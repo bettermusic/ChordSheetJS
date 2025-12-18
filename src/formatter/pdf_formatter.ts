@@ -11,6 +11,9 @@ import Song from '../chord_sheet/song';
 import { getPDFDefaultConfig } from './configuration';
 import { LayoutConfig, LayoutEngine } from '../layout/engine';
 
+/**
+ * PdfFormatter formats a song into a PDF document.
+ */
 class PdfFormatter extends MeasurementBasedFormatter<PDFFormatterConfiguration> {
   private song: Song = new Song();
 
@@ -24,9 +27,9 @@ class PdfFormatter extends MeasurementBasedFormatter<PDFFormatterConfiguration> 
   }
 
   /**
-   * Formats a song into a PDF
-   * @param {Song} song The song to format
-   * @param {PdfConstructor} docConstructor The PDF document constructor
+   * Formats a song into a PDF.
+   * @param song - The song to format.
+   * @param docConstructor - The PDF document constructor.
    */
   format(
     song: Song,
@@ -127,9 +130,7 @@ class PdfFormatter extends MeasurementBasedFormatter<PDFFormatterConfiguration> 
   }
 
   /**
-   * Get the document wrapper - primarily for testing purposes
-   * @returns {DocWrapper} The document wrapper
-   * @throws {Error} If the renderer is not initialized
+   * Get the document wrapper - primarily for testing purposes.
    */
   getDocumentWrapper(): DocWrapper {
     if (!this.renderer) {

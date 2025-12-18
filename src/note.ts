@@ -170,10 +170,16 @@ class Note implements NoteProperties {
     return this.minor;
   }
 
+  /**
+   * Returns a new Note with the minor flag set to false.
+   */
   toMajor(): Note {
     return this.set({ minor: false });
   }
 
+  /**
+   * Returns a new Note with the minor flag set to true.
+   */
   toMinor(): Note {
     return this.set({ minor: true });
   }
