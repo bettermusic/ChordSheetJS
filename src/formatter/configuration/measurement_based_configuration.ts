@@ -282,6 +282,25 @@ export interface LineLayout {
   line?: Line
 }
 
+// Playback highlighting configuration
+export interface PlaybackHighlightStyles {
+  fonts?: Partial<FontConfigurations>;
+  container?: {
+    border?: string;
+    borderRadius?: string;
+    backgroundColor?: string;
+    boxShadow?: string;
+    padding?: string;
+  };
+}
+
+export interface PlaybackConfig {
+  granularity: 'line' | 'paragraph' | 'section';
+  timestampStrategy?: 'first' | 'all';  // How to derive section timestamp
+  highlighted: PlaybackHighlightStyles;
+  activeTimestamp?: number | null;      // For testing/PDF re-render
+}
+
 // Combined layout configuration
 export interface MeasurementBasedLayoutConfig {
   // Common layout settings
@@ -310,6 +329,9 @@ export interface MeasurementBasedLayoutConfig {
 
   // Optional chord diagrams configuration
   chordDiagrams?: ChordDiagramsConfig;
+
+  // Optional playback highlighting configuration
+  playback?: PlaybackConfig;
 }
 
 // Default layout configuration for measurement-based formatters

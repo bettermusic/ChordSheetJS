@@ -16,11 +16,11 @@ class HtmlDocWrapper {
 
   totalPages = 1;
 
-  pageSize: { width: number; height: number };
+  pageSize: { width: number; height: number | 'auto' };
 
   measurer: DomMeasurer;
 
-  constructor(container: HTMLElement, pageSize: { width: number; height: number }) {
+  constructor(container: HTMLElement, pageSize: { width: number; height: number | 'auto' }) {
     this.container = container;
     this.container.style.width = '100%';
     this.container.style.margin = '0 auto';
@@ -51,12 +51,25 @@ class HtmlDocWrapper {
   }
 
   get pageStyles(): Record<string, string> {
-    return {
+    const isAutoHeight = this.pageSize.height === 'auto';
+    const baseStyles: Record<string, string> = {
       width: `${this.pageSize.width}px`,
-      height: `${this.pageSize.height}px`,
-      overflow: 'hidden',
       boxSizing: 'border-box',
       backgroundColor: 'var(--studio-display-background-color)',
+    };
+
+    if (isAutoHeight) {
+      return {
+        ...baseStyles,
+        minHeight: '100%',
+        overflow: 'visible',
+      };
+    }
+
+    return {
+      ...baseStyles,
+      height: `${this.pageSize.height}px`,
+      overflow: 'hidden',
     };
   }
 

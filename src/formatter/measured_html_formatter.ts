@@ -137,6 +137,104 @@ class MeasuredHtmlFormatter extends MeasurementBasedFormatter<MeasuredHtmlFormat
   }
 
   /**
+   * Generates CSS string for the highlighted state based on playback config
+   * @param scope Optional CSS scope selector
+   * @returns CSS string
+   */
+  cssString(scope = ''): string {
+    const styles: string[] = [];
+    const playbackConfig = this.configuration.layout.playback;
+    
+    if (!playbackConfig?.highlighted) {
+      return '';
+    }
+
+    const prefix = this.configuration.cssClassPrefix || 'cs-';
+    const highlightClass = `${prefix}highlighted`;
+    const scopePrefix = scope ? `${scope} ` : '';
+
+    // Container styles (border, background, etc.)
+    if (playbackConfig.highlighted.container) {
+      const containerStyles: string[] = [];
+      const container = playbackConfig.highlighted.container;
+      
+      if (container.border) containerStyles.push(`border: ${container.border}`);
+      if (container.borderRadius) containerStyles.push(`border-radius: ${container.borderRadius}`);
+      if (container.backgroundColor) containerStyles.push(`background-color: ${container.backgroundColor}`);
+      if (container.boxShadow) containerStyles.push(`box-shadow: ${container.boxShadow}`);
+      if (container.padding) containerStyles.push(`padding: ${container.padding}`);
+      
+      if (containerStyles.length > 0) {
+        styles.push(`${scopePrefix}.${highlightClass} { ${containerStyles.join('; ')}; }`);
+      }
+    }
+
+    // Font styles for chord and text elements
+    if (playbackConfig.highlighted.fonts) {
+      const fonts = playbackConfig.highlighted.fonts;
+      
+      // Chord font overrides
+      if (fonts.chord) {
+        const chordStyles = this.generateFontStyles(fonts.chord);
+        if (chordStyles.length > 0) {
+          styles.push(`${scopePrefix}.${highlightClass} .${prefix}chord { ${chordStyles.join('; ')}; }`);
+        }
+      }
+      
+      // Text/lyrics font overrides
+      if (fonts.text) {
+        const textStyles = this.generateFontStyles(fonts.text);
+        if (textStyles.length > 0) {
+          styles.push(`${scopePrefix}.${highlightClass} .${prefix}lyrics { ${textStyles.join('; ')}; }`);
+        }
+      }
+      
+      // Section label font overrides
+      if (fonts.sectionLabel) {
+        const labelStyles = this.generateFontStyles(fonts.sectionLabel);
+        if (labelStyles.length > 0) {
+          styles.push(`${scopePrefix}.${highlightClass} .${prefix}sectionLabel { ${labelStyles.join('; ')}; }`);
+        }
+      }
+      
+      // Comment font overrides
+      if (fonts.comment) {
+        const commentStyles = this.generateFontStyles(fonts.comment);
+        if (commentStyles.length > 0) {
+          styles.push(`${scopePrefix}.${highlightClass} .${prefix}comment { ${commentStyles.join('; ')}; }`);
+        }
+      }
+    }
+
+    return styles.join('\n');
+  }
+
+  /**
+   * Generates CSS property strings from font configuration
+   */
+  private generateFontStyles(fontConfig: Partial<any>): string[] {
+    const styles: string[] = [];
+    
+    if (fontConfig.name) styles.push(`font-family: ${fontConfig.name}`);
+    if (fontConfig.size) styles.push(`font-size: ${fontConfig.size}px`);
+    if (fontConfig.weight) styles.push(`font-weight: ${fontConfig.weight}`);
+    if (fontConfig.style) styles.push(`font-style: ${fontConfig.style}`);
+    if (fontConfig.color) {
+      const color = typeof fontConfig.color === 'number' 
+        ? `#${fontConfig.color.toString(16).padStart(6, '0')}` 
+        : fontConfig.color;
+      styles.push(`color: ${color}`);
+    }
+    if (fontConfig.underline !== undefined) {
+      styles.push(`text-decoration: ${fontConfig.underline ? 'underline' : 'none'}`);
+    }
+    if (fontConfig.textTransform) styles.push(`text-transform: ${fontConfig.textTransform}`);
+    if (fontConfig.letterSpacing) styles.push(`letter-spacing: ${fontConfig.letterSpacing}`);
+    
+    return styles;
+  }
+
+  /**
    * Clean up resources when the formatter is no longer needed
    */
   dispose(): void {

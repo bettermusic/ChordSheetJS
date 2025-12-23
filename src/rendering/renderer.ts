@@ -18,6 +18,7 @@ export interface ParagraphLayout {
   units: LineLayout[][];
   addSpacing: boolean;
   sectionType: string;
+  timestamps?: number[]; // Distributed based on repeatedSections config
 }
 
 /**
@@ -33,6 +34,7 @@ export interface PositionedElement {
   style?: any;
   page: number;
   column: number;
+  lineLayout?: LineLayout;  // Reference to the line this element belongs to
 }
 
 /**
@@ -168,6 +170,9 @@ abstract class Renderer {
       this.moveToNextColumn();
     }
 
+    // Notify subclasses that we're rendering this line
+    this.onBeforeRenderLine(lineLayout);
+
     const yOffset = this.y;
     const { chordsYOffset, lyricsYOffset } = this.calculateChordLyricYOffsets(items, yOffset);
 
@@ -180,11 +185,28 @@ abstract class Renderer {
       currentX += width;
     });
 
+    // Notify subclasses that we're done rendering this line
+    this.onAfterRenderLine(lineLayout);
+
     // Update the vertical position after rendering the line
     this.y += lineHeight;
 
     // Reset x to the left margin for the next line
     this.x = this.getColumnStartX();
+  }
+
+  /**
+   * Hook called before rendering a line - subclasses can override
+   */
+  protected onBeforeRenderLine(lineLayout: LineLayout): void {
+    // Default: do nothing
+  }
+
+  /**
+   * Hook called after rendering a line - subclasses can override
+   */
+  protected onAfterRenderLine(lineLayout: LineLayout): void {
+    // Default: do nothing
   }
 
   protected hasColumnBreak(lineLayout: LineLayout) {
@@ -493,7 +515,7 @@ abstract class Renderer {
   /**
    * Get the page size from the document wrapper
    */
-  protected abstract getDocPageSize(): { width: number; height: number };
+  protected abstract getDocPageSize(): { width: number; height: number | 'auto' };
 
   /**
    * Get the layout configuration
@@ -531,7 +553,9 @@ abstract class Renderer {
    * Get the page height
    */
   protected getPageHeight(): number {
-    return this.getDocPageSize().height;
+    const { height } = this.getDocPageSize();
+    // Convert 'auto' to Infinity for layout calculations
+    return height === 'auto' ? Infinity : height;
   }
 
   /**

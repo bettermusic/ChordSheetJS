@@ -26,6 +26,8 @@ class JsPdfRenderer extends Renderer {
 
   doc: DocWrapper;
 
+  private currentLineLayout: any = null;  // Track current line for highlighting
+
   constructor(
     song: Song,
     docConstructor: PdfConstructor,
@@ -41,7 +43,57 @@ class JsPdfRenderer extends Renderer {
   //
 
   getFontConfiguration(objectType: string): FontConfiguration {
-    return this.configuration.fonts[objectType];
+    const baseFont = this.configuration.fonts[objectType];
+    
+    // Check if we should apply highlighted font styles
+    const playbackConfig = this.configuration.layout.playback;
+    if (!playbackConfig?.highlighted || playbackConfig.activeTimestamp === undefined) {
+      return baseFont;
+    }
+
+    // Check if current line is highlighted
+    const isHighlighted = this.isCurrentLineHighlighted();
+    
+    if (isHighlighted && playbackConfig.highlighted.fonts) {
+      const highlightedFont = playbackConfig.highlighted.fonts[objectType];
+      if (highlightedFont) {
+        // Merge highlighted font with base font
+        return { ...baseFont, ...highlightedFont };
+      }
+    }
+
+    return baseFont;
+  }
+
+  /**
+   * Check if the current line being rendered should be highlighted
+   */
+  private isCurrentLineHighlighted(): boolean {
+    const activeTimestamp = this.configuration.layout.playback?.activeTimestamp;
+    if (activeTimestamp === null || activeTimestamp === undefined) {
+      return false;
+    }
+
+    // Check if current line has the active timestamp
+    if (this.currentLineLayout?.line?.timestamps) {
+      return this.currentLineLayout.line.timestamps.includes(activeTimestamp);
+    }
+
+    return false;
+  }
+
+  /**
+   * Hook: Track the line we're rendering for highlighting
+   */
+  protected onBeforeRenderLine(lineLayout: any): void {
+    this.currentLineLayout = lineLayout;
+  }
+
+  /**
+   * Hook: Clear the current line after rendering
+   */
+  protected onAfterRenderLine(_lineLayout: any): void {
+    this.currentLineLayout = null;
   }
 
   getDocumentMetadata(): Record<string, any> {
@@ -218,7 +270,7 @@ class JsPdfRenderer extends Renderer {
     return this._dimensions;
   }
 
-  protected getDocPageSize(): { width: number; height: number } {
+  protected getDocPageSize(): { width: number; height: number | 'auto' } {
     return this.doc.pageSize;
   }
 

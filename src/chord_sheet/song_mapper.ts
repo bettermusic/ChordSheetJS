@@ -37,6 +37,11 @@ class SongMapper {
       this.ensureLine();
     }
 
+    // Copy timestamps from the original line to the new line
+    if (line.timestamps && line.timestamps.length > 0 && this.builder.currentLine) {
+      this.builder.currentLine.timestamps = [...line.timestamps];
+    }
+
     this.addedLine = false;
   }
 
