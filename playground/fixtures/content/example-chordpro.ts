@@ -223,58 +223,58 @@ No, He [Bb]won't`,
 
 {tm: 0:00}
 {start_of_verse}
-[C]This is the first verse
-[G]Starting at zero seconds
-[Am]Watch as we scroll along
-[F]Following the music
+{tm: 0:00}[C]This is the first verse
+{tm: 0:04}[G]Starting at zero seconds
+{tm: 0:08}[Am]Watch as we scroll along
+{tm: 0:12}[F]Following the music
 {end_of_verse}
-
-{tm: 0:08}
-{start_of_chorus}
-[Am]Chorus begins here
-[F]At eight seconds in
-[C]Auto-scrolling in action
-[G]Highlighting each section
-{end_of_chorus}
 
 {tm: 0:16}
-{start_of_verse}
-[C]Second verse starts now
-[G]At sixteen seconds
-[Am]Try the time slider below
-[F]Or upload your audio file
-{end_of_verse}
-
-{tm: 0:24|0:48}
 {start_of_chorus}
-[Am]Chorus repeats twice
-[F]With different timestamps
-[C]First at 0:24
-[G]Then again at 0:48
+{tm: 0:16}[Am]Chorus begins here
+{tm: 0:20}[F]At eight seconds in
+{tm: 0:24}[C]Auto-scrolling in action
+{tm: 0:28}[G]Highlighting each section
 {end_of_chorus}
 
 {tm: 0:32}
-{start_of_bridge}
-[Dm]This is the bridge section
-[Em]Appearing at thirty-two
-[F]Each section gets highlighted
-[G]As the time progresses
-{end_of_bridge}
-
-{tm: 0:40}
 {start_of_verse}
-[C]Final verse to close
-[G]At forty seconds mark
-[Am]Test the audio sync feature
-[F]With your own recording
+{tm: 0:32}[C]Second verse starts now
+{tm: 0:36}[G]At sixteen seconds
+{tm: 0:40}[Am]Try the time slider below
+{tm: 0:44}[F]Or upload your audio file
 {end_of_verse}
 
-{tm: 0:56}
+{tm: 0:48}
+{start_of_chorus}
+{tm: 0:48}[Am]Chorus repeats twice
+{tm: 0:52}[F]With different timestamps
+{tm: 0:56}[C]First at 0:24
+{tm: 1:00}[G]Then again at 0:48
+{end_of_chorus}
+
+{tm: 1:04}
+{start_of_bridge}
+{tm: 1:04}[Dm]This is the bridge section
+{tm: 1:08}[Em]Appearing at thirty-two
+{tm: 1:12}[F]Each section gets highlighted
+{tm: 1:16}[G]As the time progresses
+{end_of_bridge}
+
+{tm: 1:20}
+{start_of_verse}
+{tm: 1:20}[C]Final verse to close
+{tm: 1:24}[G]At forty seconds mark
+{tm: 1:28}[Am]Test the audio sync feature
+{tm: 1:32}[F]With your own recording
+{end_of_verse}
+
+{tm: 1:36}
 {start_of_outro}
-[C]Outro fading out
-[G]Song coming to end
-[Am]Thanks for testing this
-[F]Audio [C]sync feature
+{tm: 1:36}[C]Outro fading out
+{tm: 1:40}[G]Song coming to end
+{tm: 1:44}[Am]Thanks for testing this
+{tm: 1:48}[F]Audio [C]sync feature
 {end_of_outro}
 `,
   },

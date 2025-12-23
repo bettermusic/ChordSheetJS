@@ -26,7 +26,7 @@ class JsPdfRenderer extends Renderer {
 
   doc: DocWrapper;
 
-  private currentLineLayout: any = null;  // Track current line for highlighting
+  private currentLineLayout: any = null; // Track current line for highlighting
 
   constructor(
     song: Song,
@@ -44,7 +44,7 @@ class JsPdfRenderer extends Renderer {
 
   getFontConfiguration(objectType: string): FontConfiguration {
     const baseFont = this.configuration.fonts[objectType];
-    
+
     // Check if we should apply highlighted font styles
     const playbackConfig = this.configuration.layout.playback;
     if (!playbackConfig?.highlighted || playbackConfig.activeTimestamp === undefined) {
@@ -53,7 +53,7 @@ class JsPdfRenderer extends Renderer {
 
     // Check if current line is highlighted
     const isHighlighted = this.isCurrentLineHighlighted();
-    
+
     if (isHighlighted && playbackConfig.highlighted.fonts) {
       const highlightedFont = playbackConfig.highlighted.fonts[objectType];
       if (highlightedFont) {

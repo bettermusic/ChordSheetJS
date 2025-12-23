@@ -296,9 +296,9 @@ export interface PlaybackHighlightStyles {
 
 export interface PlaybackConfig {
   granularity: 'line' | 'paragraph' | 'section';
-  timestampStrategy?: 'first' | 'all';  // How to derive section timestamp
+  timestampStrategy?: 'first' | 'all'; // How to derive section timestamp
   highlighted: PlaybackHighlightStyles;
-  activeTimestamp?: number | null;      // For testing/PDF re-render
+  activeTimestamp?: number | null; // For testing/PDF re-render
 }
 
 // Combined layout configuration

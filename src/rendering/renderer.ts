@@ -34,7 +34,7 @@ export interface PositionedElement {
   style?: any;
   page: number;
   column: number;
-  lineLayout?: LineLayout;  // Reference to the line this element belongs to
+  lineLayout?: LineLayout; // Reference to the line this element belongs to
 }
 
 /**
@@ -156,56 +156,54 @@ abstract class Renderer {
     });
   }
 
-  private renderLineLayout(lineLayout: LineLayout) {
-    const { items, lineHeight, line } = lineLayout;
-
-    // Filter items that are column breaks and handle them first
-    if (this.hasColumnBreak(lineLayout)) {
-      this.moveToNextColumn();
-      return; // Skip to the next iteration of lines
-    }
-
-    // Check if the line will fit in the current column
+  private handleColumnOverflow(lineHeight: number): void {
     if (this.y + lineHeight > this.getColumnBottomY()) {
       this.moveToNextColumn();
     }
+  }
 
-    // Notify subclasses that we're rendering this line
-    this.onBeforeRenderLine(lineLayout);
-
-    const yOffset = this.y;
-    const { chordsYOffset, lyricsYOffset } = this.calculateChordLyricYOffsets(items, yOffset);
-
+  private renderItemsInLine(
+    items: MeasuredItem[],
+    line: Line | null,
+    yOffset: number,
+    chordsYOffset: number,
+    lyricsYOffset: number,
+  ): void {
     let currentX = this.x;
-
-    // Process each item in the line
     items.forEach((measuredItem) => {
       const { item, width } = measuredItem;
-      this.renderItem(item, line, currentX, chordsYOffset, lyricsYOffset, items, yOffset);
+      this.renderItem(item, line!, currentX, chordsYOffset, lyricsYOffset, items, yOffset);
       currentX += width;
     });
+  }
 
-    // Notify subclasses that we're done rendering this line
+  private renderLineLayout(lineLayout: LineLayout) {
+    const { items, lineHeight, line } = lineLayout;
+    if (this.hasColumnBreak(lineLayout)) {
+      this.moveToNextColumn();
+      return;
+    }
+    this.handleColumnOverflow(lineHeight);
+    this.onBeforeRenderLine(lineLayout);
+    const yOffset = this.y;
+    const { chordsYOffset, lyricsYOffset } = this.calculateChordLyricYOffsets(items, yOffset);
+    this.renderItemsInLine(items, line, yOffset, chordsYOffset, lyricsYOffset);
     this.onAfterRenderLine(lineLayout);
-
-    // Update the vertical position after rendering the line
     this.y += lineHeight;
-
-    // Reset x to the left margin for the next line
     this.x = this.getColumnStartX();
   }
 
   /**
    * Hook called before rendering a line - subclasses can override
    */
-  protected onBeforeRenderLine(lineLayout: LineLayout): void {
+  protected onBeforeRenderLine(_lineLayout: LineLayout): void {
     // Default: do nothing
   }
 
   /**
    * Hook called after rendering a line - subclasses can override
    */
-  protected onAfterRenderLine(lineLayout: LineLayout): void {
+  protected onAfterRenderLine(_lineLayout: LineLayout): void {
     // Default: do nothing
   }
 

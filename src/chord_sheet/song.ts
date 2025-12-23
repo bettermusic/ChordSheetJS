@@ -94,13 +94,13 @@ class Song extends MetadataAccessors {
    */
   getAllTimestamps(): number[] {
     const timestamps = new Set<number>();
-    
+
     this.lines.forEach((line) => {
       if (line.timestamps && line.timestamps.length > 0) {
         line.timestamps.forEach((ts) => timestamps.add(ts));
       }
     });
-    
+
     return Array.from(timestamps).sort((a, b) => a - b);
   }
 
@@ -115,9 +115,7 @@ class Song extends MetadataAccessors {
       if (line.isEmpty() || (line.isSectionEnd() && nextLine && !nextLine.isEmpty())) {
         currentParagraph = new Paragraph();
         paragraphs.push(currentParagraph);
-        // Don't clear pending timestamps - they should carry forward to the next paragraph
       } else if (line.hasRenderableItems()) {
-        // If there are pending timestamps from previous non-renderable lines, attach them to this line
         if (pendingTimestamps.length > 0) {
           // eslint-disable-next-line no-param-reassign
           line.timestamps = [...pendingTimestamps, ...line.timestamps];
@@ -126,7 +124,6 @@ class Song extends MetadataAccessors {
 
         currentParagraph.addLine(line);
       } else if (line.hasTimestamps()) {
-        // Non-renderable line with timestamps - save them for the next renderable line
         pendingTimestamps.push(...line.timestamps);
       }
     });
@@ -134,7 +131,7 @@ class Song extends MetadataAccessors {
     return paragraphs;
   }
 
-  /** Returns a deep clone of the song @returns {Song} */
+  /** Returns a deep clone of the song */
   clone(): Song {
     const clone = new Song();
     clone.warnings = [...this.warnings];
@@ -458,39 +455,10 @@ Or set the song key before changing key:
     return currentKey;
   }
 
-  /**
-   * Returns a copy of the song with the directive value(s) set to the specified value(s).
-   * - when there is a matching directive in the song, it will update the directive
-   * - when there is no matching directive, it will be inserted
-   * If `value` is `null` it will act as a delete, any directive matching `name` will be removed.
-   *
-   * @example
-   * ```javascript
-   * song.changeMetadata('author', 'John');
-   * song.changeMetadata('composer', ['Jane', 'John']);
-   * song.changeMetadata('key', null); // Remove key directive
-   * ```
-   * @param name The directive name
-   * @param {string | string[] | null} value The value to set, or `null` to remove the directive
-   * @return {Song} The changed song
-   */
+  /** Returns a copy with directive value(s) set. Updates existing or inserts new. `null` removes directive. */
   changeMetadata(name: string, value: string | string[] | null): Song;
 
-  /**
-   * Returns a copy of the song with the metadata changed. It will:
-   * - update the metadata
-   * - update any existing directive matching the metadata key
-   * - insert a new directive if it does not exist
-   * @example
-   * ```javascript
-   * song.changeMetadata({
-   *   author: 'John',
-   *   composer: ['Jane', 'John'],
-   *   key: null, // Remove key directive
-   * });
-   * ```
-   * @param {Record<string, string | string[] | null>} metadata The metadata to change
-   */
+  /** Returns a copy with metadata changed. Updates metadata and directives, inserts if missing. */
   changeMetadata(metadata: Record<string, string | string[] | null>): Song;
 
   changeMetadata(
@@ -594,11 +562,7 @@ Or set the song key before changing key:
     return chordDefinitions;
   }
 
-  /**
-   * The song's metadata. When there is only one value for an entry, the value is a string. Else, the value is
-   * an array containing all unique values for the entry.
-   * @type {Metadata}
-   */
+  /** The song's metadata. Single value is string, multiple values is array of unique values. */
   get metadata(): Metadata {
     if (!this._metadata) {
       this._metadata = this.getMetadata();
@@ -637,20 +601,7 @@ Or set the song key before changing key:
     return new ChordDefinitionSet(this.getChordDefinitions());
   }
 
-  /**
-   * Change the song contents inline. Return a new {@link Line} to replace it. Return `null` to remove it.
-   * @example
-   * // remove lines with only Tags:
-   * song.mapLines((line) => {
-   *   if (line.items.every(item => item instanceof Tag)) {
-   *     return null;
-   *   }
-   *
-   *   return line;
-   * });
-   * @param {MapLinesCallback} func the callback function
-   * @returns {Song} the changed song
-   */
+  /** Change song contents inline. Return new Line to replace, `null` to remove. */
   mapLines(func: (_line: Line) => Line | null): Song {
     const clonedSong = new Song();
     const builder = new SongBuilder(clonedSong);
@@ -662,8 +613,7 @@ Or set the song key before changing key:
         builder.addLine();
         changedLine.items.forEach((item) => builder.addItem(item));
 
-        // Preserve timestamps from the changed line
-        if (changedLine.timestamps && changedLine.timestamps.length > 0 && builder.currentLine) {
+        if (changedLine.timestamps?.length > 0 && builder.currentLine) {
           builder.currentLine.timestamps = [...changedLine.timestamps];
         }
       }
@@ -678,126 +628,78 @@ Or set the song key before changing key:
     notFoundCallback: (_song: Song) => Song,
   ): Song {
     let found = false;
-
     const updatedSong = this.mapItems((item) => {
       if (findCallback(item)) {
         found = true;
         return updateCallback(item);
       }
-
       return item;
     });
-
-    if (!found) {
-      return notFoundCallback(updatedSong);
-    }
-
-    return updatedSong;
+    return found ? updatedSong : notFoundCallback(updatedSong);
   }
 
   private removeItem(callback: (_item: Item) => boolean): Song {
     return this.mapLines((line) => {
       const { items } = line;
       const index = items.findIndex(callback);
+      if (index === -1) return line;
+      if (items.length === 1) return null;
+      return line.set({ items: [...items.slice(0, index), ...items.slice(index + 1)] });
+    });
+  }
 
-      if (index === -1) {
-        return line;
+  private calculateTempoRatio(oldTempoOrOptions: number | { ratio: number }, newTempo?: number): number {
+    if (typeof oldTempoOrOptions === 'object') {
+      return oldTempoOrOptions.ratio;
+    }
+    if (typeof newTempo !== 'number') {
+      throw new Error('newTempo is required when oldTempo is provided');
+    }
+    if (oldTempoOrOptions <= 0 || newTempo <= 0) {
+      throw new Error('Tempo values must be positive numbers');
+    }
+    return oldTempoOrOptions / newTempo;
+  }
+
+  private scaleLineTimestamps(line: Line, ratio: number): void {
+    if (line.timestamps.length > 0) {
+      // eslint-disable-next-line no-param-reassign
+      line.timestamps = line.timestamps.map((ts) => ts * ratio);
+    }
+  }
+
+  private scaleInlineTimestamps(line: Line, ratio: number): void {
+    line.items.forEach((item) => {
+      if (item instanceof ChordLyricsPair && item.timestamps.length > 0) {
+        // eslint-disable-next-line no-param-reassign
+        item.timestamps = item.timestamps.map((ts) => ts * ratio);
       }
-
-      if (items.length === 1) {
-        return null;
-      }
-
-      return line.set({
-        items: [...items.slice(0, index), ...items.slice(index + 1)],
-      });
     });
   }
 
   /**
    * Returns a copy of the song with all timestamps scaled according to a tempo change.
-   * This is useful when the song's tempo changes and all timestamps need to be recalculated.
-   *
    * The math is: `newTimestamp = oldTimestamp × (oldTempo / newTempo)`
-   *
-   * Examples:
-   * - 120 BPM → 60 BPM: timestamps are doubled (song takes twice as long)
-   * - 120 BPM → 180 BPM: timestamps are scaled to 2/3 (song is faster)
-   *
-   * @example
-   * ```javascript
-   * // Song was synced at 120 BPM, now changing to 100 BPM
-   * const adjustedSong = song.changeTempo(120, 100);
-   *
-   * // Using a ratio directly (e.g., 1.5 = 50% slower)
-   * const slowerSong = song.changeTempo({ ratio: 1.5 });
-   * ```
-   *
-   * @param {number} oldTempo The original tempo in BPM
-   * @param {number} newTempo The new tempo in BPM
-   * @returns {Song} A new song with all timestamps scaled
+   * Examples: 120 BPM → 60 BPM: timestamps doubled; 120 BPM → 180 BPM: timestamps scaled to 2/3
+   * @example song.changeTempo(120, 100) or song.changeTempo({ ratio: 1.5 })
    */
   changeTempo(oldTempo: number, newTempo: number): Song;
 
-  /**
-   * Returns a copy of the song with all timestamps scaled by a ratio.
-   *
-   * @example
-   * ```javascript
-   * // Double all timestamps (equivalent to halving the tempo)
-   * const slowerSong = song.changeTempo({ ratio: 2 });
-   *
-   * // Halve all timestamps (equivalent to doubling the tempo)
-   * const fasterSong = song.changeTempo({ ratio: 0.5 });
-   * ```
-   *
-   * @param {Object} options Options object
-   * @param {number} options.ratio The ratio to scale timestamps by
-   * @returns {Song} A new song with all timestamps scaled
-   */
   changeTempo(options: { ratio: number }): Song;
 
   changeTempo(
     oldTempoOrOptions: number | { ratio: number },
     newTempo?: number,
   ): Song {
-    let ratio: number;
-
-    if (typeof oldTempoOrOptions === 'object') {
-      ratio = oldTempoOrOptions.ratio;
-    } else {
-      if (typeof newTempo !== 'number') {
-        throw new Error('newTempo is required when oldTempo is provided');
-      }
-      if (oldTempoOrOptions <= 0 || newTempo <= 0) {
-        throw new Error('Tempo values must be positive numbers');
-      }
-      ratio = oldTempoOrOptions / newTempo;
-    }
-
+    const ratio = this.calculateTempoRatio(oldTempoOrOptions, newTempo);
     if (ratio <= 0) {
       throw new Error('Ratio must be a positive number');
     }
-
-    // Scale all line-level and inline timestamps
     const clonedSong = this.clone();
-
     clonedSong.lines.forEach((line) => {
-      // Scale line-level timestamps
-      if (line.timestamps.length > 0) {
-        // eslint-disable-next-line no-param-reassign
-        line.timestamps = line.timestamps.map((ts) => ts * ratio);
-      }
-
-      // Scale inline timestamps on ChordLyricsPairs
-      line.items.forEach((item) => {
-        if (item instanceof ChordLyricsPair && item.timestamps.length > 0) {
-          // eslint-disable-next-line no-param-reassign
-          item.timestamps = item.timestamps.map((ts) => ts * ratio);
-        }
-      });
+      this.scaleLineTimestamps(line, ratio);
+      this.scaleInlineTimestamps(line, ratio);
     });
-
     return clonedSong;
   }
 }

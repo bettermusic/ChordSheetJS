@@ -1,8 +1,7 @@
 import MeasuredHtmlFormatter from '../../src/formatter/measured_html_formatter';
 
 // Mock DOM environment
-declare const document: any;
-global.document = {
+(global as any).document = {
   createElement: () => ({
     style: {},
     classList: {
@@ -32,7 +31,7 @@ describe('MeasuredHtmlFormatter', () => {
     it('returns empty string when no playback config is provided', () => {
       const formatter = new MeasuredHtmlFormatter(mockContainer);
       formatter.configure({});
-      
+
       expect(formatter.cssString()).toBe('');
     });
 
@@ -54,7 +53,7 @@ describe('MeasuredHtmlFormatter', () => {
       });
 
       const css = formatter.cssString();
-      
+
       expect(css).toContain('.cs-highlighted');
       expect(css).toContain('border: 2px solid #3B82F6');
       expect(css).toContain('border-radius: 8px');
@@ -80,7 +79,7 @@ describe('MeasuredHtmlFormatter', () => {
       });
 
       const css = formatter.cssString();
-      
+
       expect(css).toContain('.cs-highlighted .cs-chord');
       expect(css).toContain('font-weight: bold');
       expect(css).toContain('color: #1D4ED8');
@@ -104,7 +103,7 @@ describe('MeasuredHtmlFormatter', () => {
       });
 
       const css = formatter.cssString();
-      
+
       expect(css).toContain('.cs-highlighted .cs-lyrics');
       expect(css).toContain('font-weight: bold');
     });
@@ -125,7 +124,7 @@ describe('MeasuredHtmlFormatter', () => {
       });
 
       const css = formatter.cssString('.song-viewer');
-      
+
       expect(css).toContain('.song-viewer .cs-highlighted');
       expect(css).toContain('border: 2px solid blue');
     });
@@ -154,12 +153,12 @@ describe('MeasuredHtmlFormatter', () => {
       });
 
       const css = formatter.cssString();
-      
+
       expect(css).toContain('.cs-highlighted .cs-chord');
       expect(css).toContain('font-weight: bold');
       expect(css).toContain('font-size: 14px');
       expect(css).toContain('color: #1D4ED8');
-      
+
       expect(css).toContain('.cs-highlighted .cs-lyrics');
       expect(css).toContain('font-weight: bold');
       expect(css).toContain('font-style: italic');
@@ -182,7 +181,7 @@ describe('MeasuredHtmlFormatter', () => {
       });
 
       const css = formatter.cssString();
-      
+
       expect(css).toContain('.custom-highlighted');
       expect(css).not.toContain('.cs-highlighted');
     });
@@ -212,7 +211,7 @@ describe('MeasuredHtmlFormatter', () => {
       });
 
       const css = formatter.cssString();
-      
+
       expect(css).toContain('.cs-highlighted {');
       expect(css).toContain('border: 2px solid #3B82F6');
       expect(css).toContain('padding: 8px');
@@ -221,4 +220,3 @@ describe('MeasuredHtmlFormatter', () => {
     });
   });
 });
-

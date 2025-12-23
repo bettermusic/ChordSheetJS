@@ -218,18 +218,18 @@ export class AudioSyncPanel extends HTMLElement {
             <span>🎵 Audio Sync Testing</span>
           </div>
         </div>
-        
+
         <div class="panel-content" id="panel-content">
           <!-- Time Slider -->
           <div class="control-group">
             <label>Time Position</label>
             <div class="control-row">
-              <input 
-                type="range" 
-                id="time-slider" 
-                min="0" 
-                max="${this.maxDuration}" 
-                value="0" 
+              <input
+                type="range"
+                id="time-slider"
+                min="0"
+                max="${this.maxDuration}"
+                value="0"
                 step="0.1"
               />
               <span class="time-display" id="current-time">0:00</span>
@@ -240,9 +240,9 @@ export class AudioSyncPanel extends HTMLElement {
           <div class="control-group">
             <label>Audio File (optional)</label>
             <div class="control-row">
-              <input 
-                type="file" 
-                id="audio-file" 
+              <input
+                type="file"
+                id="audio-file"
                 accept="audio/*"
               />
               <button id="play-pause" disabled>▶ Play</button>

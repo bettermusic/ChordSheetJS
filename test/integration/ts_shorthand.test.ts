@@ -7,11 +7,11 @@ describe('{tm:} shorthand for {timestamp:}', () => {
 [C]Test line`;
 
     const song = new ChordProParser().parse(chordSheet);
-    
+
     // Find the line with content
     const linesWithContent = song.lines.filter((line) => line.items.length > 0);
     expect(linesWithContent.length).toBeGreaterThan(0);
-    
+
     const firstContentLine = linesWithContent[0];
     expect(firstContentLine.timestamps).toBeDefined();
     expect(firstContentLine.timestamps.length).toBe(1);
@@ -24,10 +24,10 @@ describe('{tm:} shorthand for {timestamp:}', () => {
 [C]Test line`;
 
     const song = new ChordProParser().parse(chordSheet);
-    
+
     const linesWithContent = song.lines.filter((line) => line.items.length > 0);
     const firstContentLine = linesWithContent[0];
-    
+
     expect(firstContentLine.timestamps).toBeDefined();
     expect(firstContentLine.timestamps).toEqual([16, 80]);
   });
@@ -43,11 +43,10 @@ describe('{tm:} shorthand for {timestamp:}', () => {
 
     const song1 = new ChordProParser().parse(chordSheetWithTimestamp);
     const song2 = new ChordProParser().parse(chordSheetWithTm);
-    
+
     const line1 = song1.lines.filter((l) => l.items.length > 0)[0];
     const line2 = song2.lines.filter((l) => l.items.length > 0)[0];
-    
+
     expect(line1.timestamps).toEqual(line2.timestamps);
   });
 });
-

@@ -43,7 +43,7 @@ class PositionedHtmlRenderer extends Renderer {
 
   doc: HtmlDocWrapper;
 
-  private currentLineLayout: LineLayout | null = null;  // Track current line being rendered
+  private currentLineLayout: LineLayout | null = null; // Track current line being rendered
 
   /**
    * Creates a new HtmlRenderer
@@ -70,10 +70,6 @@ class PositionedHtmlRenderer extends Renderer {
       height: this.configuration.pageSize.height,
     });
   }
-
-  //
-  // PUBLIC API
-  //
 
   getFontConfiguration(objectType: string): FontConfiguration {
     return this.configuration.fonts[objectType];
@@ -109,10 +105,6 @@ class PositionedHtmlRenderer extends Renderer {
       this.doc.dispose();
     }
   }
-
-  //
-  // ABSTRACT METHOD IMPLEMENTATIONS
-  //
 
   protected initializeBackend(): void {
     if (this.configuration.additionalCss) {
@@ -249,27 +241,16 @@ class PositionedHtmlRenderer extends Renderer {
   ): { column: number; page: number } {
     if (this.hasColumnBreak(lineLayout)) {
       this.moveToNextColumn();
-      return this.getCurrentContext();
+      return { column: this.currentColumn, page: this.currentPage };
     }
 
-    const currentCtx = this.handleColumnOverflow(lineLayout.lineHeight, ctx);
+    let currentCtx = ctx;
+    if (this.y + lineLayout.lineHeight > this.getColumnBottomY()) {
+      this.moveToNextColumn();
+      currentCtx = { column: this.currentColumn, page: this.currentPage };
+    }
     this.renderLineContent(lineLayout, currentCtx);
     return currentCtx;
-  }
-
-  private getCurrentContext(): { column: number; page: number } {
-    return { column: this.currentColumn, page: this.currentPage };
-  }
-
-  private handleColumnOverflow(
-    lineHeight: number,
-    ctx: { column: number; page: number },
-  ): { column: number; page: number } {
-    if (this.y + lineHeight > this.getColumnBottomY()) {
-      this.moveToNextColumn();
-      return this.getCurrentContext();
-    }
-    return ctx;
   }
 
   private renderLineContent(lineLayout: LineLayout, ctx: { column: number; page: number }): void {
@@ -362,21 +343,11 @@ class PositionedHtmlRenderer extends Renderer {
     lastElement.lineLayout = this.currentLineLayout || undefined;
   }
 
-  protected addSectionLabel(
-    label: string,
-    x: number,
-    y: number,
-    options: { noUnderline?: boolean } = {},
-  ): void {
+  protected addSectionLabel(label: string, x: number, y: number, options: { noUnderline?: boolean } = {}): void {
     this.addTextElementWithOptions(label, x, y, 'sectionLabel', options);
   }
 
-  protected addComment(
-    comment: string,
-    x: number,
-    y: number,
-    options: { noUnderline?: boolean } = {},
-  ): void {
+  protected addComment(comment: string, x: number, y: number, options: { noUnderline?: boolean } = {}): void {
     this.addTextElementWithOptions(comment, x, y, 'comment', options);
   }
 
@@ -417,25 +388,17 @@ class PositionedHtmlRenderer extends Renderer {
 
   protected finalizeRendering(): void {
     const pageCount = Math.max(this.currentPage, this.doc.totalPages);
-
     while (this.doc.totalPages < pageCount) {
       this.doc.createPage();
     }
-
     for (let page = 1; page <= pageCount; page += 1) {
       const pageElements = this.getElementsForPage(page);
       if (pageElements.length > 0) {
         this.doc.setPage(page);
-        pageElements.forEach((element) => {
-          this.drawElement(element);
-        });
+        pageElements.forEach((element) => this.drawElement(element));
       }
     }
   }
-
-  //
-  // ABSTRACT ACCESSOR IMPLEMENTATIONS
-  //
 
   protected getConfiguration() {
     return this.configuration;
@@ -451,7 +414,6 @@ class PositionedHtmlRenderer extends Renderer {
   }
 
   protected getColumnBottomY(): number {
-    // Return Infinity for auto height to prevent page breaks
     if (this.configuration.pageSize.height === 'auto') {
       return Infinity;
     }
@@ -461,10 +423,6 @@ class PositionedHtmlRenderer extends Renderer {
   protected getDocPageSize(): { width: number; height: number | 'auto' } {
     return this.doc.pageSize;
   }
-
-  //
-  // PRIVATE HELPERS
-  //
 
   private calculateBounds(group: PositionedElement[]): Bounds {
     let minX = Number.MAX_VALUE;
@@ -484,6 +442,19 @@ class PositionedHtmlRenderer extends Renderer {
     };
   }
 
+  private addTimestampAttributes(div: HTMLElement, timestamps: number[] | undefined): void {
+    const granularity = this.configuration.layout.playback?.granularity;
+    const activeTimestamp = this.configuration.layout.playback?.activeTimestamp;
+
+    if ((granularity === 'paragraph' || granularity === 'section') && timestamps && timestamps.length > 0) {
+      // eslint-disable-next-line no-param-reassign
+      div.dataset.timestamp = timestamps.join('|');
+      if (activeTimestamp !== undefined && activeTimestamp !== null && timestamps.includes(activeTimestamp)) {
+        div.classList.add(`${this.styler.prefix}highlighted`);
+      }
+    }
+  }
+
   private createParagraphDiv(bounds: Bounds, classes: (string | undefined)[], layout: ParagraphLayout) {
     const width = bounds.maxX - bounds.minX;
     const height = bounds.maxY - bounds.minY;
@@ -498,43 +469,14 @@ class PositionedHtmlRenderer extends Renderer {
       height: `${height}px`,
     });
 
-    // Add data-timestamp attribute based on granularity
-    const granularity = this.configuration.layout.playback?.granularity;
-    const activeTimestamp = this.configuration.layout.playback?.activeTimestamp;
-    
-    if (granularity === 'paragraph' || granularity === 'section') {
-      // For paragraph/section level, add timestamp to paragraph div
-      if (layout.timestamps && layout.timestamps.length > 0) {
-        div.dataset.timestamp = layout.timestamps.join('|');
-        
-        // Add highlighted class if this timestamp matches activeTimestamp
-        if (activeTimestamp !== undefined && activeTimestamp !== null) {
-          const isActive = layout.timestamps.includes(activeTimestamp);
-          if (isActive) {
-            div.classList.add(`${this.styler.prefix}highlighted`);
-          }
-        }
-      }
-    }
-
+    this.addTimestampAttributes(div, layout.timestamps);
     return div;
   }
 
-  private createElementGroupDiv(
-    x: number,
-    y: number,
-    content: string,
-    classes: (string | undefined)[],
-  ): HTMLElement {
+  private createElementGroupDiv(x: number, y: number, content: string, classes: (string | undefined)[]): HTMLElement {
     const div = document.createElement('div');
     div.className = this.styler.createClassName(...classes);
-
-    Object.assign(div.style, {
-      position: 'absolute',
-      left: `${x}px`,
-      top: `${y}px`,
-    });
-
+    Object.assign(div.style, { position: 'absolute', left: `${x}px`, top: `${y}px` });
     div.textContent = content;
     return div;
   }
@@ -578,14 +520,65 @@ class PositionedHtmlRenderer extends Renderer {
       element.x - bounds.minX,
       element.y - bounds.minY,
       element.content,
-      [
-        `${prefix}element ${prefix}${element.type}`,
-        this.styler.getCustomClass(element.type),
-      ],
+      [`${prefix}element ${prefix}${element.type}`, this.styler.getCustomClass(element.type)],
     );
-
     this.styler.applyElementStyle(htmlElement, element);
     paragraphDiv.appendChild(htmlElement);
+  }
+
+  private groupElementsByLine(elements: PositionedElement[]): Map<LineLayout, PositionedElement[]> {
+    const lineGroups = new Map<LineLayout, PositionedElement[]>();
+    elements.forEach((element) => {
+      if (element.lineLayout) {
+        if (!lineGroups.has(element.lineLayout)) {
+          lineGroups.set(element.lineLayout, []);
+        }
+        lineGroups.get(element.lineLayout)!.push(element);
+      }
+    });
+    return lineGroups;
+  }
+
+  private createLineWrapperDiv(lineBounds: Bounds, bounds: Bounds): HTMLElement {
+    const lineDiv = document.createElement('div');
+    lineDiv.className = `${this.styler.prefix}line`;
+    Object.assign(lineDiv.style, {
+      position: 'absolute',
+      left: `${lineBounds.minX - bounds.minX}px`,
+      top: `${lineBounds.minY - bounds.minY}px`,
+      width: `${lineBounds.maxX - lineBounds.minX}px`,
+      height: `${lineBounds.maxY - lineBounds.minY}px`,
+    });
+    return lineDiv;
+  }
+
+  private addLineTimestampAttributes(lineDiv: HTMLElement, lineLayout: LineLayout): void {
+    const timestamps = lineLayout.line?.timestamps;
+    const activeTimestamp = this.configuration.layout.playback?.activeTimestamp;
+
+    if (timestamps && timestamps.length > 0) {
+      // eslint-disable-next-line no-param-reassign
+      lineDiv.dataset.timestamp = timestamps.join('|');
+      if (activeTimestamp !== undefined && activeTimestamp !== null && timestamps.includes(activeTimestamp)) {
+        lineDiv.classList.add(`${this.styler.prefix}highlighted`);
+      }
+    }
+  }
+
+  private renderLineElements(lineElements: PositionedElement[], lineBounds: Bounds, lineDiv: HTMLElement): void {
+    lineElements.forEach((element) => {
+      const htmlElement = this.createElementGroupDiv(
+        element.x - lineBounds.minX,
+        element.y - lineBounds.minY,
+        element.content,
+        [
+          `${this.styler.prefix}element ${this.styler.prefix}${element.type}`,
+          this.styler.getCustomClass(element.type),
+        ],
+      );
+      this.styler.applyElementStyle(htmlElement, element);
+      lineDiv.appendChild(htmlElement);
+    });
   }
 
   private renderElementsWithLineWrappers(
@@ -593,66 +586,19 @@ class PositionedHtmlRenderer extends Renderer {
     bounds: Bounds,
     paragraphDiv: HTMLElement,
   ): void {
-    // Group elements by line
-    const lineGroups = new Map<LineLayout, PositionedElement[]>();
-    
+    const lineGroups = this.groupElementsByLine(elements);
+
     elements.forEach((element) => {
-      if (element.lineLayout) {
-        if (!lineGroups.has(element.lineLayout)) {
-          lineGroups.set(element.lineLayout, []);
-        }
-        lineGroups.get(element.lineLayout)!.push(element);
-      } else {
-        // Elements without line reference (e.g., section labels) go directly in paragraph
+      if (!element.lineLayout) {
         this.renderElement(element, bounds, paragraphDiv);
       }
     });
 
-    // Create a line wrapper div for each line
-    const activeTimestamp = this.configuration.layout.playback?.activeTimestamp;
-    
     lineGroups.forEach((lineElements, lineLayout) => {
       const lineBounds = this.calculateBounds(lineElements);
-      const lineDiv = document.createElement('div');
-      lineDiv.className = `${this.styler.prefix}line`;
-      
-      Object.assign(lineDiv.style, {
-        position: 'absolute',
-        left: `${lineBounds.minX - bounds.minX}px`,
-        top: `${lineBounds.minY - bounds.minY}px`,
-        width: `${lineBounds.maxX - lineBounds.minX}px`,
-        height: `${lineBounds.maxY - lineBounds.minY}px`,
-      });
-
-      // Add data-timestamp for this line
-      if (lineLayout.line?.timestamps && lineLayout.line.timestamps.length > 0) {
-        lineDiv.dataset.timestamp = lineLayout.line.timestamps.join('|');
-        
-        // Add highlighted class if this timestamp matches activeTimestamp
-        if (activeTimestamp !== undefined && activeTimestamp !== null) {
-          const isActive = lineLayout.line.timestamps.includes(activeTimestamp);
-          if (isActive) {
-            lineDiv.classList.add(`${this.styler.prefix}highlighted`);
-          }
-        }
-      }
-
-      // Render elements within this line wrapper
-      lineElements.forEach((element) => {
-        const htmlElement = this.createElementGroupDiv(
-          element.x - lineBounds.minX,
-          element.y - lineBounds.minY,
-          element.content,
-          [
-            `${this.styler.prefix}element ${this.styler.prefix}${element.type}`,
-            this.styler.getCustomClass(element.type),
-          ],
-        );
-
-        this.styler.applyElementStyle(htmlElement, element);
-        lineDiv.appendChild(htmlElement);
-      });
-
+      const lineDiv = this.createLineWrapperDiv(lineBounds, bounds);
+      this.addLineTimestampAttributes(lineDiv, lineLayout);
+      this.renderLineElements(lineElements, lineBounds, lineDiv);
       paragraphDiv.appendChild(lineDiv);
     });
   }
