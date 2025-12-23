@@ -9,6 +9,7 @@ export const chordproExamples = [
 {time:6/8}
 {copyright: @2021 Writers Roof Publishing, TBCO Publishing, A.L.K.D. Music, Capitol CMG Paragon  (Admin by Capitol CMG Publishing) For Humans, Maverick City Publishing (Admin by Essential Music Publishing)}
 
+{timestamp: 0:00}
 {c:Intro}
 [A]A - [E/A]men, [A]a - [E/A]men, [Bm7]a [/]-[A/C#] [C#m7][D] [/]- [E]men`,
   },
@@ -210,6 +211,71 @@ No, He [Bb]won't`,
 
 [Am4][/][|][/][/][|][C7][/][|][/]
 
+`,
+  },
+  {
+    name: 'Timestamp Demo',
+    content: `{title: Timestamp Demo}
+{artist: Test Artist}
+{key: C}
+{tempo: 120}
+{time: 4/4}
+
+{tm: 0:00}
+{start_of_verse}
+{tm: 0:00}[C]This is the first verse
+{tm: 0:04}[G]Starting at zero seconds
+{tm: 0:08}[Am]Watch as we scroll along
+{tm: 0:12}[F]Following the music
+{end_of_verse}
+
+{tm: 0:16}
+{start_of_chorus}
+{tm: 0:16}[Am]Chorus begins here
+{tm: 0:20}[F]At eight seconds in
+{tm: 0:24}[C]Auto-scrolling in action
+{tm: 0:28}[G]Highlighting each section
+{end_of_chorus}
+
+{tm: 0:32}
+{start_of_verse}
+{tm: 0:32}[C]Second verse starts now
+{tm: 0:36}[G]At sixteen seconds
+{tm: 0:40}[Am]Try the time slider below
+{tm: 0:44}[F]Or upload your audio file
+{end_of_verse}
+
+{tm: 0:48}
+{start_of_chorus}
+{tm: 0:48}[Am]Chorus repeats twice
+{tm: 0:52}[F]With different timestamps
+{tm: 0:56}[C]First at 0:24
+{tm: 1:00}[G]Then again at 0:48
+{end_of_chorus}
+
+{tm: 1:04}
+{start_of_bridge}
+{tm: 1:04}[Dm]This is the bridge section
+{tm: 1:08}[Em]Appearing at thirty-two
+{tm: 1:12}[F]Each section gets highlighted
+{tm: 1:16}[G]As the time progresses
+{end_of_bridge}
+
+{tm: 1:20}
+{start_of_verse}
+{tm: 1:20}[C]Final verse to close
+{tm: 1:24}[G]At forty seconds mark
+{tm: 1:28}[Am]Test the audio sync feature
+{tm: 1:32}[F]With your own recording
+{end_of_verse}
+
+{tm: 1:36}
+{start_of_outro}
+{tm: 1:36}[C]Outro fading out
+{tm: 1:40}[G]Song coming to end
+{tm: 1:44}[Am]Thanks for testing this
+{tm: 1:48}[F]Audio [C]sync feature
+{end_of_outro}
 `,
   },
 ];

@@ -95,6 +95,22 @@ export { DomMeasurer } from './layout/measurement';
 export { CanvasMeasurer } from './layout/measurement';
 export { LayoutEngine } from './layout/engine/layout_engine';
 
+export { TimestampManager, StatelessTimestampTracker } from './playback';
+export type { TimestampEntry, TimestampManagerOptions } from './playback';
+export { formatTimestamp, parseTimestamp, parseTimestamps } from './utilities/timestamp_parser';
+export type { TimestampPrecision } from './utilities/timestamp_parser';
+export { TIMESTAMP } from './chord_sheet/tags';
+
+export type {
+  PlaybackConfig,
+  PlaybackHighlightStyles,
+  FontConfiguration,
+  FontConfigurations,
+  MeasurementBasedLayoutConfig,
+  PDFFormatterConfiguration,
+  MeasuredHtmlFormatterConfiguration,
+} from './formatter/configuration';
+
 export {
   ABC,
   CHORUS,

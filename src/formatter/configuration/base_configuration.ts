@@ -1,6 +1,7 @@
 import { ContentType } from '../../serialized_types';
 import Key from '../../key';
 import { META_TAGS } from '../../chord_sheet/tag';
+import { TimestampPrecision } from '../../utilities/timestamp_parser';
 
 export type Delegate = (_string: string) => string;
 export const defaultDelegate: Delegate = (string: string) => string;
@@ -60,6 +61,15 @@ export interface BaseFormatterConfiguration {
   key: Key | null;
   metadata: MetadataConfiguration;
   normalizeChords: boolean;
+  /**
+   * Precision for timestamp formatting (decimal places for fractional seconds).
+   * - 0: whole seconds (e.g., "1:23")
+   * - 1: tenths (e.g., "1:23.5")
+   * - 2: centiseconds (e.g., "1:23.50")
+   * - 3: milliseconds (e.g., "1:23.500")
+   * @default 2
+   */
+  timestampPrecision: TimestampPrecision;
   useUnicodeModifiers: boolean;
   user: UserConfigurationProperties | null;
 }
@@ -74,6 +84,7 @@ export type ConfigurationProperties = Record<string, any> & Partial<{
   key: Key | string | null;
   metadata: Partial<MetadataConfiguration>;
   normalizeChords: boolean;
+  timestampPrecision: TimestampPrecision;
   useUnicodeModifiers: boolean;
   user: Partial<UserConfigurationProperties>;
 }>;
@@ -88,6 +99,7 @@ export const defaultBaseConfiguration: BaseFormatterConfiguration = {
   key: null,
   metadata: defaultMetadataConfiguration,
   normalizeChords: true,
+  timestampPrecision: 2, // Centisecond precision (e.g., "1:23.50")
   useUnicodeModifiers: false,
   user: null,
 };
