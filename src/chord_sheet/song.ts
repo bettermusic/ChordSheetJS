@@ -88,18 +88,49 @@ class Song extends MetadataAccessors {
     return this.selectRenderableItems(this.linesToParagraphs(expandedLines)) as Paragraph[];
   }
 
+  /**
+   * Get all timestamps from all lines in the song
+   * @returns {number[]} Sorted array of unique timestamps in seconds
+   */
+  getAllTimestamps(): number[] {
+    const timestamps = new Set<number>();
+    
+    this.lines.forEach((line) => {
+      if (line.timestamps && line.timestamps.length > 0) {
+        line.timestamps.forEach((ts) => timestamps.add(ts));
+      }
+    });
+    
+    return Array.from(timestamps).sort((a, b) => a - b);
+  }
+
   linesToParagraphs(lines: Line[]): Paragraph[] {
     let currentParagraph = new Paragraph();
     const paragraphs = [currentParagraph];
+    let pendingTimestamps: number[] = [];
+
     lines.forEach((line, index) => {
       const nextLine: Line | null = lines[index + 1] || null;
+
       if (line.isEmpty() || (line.isSectionEnd() && nextLine && !nextLine.isEmpty())) {
         currentParagraph = new Paragraph();
         paragraphs.push(currentParagraph);
+        // Don't clear pending timestamps - they should carry forward to the next paragraph
       } else if (line.hasRenderableItems()) {
+        // If there are pending timestamps from previous non-renderable lines, attach them to this line
+        if (pendingTimestamps.length > 0) {
+          // eslint-disable-next-line no-param-reassign
+          line.timestamps = [...pendingTimestamps, ...line.timestamps];
+          pendingTimestamps = [];
+        }
+
         currentParagraph.addLine(line);
+      } else if (line.hasTimestamps()) {
+        // Non-renderable line with timestamps - save them for the next renderable line
+        pendingTimestamps.push(...line.timestamps);
       }
     });
+
     return paragraphs;
   }
 
@@ -630,6 +661,11 @@ Or set the song key before changing key:
       if (changedLine) {
         builder.addLine();
         changedLine.items.forEach((item) => builder.addItem(item));
+
+        // Preserve timestamps from the changed line
+        if (changedLine.timestamps && changedLine.timestamps.length > 0 && builder.currentLine) {
+          builder.currentLine.timestamps = [...changedLine.timestamps];
+        }
       }
     });
 
@@ -676,6 +712,93 @@ Or set the song key before changing key:
         items: [...items.slice(0, index), ...items.slice(index + 1)],
       });
     });
+  }
+
+  /**
+   * Returns a copy of the song with all timestamps scaled according to a tempo change.
+   * This is useful when the song's tempo changes and all timestamps need to be recalculated.
+   *
+   * The math is: `newTimestamp = oldTimestamp × (oldTempo / newTempo)`
+   *
+   * Examples:
+   * - 120 BPM → 60 BPM: timestamps are doubled (song takes twice as long)
+   * - 120 BPM → 180 BPM: timestamps are scaled to 2/3 (song is faster)
+   *
+   * @example
+   * ```javascript
+   * // Song was synced at 120 BPM, now changing to 100 BPM
+   * const adjustedSong = song.changeTempo(120, 100);
+   *
+   * // Using a ratio directly (e.g., 1.5 = 50% slower)
+   * const slowerSong = song.changeTempo({ ratio: 1.5 });
+   * ```
+   *
+   * @param {number} oldTempo The original tempo in BPM
+   * @param {number} newTempo The new tempo in BPM
+   * @returns {Song} A new song with all timestamps scaled
+   */
+  changeTempo(oldTempo: number, newTempo: number): Song;
+
+  /**
+   * Returns a copy of the song with all timestamps scaled by a ratio.
+   *
+   * @example
+   * ```javascript
+   * // Double all timestamps (equivalent to halving the tempo)
+   * const slowerSong = song.changeTempo({ ratio: 2 });
+   *
+   * // Halve all timestamps (equivalent to doubling the tempo)
+   * const fasterSong = song.changeTempo({ ratio: 0.5 });
+   * ```
+   *
+   * @param {Object} options Options object
+   * @param {number} options.ratio The ratio to scale timestamps by
+   * @returns {Song} A new song with all timestamps scaled
+   */
+  changeTempo(options: { ratio: number }): Song;
+
+  changeTempo(
+    oldTempoOrOptions: number | { ratio: number },
+    newTempo?: number,
+  ): Song {
+    let ratio: number;
+
+    if (typeof oldTempoOrOptions === 'object') {
+      ratio = oldTempoOrOptions.ratio;
+    } else {
+      if (typeof newTempo !== 'number') {
+        throw new Error('newTempo is required when oldTempo is provided');
+      }
+      if (oldTempoOrOptions <= 0 || newTempo <= 0) {
+        throw new Error('Tempo values must be positive numbers');
+      }
+      ratio = oldTempoOrOptions / newTempo;
+    }
+
+    if (ratio <= 0) {
+      throw new Error('Ratio must be a positive number');
+    }
+
+    // Scale all line-level and inline timestamps
+    const clonedSong = this.clone();
+
+    clonedSong.lines.forEach((line) => {
+      // Scale line-level timestamps
+      if (line.timestamps.length > 0) {
+        // eslint-disable-next-line no-param-reassign
+        line.timestamps = line.timestamps.map((ts) => ts * ratio);
+      }
+
+      // Scale inline timestamps on ChordLyricsPairs
+      line.items.forEach((item) => {
+        if (item instanceof ChordLyricsPair && item.timestamps.length > 0) {
+          // eslint-disable-next-line no-param-reassign
+          item.timestamps = item.timestamps.map((ts) => ts * ratio);
+        }
+      });
+    });
+
+    return clonedSong;
   }
 }
 

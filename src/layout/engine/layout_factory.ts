@@ -31,9 +31,33 @@ export class LayoutFactory {
     const maxChordHeight = Math.max(...items.map((mi) => mi.chordHeight || 0));
     const lineHeight = this.calculateLineHeight(flags, maxChordHeight);
 
+    // Collect timestamps from line and inline items
+    const timestamps = this.collectTimestamps(line, items);
+
     return {
-      type, items, lineHeight, line,
+      type, items, lineHeight, line, timestamps,
     };
+  }
+
+  /**
+   * Collect timestamps from line and measured items
+   */
+  private collectTimestamps(line: Line, items: MeasuredItem[]): number[] | undefined {
+    const timestamps: number[] = [];
+
+    // Add line-level timestamps
+    if (line.timestamps && line.timestamps.length > 0) {
+      timestamps.push(...line.timestamps);
+    }
+
+    // Add inline timestamps from items
+    items.forEach((item) => {
+      if (item.timestamps && item.timestamps.length > 0) {
+        timestamps.push(...item.timestamps);
+      }
+    });
+
+    return timestamps.length > 0 ? timestamps : undefined;
   }
 
   private analyzeLineContent(items: MeasuredItem[]): LineContentFlags {

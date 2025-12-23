@@ -79,8 +79,9 @@ function formatSong(formatter: any, options?: any): string {
     const { currentFormatter } = formatterStore.getState();
     const config = { ...(formatterStore.getState().formatterConfigs[currentFormatter] || {}), ...options };
 
-    console.log(`Formatting song with key: ${song.key}, config:`, config);
-    return formatter.configure(config).format(song);
+    const output = formatter.configure(config).format(song);
+
+    return output;
   } catch (error) {
     console.error('Error formatting song:', error);
     return 'Error formatting song.';

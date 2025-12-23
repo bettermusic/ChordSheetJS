@@ -23,7 +23,7 @@ import {
  * Both PDF and HTML renderers implement this interface.
  */
 export interface LayoutRenderingBackend {
-  pageSize: { width: number; height: number };
+  pageSize: { width: number; height: number | 'auto' };
   currentPage: number;
   totalPages: number;
 
@@ -86,9 +86,13 @@ export class LayoutSectionRenderer {
   renderLayout(layoutConfig: LayoutItem, section: LayoutSection): void {
     const { height } = layoutConfig;
     const { height: pageHeight } = this.backend.pageSize;
+
+    // For auto height, position footer at a large offset (will be positioned naturally)
+    const numericHeight = pageHeight === 'auto' ? 10000 : pageHeight;
+
     const sectionY = section === 'header' ?
       this.context.margins.top :
-      pageHeight - height - this.context.margins.bottom;
+      numericHeight - height - this.context.margins.bottom;
 
     layoutConfig.content.forEach((contentItem) => {
       const item = contentItem as LayoutContentItem;

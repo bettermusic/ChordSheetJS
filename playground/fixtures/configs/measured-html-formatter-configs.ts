@@ -144,6 +144,24 @@ export const measuredHtmlConfigs = [
             },
           },
         },
+        playback: {
+          granularity: 'line',
+          highlighted: {
+            fonts: {
+              chord: {
+                weight: 'bold',
+              },
+              text: {
+                weight: 'bold',
+              },
+            },
+            container: {
+              backgroundColor: 'rgba(237, 110, 110, 0.1)',
+              borderLeft: '4px solid #ed6e6e',
+              paddingLeft: '8px',
+            },
+          },
+        },
       },
     },
   },

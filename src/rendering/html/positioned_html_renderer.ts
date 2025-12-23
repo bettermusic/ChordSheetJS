@@ -43,6 +43,8 @@ class PositionedHtmlRenderer extends Renderer {
 
   doc: HtmlDocWrapper;
 
+  private currentLineLayout: LineLayout | null = null;  // Track current line being rendered
+
   /**
    * Creates a new HtmlRenderer
    */
@@ -275,11 +277,16 @@ class PositionedHtmlRenderer extends Renderer {
     const yOffset = this.y;
     const { chordsYOffset, lyricsYOffset } = this.calculateChordLyricYOffsets(items, yOffset);
 
+    // Track current line for element grouping
+    this.currentLineLayout = lineLayout;
+
     let currentX = this.x;
     items.forEach((measuredItem) => {
       this.renderMeasuredItem(measuredItem, currentX, yOffset, chordsYOffset, lyricsYOffset, items, line, ctx);
       currentX += measuredItem.width;
     });
+
+    this.currentLineLayout = null;
 
     this.y += lineHeight;
     this.x = this.getColumnStartX();
@@ -352,6 +359,7 @@ class PositionedHtmlRenderer extends Renderer {
     const lastElement = this.elements[this.elements.length - 1];
     lastElement.column = column;
     lastElement.page = page;
+    lastElement.lineLayout = this.currentLineLayout || undefined;
   }
 
   protected addSectionLabel(
@@ -442,7 +450,15 @@ class PositionedHtmlRenderer extends Renderer {
     return this._dimensions;
   }
 
-  protected getDocPageSize(): { width: number; height: number } {
+  protected getColumnBottomY(): number {
+    // Return Infinity for auto height to prevent page breaks
+    if (this.configuration.pageSize.height === 'auto') {
+      return Infinity;
+    }
+    return super.getColumnBottomY();
+  }
+
+  protected getDocPageSize(): { width: number; height: number | 'auto' } {
     return this.doc.pageSize;
   }
 
@@ -468,7 +484,7 @@ class PositionedHtmlRenderer extends Renderer {
     };
   }
 
-  private createParagraphDiv(bounds: Bounds, classes: (string | undefined)[]) {
+  private createParagraphDiv(bounds: Bounds, classes: (string | undefined)[], layout: ParagraphLayout) {
     const width = bounds.maxX - bounds.minX;
     const height = bounds.maxY - bounds.minY;
     const div = document.createElement('div');
@@ -481,6 +497,25 @@ class PositionedHtmlRenderer extends Renderer {
       width: `${width}px`,
       height: `${height}px`,
     });
+
+    // Add data-timestamp attribute based on granularity
+    const granularity = this.configuration.layout.playback?.granularity;
+    const activeTimestamp = this.configuration.layout.playback?.activeTimestamp;
+    
+    if (granularity === 'paragraph' || granularity === 'section') {
+      // For paragraph/section level, add timestamp to paragraph div
+      if (layout.timestamps && layout.timestamps.length > 0) {
+        div.dataset.timestamp = layout.timestamps.join('|');
+        
+        // Add highlighted class if this timestamp matches activeTimestamp
+        if (activeTimestamp !== undefined && activeTimestamp !== null) {
+          const isActive = layout.timestamps.includes(activeTimestamp);
+          if (isActive) {
+            div.classList.add(`${this.styler.prefix}highlighted`);
+          }
+        }
+      }
+    }
 
     return div;
   }
@@ -520,11 +555,19 @@ class PositionedHtmlRenderer extends Renderer {
       `${prefix}paragraph`,
       `paragraph-${paragraphIndex}-${groupIndex}`,
       `${prefix}${layout.sectionType}`,
-    ]);
+    ], layout);
 
-    group.forEach((element) => {
-      this.renderElement(element, bounds, paragraphDiv);
-    });
+    const granularity = this.configuration.layout.playback?.granularity;
+
+    if (granularity === 'line') {
+      // Group elements by line and create line wrappers
+      this.renderElementsWithLineWrappers(group, bounds, paragraphDiv);
+    } else {
+      // Default: render elements directly in paragraph
+      group.forEach((element) => {
+        this.renderElement(element, bounds, paragraphDiv);
+      });
+    }
 
     this.doc.addElement(paragraphDiv, bounds.minX, bounds.minY);
   }
@@ -543,6 +586,75 @@ class PositionedHtmlRenderer extends Renderer {
 
     this.styler.applyElementStyle(htmlElement, element);
     paragraphDiv.appendChild(htmlElement);
+  }
+
+  private renderElementsWithLineWrappers(
+    elements: PositionedElement[],
+    bounds: Bounds,
+    paragraphDiv: HTMLElement,
+  ): void {
+    // Group elements by line
+    const lineGroups = new Map<LineLayout, PositionedElement[]>();
+    
+    elements.forEach((element) => {
+      if (element.lineLayout) {
+        if (!lineGroups.has(element.lineLayout)) {
+          lineGroups.set(element.lineLayout, []);
+        }
+        lineGroups.get(element.lineLayout)!.push(element);
+      } else {
+        // Elements without line reference (e.g., section labels) go directly in paragraph
+        this.renderElement(element, bounds, paragraphDiv);
+      }
+    });
+
+    // Create a line wrapper div for each line
+    const activeTimestamp = this.configuration.layout.playback?.activeTimestamp;
+    
+    lineGroups.forEach((lineElements, lineLayout) => {
+      const lineBounds = this.calculateBounds(lineElements);
+      const lineDiv = document.createElement('div');
+      lineDiv.className = `${this.styler.prefix}line`;
+      
+      Object.assign(lineDiv.style, {
+        position: 'absolute',
+        left: `${lineBounds.minX - bounds.minX}px`,
+        top: `${lineBounds.minY - bounds.minY}px`,
+        width: `${lineBounds.maxX - lineBounds.minX}px`,
+        height: `${lineBounds.maxY - lineBounds.minY}px`,
+      });
+
+      // Add data-timestamp for this line
+      if (lineLayout.line?.timestamps && lineLayout.line.timestamps.length > 0) {
+        lineDiv.dataset.timestamp = lineLayout.line.timestamps.join('|');
+        
+        // Add highlighted class if this timestamp matches activeTimestamp
+        if (activeTimestamp !== undefined && activeTimestamp !== null) {
+          const isActive = lineLayout.line.timestamps.includes(activeTimestamp);
+          if (isActive) {
+            lineDiv.classList.add(`${this.styler.prefix}highlighted`);
+          }
+        }
+      }
+
+      // Render elements within this line wrapper
+      lineElements.forEach((element) => {
+        const htmlElement = this.createElementGroupDiv(
+          element.x - lineBounds.minX,
+          element.y - lineBounds.minY,
+          element.content,
+          [
+            `${this.styler.prefix}element ${this.styler.prefix}${element.type}`,
+            this.styler.getCustomClass(element.type),
+          ],
+        );
+
+        this.styler.applyElementStyle(htmlElement, element);
+        lineDiv.appendChild(htmlElement);
+      });
+
+      paragraphDiv.appendChild(lineDiv);
+    });
   }
 
   private drawElement(element: PositionedElement): void {

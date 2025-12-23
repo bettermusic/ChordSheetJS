@@ -73,6 +73,12 @@ class Line {
    */
   chordFont: Font = new Font();
 
+  /**
+   * Timestamps for this line in seconds. Supports multiple timestamps for repeating sections.
+   * @type {number[]}
+   */
+  timestamps: number[] = [];
+
   constructor({ type, items }: { type: string, items: Item[] } = { type: NONE, items: [] }) {
     this.type = type;
     this.items = items;
@@ -111,6 +117,14 @@ class Line {
   }
 
   /**
+   * Indicates whether the line has timestamps
+   * @returns {boolean}
+   */
+  hasTimestamps(): boolean {
+    return this.timestamps.length > 0;
+  }
+
+  /**
    * Returns a deep copy of the line and all of its items
    * @returns {Line}
    */
@@ -129,6 +143,7 @@ class Line {
       .filter((item) => item !== null) as Item[];
 
     clonedLine.type = this.type;
+    clonedLine.timestamps = [...this.timestamps];
     return clonedLine;
   }
 

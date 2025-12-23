@@ -20,7 +20,7 @@ export interface MeasuredHtmlFormatterConfiguration extends MeasurementBasedForm
   layout: MeasuredHtmlLayoutConfig;
   pageSize: {
     width: number;
-    height: number;
+    height: number | 'auto'; // Allow 'auto' for continuous scroll
   };
   cssClassPrefix?: string;
   additionalCss?: string;
@@ -42,7 +42,7 @@ export interface MeasuredHtmlConfigurationProperties extends MeasurementBasedCon
   layout?: Partial<MeasuredHtmlLayoutConfig>;
   pageSize?: {
     width?: number;
-    height?: number;
+    height?: number | 'auto'; // Allow 'auto' for continuous scroll
   };
   cssClassPrefix?: string;
   additionalCss?: string;

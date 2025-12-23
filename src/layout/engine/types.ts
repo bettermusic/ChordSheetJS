@@ -26,6 +26,7 @@ export interface MeasuredItem {
   width: number;
   chordHeight?: number;
   chordLyricWidthDifference?: number;
+  timestamps?: number[]; // Inline timestamps from ChordLyricsPair
 }
 
 /**
@@ -36,6 +37,7 @@ export interface LineLayout {
   lineHeight: number;
   items: MeasuredItem[];
   line: Line;
+  timestamps?: number[]; // Timestamps for this line segment
 }
 
 /**
@@ -90,6 +92,7 @@ export interface ParagraphLayoutResult {
   units: LineLayout[][];
   addSpacing: boolean;
   sectionType: string;
+  timestamps?: number[]; // Distributed based on repeatedSections config
 }
 
 /**

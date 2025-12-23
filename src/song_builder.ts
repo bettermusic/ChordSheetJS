@@ -1,3 +1,4 @@
+import ChordLyricsPair from './chord_sheet/chord_lyrics_pair';
 import FontStack from './chord_sheet/font_stack';
 import Item from './chord_sheet/item';
 import Metadata from './chord_sheet/metadata';
@@ -6,9 +7,13 @@ import Song from './chord_sheet/song';
 import Tag from './chord_sheet/tag';
 import TagInterpreter from './chord_sheet/tag_interpreter';
 import TraceInfo from './chord_sheet/trace_info';
+import { parseTimestamps } from './utilities/timestamp_parser';
 
-import { KEY, NEW_KEY, TRANSPOSE } from './chord_sheet/tags';
 import Line, { LineType } from './chord_sheet/line';
+
+import {
+  KEY, NEW_KEY, TIMESTAMP, TRANSPOSE,
+} from './chord_sheet/tags';
 
 import {
   AUTO, END_TAG, NONE, PART, START_TAG,
@@ -35,6 +40,10 @@ class SongBuilder {
 
   warnings: ParserWarning[] = [];
 
+  pendingTimestamps: number[] = [];
+
+  pendingInlineTimestamps: number[] = [];
+
   constructor(song: Song) {
     this.song = song;
     this.song.lines = this.lines;
@@ -59,6 +68,12 @@ class SongBuilder {
       this.lines.push(this.currentLine);
     }
 
+    // Attach any pending line-level timestamps
+    if (this.pendingTimestamps.length > 0) {
+      this.currentLine.timestamps = [...this.pendingTimestamps];
+      this.pendingTimestamps = [];
+    }
+
     this.setCurrentProperties(this.sectionType, this.selector);
     this.currentLine.transposeKey = this.transposeKey ?? this.currentKey;
     this.currentLine.key = this.currentKey || this.song.getMetadata().getSingle(KEY);
@@ -81,6 +96,14 @@ class SongBuilder {
     } else {
       this.ensureLine();
       if (!this.currentLine) throw new Error('Expected this.currentLine to be present');
+
+      // Apply pending inline timestamps to ChordLyricsPair items
+      if (item instanceof ChordLyricsPair && this.pendingInlineTimestamps.length > 0) {
+        const pair = item;
+        pair.timestamps = [...this.pendingInlineTimestamps];
+        this.pendingInlineTimestamps = [];
+      }
+
       this.currentLine.addItem(item);
     }
   }
@@ -98,9 +121,35 @@ class SongBuilder {
 
   addTag(tagContents: string | Tag): Tag {
     const tag = Tag.parseOrFail(tagContents);
+
+    // Handle timestamp tags specially (both {timestamp:} and {tm:})
+    if (tag.name === TIMESTAMP || tag.name === 'tm') {
+      this.handleTimestampTag(tag);
+      return tag; // Don't add timestamp tags to the line items
+    }
+
     this.applyTagOnSong(tag);
     this.applyTagOnLine(tag);
     return tag;
+  }
+
+  handleTimestampTag(tag: Tag): void {
+    const timestamps = parseTimestamps(tag.value);
+
+    if (timestamps.length === 0) {
+      this.addWarning(`Invalid timestamp value: ${tag.value}`, tag);
+      return;
+    }
+
+    // If we're currently building a line with content (inline context),
+    // these timestamps apply to the next ChordLyricsPair
+    if (this.currentLine && this.currentLine.items.length > 0) {
+      this.pendingInlineTimestamps = timestamps;
+    } else {
+      // Line-level timestamps (before any line content)
+      // The line will be created when content is added
+      this.pendingTimestamps = timestamps;
+    }
   }
 
   ensureLine(): void {

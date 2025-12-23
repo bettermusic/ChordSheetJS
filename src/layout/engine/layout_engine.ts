@@ -507,11 +507,32 @@ export class LayoutEngine {
     paragraph: Paragraph,
     units: LineLayout[][],
   ): void {
+    // Collect timestamps from all lines in the paragraph
+    const timestamps = this.collectParagraphTimestamps(units);
+
     layouts.push({
       units,
       addSpacing: true,
       sectionType: paragraph.type,
+      timestamps,
     });
+  }
+
+  /**
+   * Collect all timestamps from line layouts in a paragraph
+   */
+  private collectParagraphTimestamps(units: LineLayout[][]): number[] | undefined {
+    const timestamps: number[] = [];
+
+    units.forEach((lineLayouts) => {
+      lineLayouts.forEach((lineLayout) => {
+        if (lineLayout.timestamps && lineLayout.timestamps.length > 0) {
+          timestamps.push(...lineLayout.timestamps);
+        }
+      });
+    });
+
+    return timestamps.length > 0 ? timestamps : undefined;
   }
 
   /**
