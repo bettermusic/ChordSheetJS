@@ -2,48 +2,50 @@ export const measuredHtmlConfigs = [
   {
     name: 'Html Config',
     content: {
+      cssClassPrefix: 'cs-',
       fonts: {
         title: {
-          name: '"Atkinson Hyperlegible Next"',
+          name: '"system-ui"',
           style: 'bold',
           weight: 900,
           size: 28,
           color: 'black',
         },
         subtitle: {
-          name: '"Atkinson Hyperlegible Next"',
+          name: '"system-ui"',
           style: 'normal',
           size: 10,
           color: 100,
         },
         metadata: {
-          name: '"Atkinson Hyperlegible Next"',
+          name: '"system-ui"',
           style: 'normal',
           size: 10,
           color: 100,
         },
         text: {
-          name: '"Atkinson Hyperlegible Next"',
+          name: '"system-ui"',
           style: 'normal',
+          weight: 600,
           size: 18,
-          color: 'black',
+          color: '#888888',
         },
         chord: {
-          name: '"Atkinson Hyperlegible Next"',
+          name: '"system-ui"',
           style: 'bold',
-          weight: 500,
+          weight: 800,
           size: 16,
-          color: '#ed6e6e',
+          color: '#d4a5a5',
         },
         sectionLabel: {
-          name: '"Atkinson Hyperlegible Next"',
+          name: '"system-ui"',
           weight: 700,
           size: 19,
           color: 'black',
           lineHeight: 1.2,
         },
         comment: {
-          name: '"Atkinson Hyperlegible Next"',
+          name: '"system-ui"',
           weight: 700,
           size: 19,
           color: 'black',
@@ -51,7 +53,7 @@ export const measuredHtmlConfigs = [
           lineHeight: 1.2,
         },
         annotation: {
-          name: '"Atkinson Hyperlegible Next"',
+          name: '"system-ui"',
           style: 'normal',
           size: 10,
           color: 'black',
@@ -134,13 +136,13 @@ export const measuredHtmlConfigs = [
           },
           fonts: {
             title: {
-              name: 'NimbusSansL-Bol', style: 'bold', size: 9, color: 'black',
+              name: 'system-ui', style: 'bold', size: 9, color: 'black',
             },
             fingerings: {
-              name: 'NimbusSansL-Bol', style: 'bold', size: 6, color: 'black',
+              name: 'system-ui', style: 'bold', size: 6, color: 'black',
             },
             baseFret: {
-              name: 'NimbusSansL-Bol', style: 'bold', size: 6, color: 'black',
+              name: 'system-ui', style: 'bold', size: 6, color: 'black',
             },
           },
         },
@@ -149,16 +151,14 @@ export const measuredHtmlConfigs = [
           highlighted: {
             fonts: {
               chord: {
-                weight: 'bold',
+                color: '#c0392b',
               },
               text: {
-                weight: 'bold',
+                color: '#1a1a1a',
               },
             },
             container: {
-              backgroundColor: 'rgba(237, 110, 110, 0.1)',
-              borderLeft: '4px solid #ed6e6e',
-              paddingLeft: '8px',
+              backgroundColor: 'rgba(52, 152, 219, 0.08)',
             },
           },
         },

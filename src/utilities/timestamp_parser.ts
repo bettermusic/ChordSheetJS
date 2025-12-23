@@ -124,30 +124,25 @@ export type TimestampPrecision = 0 | 1 | 2 | 3;
  * @param precision - Decimal places for fractional seconds (0-3). Default: 0
  * @returns Formatted timestamp string
  */
+function formatSecondsWithPrecision(seconds: number, precision: TimestampPrecision): string {
+  if (precision > 0) {
+    const secs = seconds % 60;
+    const wholeSecs = Math.floor(secs);
+    const fractionStr = (secs - wholeSecs).toFixed(precision).slice(2);
+    return `${String(wholeSecs).padStart(2, '0')}.${fractionStr}`;
+  }
+  return String(Math.floor(seconds % 60)).padStart(2, '0');
+}
+
 export function formatTimestamp(seconds: number, precision: TimestampPrecision = 0): string {
   if (!Number.isFinite(seconds) || seconds < 0) {
     return precision > 0 ? `0:00.${'0'.repeat(precision)}` : '0:00';
   }
-
   const hours = Math.floor(seconds / 3600);
   const minutes = Math.floor((seconds % 3600) / 60);
-
-  let secsFormatted: string;
-  if (precision > 0) {
-    // Get seconds with fractional part
-    const secs = seconds % 60;
-    const wholeSecs = Math.floor(secs);
-    const fraction = secs - wholeSecs;
-    const fractionStr = fraction.toFixed(precision).slice(2); // Remove "0."
-    secsFormatted = `${String(wholeSecs).padStart(2, '0')}.${fractionStr}`;
-  } else {
-    const secs = Math.floor(seconds % 60);
-    secsFormatted = String(secs).padStart(2, '0');
-  }
-
+  const secsFormatted = formatSecondsWithPrecision(seconds, precision);
   if (hours > 0) {
     return `${hours}:${String(minutes).padStart(2, '0')}:${secsFormatted}`;
   }
-
   return `${minutes}:${secsFormatted}`;
 }

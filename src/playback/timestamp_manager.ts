@@ -501,9 +501,21 @@ export class StatelessTimestampTracker {
    */
   getPreviousTimestamp(time: number): number | null {
     const activeIndex = this.getActiveIndex(time);
-    if (activeIndex > 0) {
-      return this.timestamps[activeIndex - 1];
+
+    // If no active timestamp (before first), return null
+    if (activeIndex === -1) {
+      return null;
     }
-    return null;
+
+    // If we're exactly at a timestamp, return the previous one
+    if (this.timestamps[activeIndex] === time) {
+      if (activeIndex > 0) {
+        return this.timestamps[activeIndex - 1];
+      }
+      return null;
+    }
+
+    // If we're between timestamps, return the active one (most recently passed)
+    return this.timestamps[activeIndex];
   }
 }

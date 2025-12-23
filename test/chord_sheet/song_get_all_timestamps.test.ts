@@ -1,5 +1,5 @@
-import Song from '../../src/chord_sheet/song';
 import Line from '../../src/chord_sheet/line';
+import Song from '../../src/chord_sheet/song';
 
 describe('Song', () => {
   describe('getAllTimestamps', () => {
@@ -83,4 +83,3 @@ describe('Song', () => {
     });
   });
 });
-

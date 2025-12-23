@@ -1,6 +1,6 @@
-import { ChordProParser, Song } from '../../src';
-import Line from '../../src/chord_sheet/line';
 import ChordLyricsPair from '../../src/chord_sheet/chord_lyrics_pair';
+import Line from '../../src/chord_sheet/line';
+import { ChordProParser, Song } from '../../src';
 
 describe('Song.changeTempo', () => {
   describe('with direct Song construction', () => {
@@ -86,7 +86,7 @@ describe('Song.changeTempo', () => {
     });
 
     it('scales inline timestamps on ChordLyricsPairs', () => {
-      const chordSheet = `[C]Hello {timestamp: 0:10}[G]World`;
+      const chordSheet = '[C]Hello {timestamp: 0:10}[G]World';
 
       const song = new ChordProParser().parse(chordSheet);
       const adjustedSong = song.changeTempo(120, 60);
@@ -185,4 +185,3 @@ describe('Song.changeTempo', () => {
     });
   });
 });
-
