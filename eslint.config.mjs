@@ -148,12 +148,14 @@ export default tseslint.config(
   {
     ignores: [
       'dist/**/*',
+      'playground/dist/**/*',
       'lib/**/*',
       'src/formatter/pdf_formatter/fonts/**/*',
       'src/normalize_mappings/suffix-normalize-mapping.ts',
       'src/parser/*/peg_parser.ts',
       'tmp/**/*',
-      './**/*.{css,html,md}',
+      './**/*.{css,html,md,json}',
+      '**/.parcelrc',
     ],
   },
 );
