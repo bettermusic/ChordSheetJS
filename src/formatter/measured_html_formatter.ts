@@ -137,6 +137,92 @@ class MeasuredHtmlFormatter extends MeasurementBasedFormatter<MeasuredHtmlFormat
   }
 
   /**
+   * Generates CSS string for the highlighted state based on playback config
+   * @param scope Optional CSS scope selector
+   * @returns CSS string
+   */
+  cssString(scope = ''): string {
+    const playbackConfig = this.configuration.layout.playback;
+    if (!playbackConfig?.highlighted) return '';
+
+    const prefix = this.configuration.cssClassPrefix || 'cs-';
+    const highlightClass = `${prefix}highlighted`;
+    const scopePrefix = scope ? `${scope} ` : '';
+
+    const styles: string[] = [];
+    this.addContainerStyles(styles, playbackConfig.highlighted.container, scopePrefix, highlightClass);
+    this.addFontStyles(styles, playbackConfig.highlighted.fonts, scopePrefix, highlightClass, prefix);
+
+    return styles.join('\n');
+  }
+
+  private addContainerStyles(
+    styles: string[],
+    container: any,
+    scopePrefix: string,
+    highlightClass: string,
+  ): void {
+    if (!container) return;
+    const props: string[] = [];
+    if (container.border) props.push(`border: ${container.border}`);
+    if (container.borderRadius) props.push(`border-radius: ${container.borderRadius}`);
+    if (container.backgroundColor) props.push(`background-color: ${container.backgroundColor}`);
+    if (container.boxShadow) props.push(`box-shadow: ${container.boxShadow}`);
+    if (container.padding) props.push(`padding: ${container.padding}`);
+    if (props.length > 0) styles.push(`${scopePrefix}.${highlightClass} { ${props.join('; ')}; }`);
+  }
+
+  private addFontStyles(
+    styles: string[],
+    fonts: any,
+    scopePrefix: string,
+    highlightClass: string,
+    prefix: string,
+  ): void {
+    if (!fonts) return;
+    const fontMap = {
+      chord: 'chord',
+      text: 'lyrics',
+      sectionLabel: 'sectionLabel',
+      comment: 'comment',
+    };
+    Object.entries(fontMap).forEach(([key, cssClass]) => {
+      if (fonts[key]) {
+        const fontStyles = this.generateFontStyles(fonts[key]);
+        if (fontStyles.length > 0) {
+          styles.push(`${scopePrefix}.${highlightClass} .${prefix}${cssClass} { ${fontStyles.join('; ')}; }`);
+        }
+      }
+    });
+  }
+
+  /**
+   * Generates CSS properties from font config.
+   * Note: Properties that affect text width (weight, size, name, style, letterSpacing)
+   * may cause layout issues with absolute positioning when used for highlighting.
+   * Safe properties: color, underline, textDecoration
+   */
+  private generateFontStyles(fontConfig: Partial<any>): string[] {
+    const styles: string[] = [];
+    const imp = ' !important';
+    if (fontConfig.name) styles.push(`font-family: ${fontConfig.name}${imp}`);
+    if (fontConfig.size) styles.push(`font-size: ${fontConfig.size}px${imp}`);
+    if (fontConfig.weight !== undefined) styles.push(`font-weight: ${fontConfig.weight}${imp}`);
+    if (fontConfig.style) styles.push(`font-style: ${fontConfig.style}${imp}`);
+    if (fontConfig.color) styles.push(`color: ${this.formatColor(fontConfig.color)}${imp}`);
+    if (fontConfig.underline !== undefined) {
+      styles.push(`text-decoration: ${fontConfig.underline ? 'underline' : 'none'}${imp}`);
+    }
+    if (fontConfig.textTransform) styles.push(`text-transform: ${fontConfig.textTransform}${imp}`);
+    if (fontConfig.letterSpacing) styles.push(`letter-spacing: ${fontConfig.letterSpacing}${imp}`);
+    return styles;
+  }
+
+  private formatColor(color: string | number): string {
+    return typeof color === 'number' ? `#${color.toString(16).padStart(6, '0')}` : color;
+  }
+
+  /**
    * Clean up resources when the formatter is no longer needed
    */
   dispose(): void {

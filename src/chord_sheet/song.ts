@@ -88,22 +88,50 @@ class Song extends MetadataAccessors {
     return this.selectRenderableItems(this.linesToParagraphs(expandedLines)) as Paragraph[];
   }
 
+  /**
+   * Get all timestamps from all lines in the song
+   * @returns {number[]} Sorted array of unique timestamps in seconds
+   */
+  getAllTimestamps(): number[] {
+    const timestamps = new Set<number>();
+
+    this.lines.forEach((line) => {
+      if (line.timestamps && line.timestamps.length > 0) {
+        line.timestamps.forEach((ts) => timestamps.add(ts));
+      }
+    });
+
+    return Array.from(timestamps).sort((a, b) => a - b);
+  }
+
   linesToParagraphs(lines: Line[]): Paragraph[] {
     let currentParagraph = new Paragraph();
     const paragraphs = [currentParagraph];
+    let pendingTimestamps: number[] = [];
+
     lines.forEach((line, index) => {
       const nextLine: Line | null = lines[index + 1] || null;
+
       if (line.isEmpty() || (line.isSectionEnd() && nextLine && !nextLine.isEmpty())) {
         currentParagraph = new Paragraph();
         paragraphs.push(currentParagraph);
       } else if (line.hasRenderableItems()) {
+        if (pendingTimestamps.length > 0) {
+          // eslint-disable-next-line no-param-reassign
+          line.timestamps = [...pendingTimestamps, ...line.timestamps];
+          pendingTimestamps = [];
+        }
+
         currentParagraph.addLine(line);
+      } else if (line.hasTimestamps()) {
+        pendingTimestamps.push(...line.timestamps);
       }
     });
+
     return paragraphs;
   }
 
-  /** Returns a deep clone of the song @returns {Song} */
+  /** Returns a deep clone of the song */
   clone(): Song {
     const clone = new Song();
     clone.warnings = [...this.warnings];
@@ -371,12 +399,7 @@ class Song extends MetadataAccessors {
     return changedSong;
   }
 
-  /**
-   * Returns a copy of the song with all chords normalized to the specified key. See {@link Chord#normalize}.
-   * @param key the key to normalize to
-   * @param options options
-   * @param options.normalizeSuffix whether to normalize the chord suffixes
-   */
+  /** Returns a copy with chords normalized to specified key. See {@link Chord#normalize}. */
   normalizeChords(
     key: Key | string | null = null,
     { normalizeSuffix = true }: { normalizeSuffix?: boolean; } = {},
@@ -419,39 +442,10 @@ Or set the song key before changing key:
     return currentKey;
   }
 
-  /**
-   * Returns a copy of the song with the directive value(s) set to the specified value(s).
-   * - when there is a matching directive in the song, it will update the directive
-   * - when there is no matching directive, it will be inserted
-   * If `value` is `null` it will act as a delete, any directive matching `name` will be removed.
-   *
-   * @example
-   * ```javascript
-   * song.changeMetadata('author', 'John');
-   * song.changeMetadata('composer', ['Jane', 'John']);
-   * song.changeMetadata('key', null); // Remove key directive
-   * ```
-   * @param name The directive name
-   * @param {string | string[] | null} value The value to set, or `null` to remove the directive
-   * @return {Song} The changed song
-   */
+  /** Returns a copy with directive value(s) set. Updates existing or inserts new. `null` removes directive. */
   changeMetadata(name: string, value: string | string[] | null): Song;
 
-  /**
-   * Returns a copy of the song with the metadata changed. It will:
-   * - update the metadata
-   * - update any existing directive matching the metadata key
-   * - insert a new directive if it does not exist
-   * @example
-   * ```javascript
-   * song.changeMetadata({
-   *   author: 'John',
-   *   composer: ['Jane', 'John'],
-   *   key: null, // Remove key directive
-   * });
-   * ```
-   * @param {Record<string, string | string[] | null>} metadata The metadata to change
-   */
+  /** Returns a copy with metadata changed. Updates metadata and directives, inserts if missing. */
   changeMetadata(metadata: Record<string, string | string[] | null>): Song;
 
   changeMetadata(
@@ -555,11 +549,7 @@ Or set the song key before changing key:
     return chordDefinitions;
   }
 
-  /**
-   * The song's metadata. When there is only one value for an entry, the value is a string. Else, the value is
-   * an array containing all unique values for the entry.
-   * @type {Metadata}
-   */
+  /** The song's metadata. Single value is string, multiple values is array of unique values. */
   get metadata(): Metadata {
     if (!this._metadata) {
       this._metadata = this.getMetadata();
@@ -598,20 +588,7 @@ Or set the song key before changing key:
     return new ChordDefinitionSet(this.getChordDefinitions());
   }
 
-  /**
-   * Change the song contents inline. Return a new {@link Line} to replace it. Return `null` to remove it.
-   * @example
-   * // remove lines with only Tags:
-   * song.mapLines((line) => {
-   *   if (line.items.every(item => item instanceof Tag)) {
-   *     return null;
-   *   }
-   *
-   *   return line;
-   * });
-   * @param {MapLinesCallback} func the callback function
-   * @returns {Song} the changed song
-   */
+  /** Change song contents inline. Return new Line to replace, `null` to remove. */
   mapLines(func: (_line: Line) => Line | null): Song {
     const clonedSong = new Song();
     const builder = new SongBuilder(clonedSong);
@@ -622,6 +599,10 @@ Or set the song key before changing key:
       if (changedLine) {
         builder.addLine();
         changedLine.items.forEach((item) => builder.addItem(item));
+
+        if (changedLine.timestamps?.length > 0 && builder.currentLine) {
+          builder.currentLine.timestamps = [...changedLine.timestamps];
+        }
       }
     });
 
@@ -634,40 +615,79 @@ Or set the song key before changing key:
     notFoundCallback: (_song: Song) => Song,
   ): Song {
     let found = false;
-
     const updatedSong = this.mapItems((item) => {
       if (findCallback(item)) {
         found = true;
         return updateCallback(item);
       }
-
       return item;
     });
-
-    if (!found) {
-      return notFoundCallback(updatedSong);
-    }
-
-    return updatedSong;
+    return found ? updatedSong : notFoundCallback(updatedSong);
   }
 
   private removeItem(callback: (_item: Item) => boolean): Song {
     return this.mapLines((line) => {
       const { items } = line;
       const index = items.findIndex(callback);
-
-      if (index === -1) {
-        return line;
-      }
-
-      if (items.length === 1) {
-        return null;
-      }
-
-      return line.set({
-        items: [...items.slice(0, index), ...items.slice(index + 1)],
-      });
+      if (index === -1) return line;
+      if (items.length === 1) return null;
+      return line.set({ items: [...items.slice(0, index), ...items.slice(index + 1)] });
     });
+  }
+
+  private calculateTempoRatio(oldTempoOrOptions: number | { ratio: number }, newTempo?: number): number {
+    if (typeof oldTempoOrOptions === 'object') {
+      return oldTempoOrOptions.ratio;
+    }
+    if (typeof newTempo !== 'number') {
+      throw new Error('newTempo is required when oldTempo is provided');
+    }
+    if (oldTempoOrOptions <= 0 || newTempo <= 0) {
+      throw new Error('Tempo values must be positive numbers');
+    }
+    return oldTempoOrOptions / newTempo;
+  }
+
+  private scaleLineTimestamps(line: Line, ratio: number): void {
+    if (line.timestamps.length > 0) {
+      // eslint-disable-next-line no-param-reassign
+      line.timestamps = line.timestamps.map((ts) => ts * ratio);
+    }
+  }
+
+  private scaleInlineTimestamps(line: Line, ratio: number): void {
+    line.items.forEach((item) => {
+      if (item instanceof ChordLyricsPair && item.timestamps.length > 0) {
+        // eslint-disable-next-line no-param-reassign
+        item.timestamps = item.timestamps.map((ts) => ts * ratio);
+      }
+    });
+  }
+
+  /**
+   * Returns a copy of the song with all timestamps scaled according to a tempo change.
+   * The math is: `newTimestamp = oldTimestamp × (oldTempo / newTempo)`
+   * Examples: 120 BPM → 60 BPM: timestamps doubled; 120 BPM → 180 BPM: timestamps scaled to 2/3
+   * @example song.changeTempo(120, 100) or song.changeTempo({ ratio: 1.5 })
+   */
+  changeTempo(oldTempo: number, newTempo: number): Song;
+
+  changeTempo(options: { ratio: number }): Song;
+
+  changeTempo(
+    oldTempoOrOptions: number | { ratio: number },
+    newTempo?: number,
+  ): Song {
+    const ratio = this.calculateTempoRatio(oldTempoOrOptions, newTempo);
+    if (ratio <= 0) {
+      throw new Error('Ratio must be a positive number');
+    }
+    const clonedSong = this.clone();
+    clonedSong.lines.forEach((line) => {
+      this.scaleLineTimestamps(line, ratio);
+      this.scaleInlineTimestamps(line, ratio);
+    });
+    return clonedSong;
   }
 }
 

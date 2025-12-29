@@ -138,10 +138,17 @@ export class ItemProcessor {
     const renderedChords = this.renderChordText(chords, line);
     const measurements = this.calculateMeasurements(renderedChords, lyrics, nextItem, lyricsOnly);
 
+    const pair = new ChordLyricsPair(chords, lyrics);
+    // Copy over timestamps from the original splitItem
+    if (splitItem.timestamps && splitItem.timestamps.length > 0) {
+      pair.timestamps = [...splitItem.timestamps];
+    }
+
     return {
-      item: new ChordLyricsPair(chords, lyrics),
+      item: pair,
       width: measurements.totalWidth,
       chordHeight: measurements.chordHeight,
+      timestamps: pair.timestamps && pair.timestamps.length > 0 ? pair.timestamps : undefined,
     };
   }
 
@@ -314,25 +321,50 @@ export class ItemProcessor {
     const items: (ChordLyricsPair | SoftLineBreak)[] = [];
 
     lyricFragments.forEach((fragment, index) => {
-      if (index > 0 && index !== 0) {
-        items.push(new SoftLineBreak(' '));
-        if (fragment.trim() !== '') {
-          // In lyricsOnly mode, remove leading space from fragments after line breaks
-          const adjustedFragment = lyricsOnly ? fragment.trimStart() : fragment;
-          items.push(new ChordLyricsPair('', adjustedFragment, ''));
-        }
-      }
-
-      if (index === 0 && lyricFragments.length === 1) {
-        items.push(new ChordLyricsPair(chords, fragment, annotation));
-      } else if (index === 0 && lyricFragments.length > 1) {
-        let commaAdjustedFragment = fragment;
-        commaAdjustedFragment += ',';
-        items.push(new ChordLyricsPair(chords, commaAdjustedFragment, annotation));
+      if (index > 0) {
+        this.addSubsequentFragment(items, fragment, lyricsOnly, pair);
+      } else {
+        this.addFirstFragment(items, fragment, lyricFragments.length, chords, annotation, pair);
       }
     });
 
     return items;
+  }
+
+  private addSubsequentFragment(
+    items: (ChordLyricsPair | SoftLineBreak)[],
+    fragment: string,
+    lyricsOnly: boolean,
+    originalPair: ChordLyricsPair,
+  ): void {
+    items.push(new SoftLineBreak(' '));
+    if (fragment.trim() !== '') {
+      const adjustedFragment = lyricsOnly ? fragment.trimStart() : fragment;
+      const newPair = new ChordLyricsPair('', adjustedFragment, '');
+      this.copyTimestamps(originalPair, newPair);
+      items.push(newPair);
+    }
+  }
+
+  private addFirstFragment(
+    items: (ChordLyricsPair | SoftLineBreak)[],
+    fragment: string,
+    fragmentCount: number,
+    chords: string | null,
+    annotation: string | null,
+    originalPair: ChordLyricsPair,
+  ): void {
+    const adjustedFragment = fragmentCount > 1 ? `${fragment},` : fragment;
+    const newPair = new ChordLyricsPair(chords || undefined, adjustedFragment, annotation || undefined);
+    this.copyTimestamps(originalPair, newPair);
+    items.push(newPair);
+  }
+
+  private copyTimestamps(source: ChordLyricsPair, target: ChordLyricsPair): void {
+    if (source.timestamps && source.timestamps.length > 0) {
+      // eslint-disable-next-line no-param-reassign
+      target.timestamps = [...source.timestamps];
+    }
   }
 
   /**
