@@ -131,7 +131,10 @@ class Song extends MetadataAccessors {
     return paragraphs;
   }
 
-  /** Returns a deep clone of the song */
+  /**
+   * Returns a deep clone of the song
+   * @returns {Song} The cloned song
+   */
   clone(): Song {
     const clone = new Song();
     clone.warnings = [...this.warnings];
@@ -455,10 +458,39 @@ Or set the song key before changing key:
     return currentKey;
   }
 
-  /** Returns a copy with directive value(s) set. Updates existing or inserts new. `null` removes directive. */
+  /**
+   * Returns a copy of the song with the directive value(s) set to the specified value(s).
+   * - when there is a matching directive in the song, it will update the directive
+   * - when there is no matching directive, it will be inserted
+   * If `value` is `null` it will act as a delete, any directive matching `name` will be removed.
+   *
+   * @example
+   * ```javascript
+   * song.changeMetadata('author', 'John');
+   * song.changeMetadata('composer', ['Jane', 'John']);
+   * song.changeMetadata('key', null); // Remove key directive
+   * ```
+   * @param name The directive name
+   * @param {string | string[] | null} value The value to set, or `null` to remove the directive
+   * @return {Song} The changed song
+   */
   changeMetadata(name: string, value: string | string[] | null): Song;
 
-  /** Returns a copy with metadata changed. Updates metadata and directives, inserts if missing. */
+  /**
+   * Returns a copy of the song with the metadata changed. It will:
+   * - update the metadata
+   * - update any existing directive matching the metadata key
+   * - insert a new directive if it does not exist
+   * @example
+   * ```javascript
+   * song.changeMetadata({
+   *   author: 'John',
+   *   composer: ['Jane', 'John'],
+   *   key: null, // Remove key directive
+   * });
+   * ```
+   * @param {Record<string, string | string[] | null>} metadata The metadata to change
+   */
   changeMetadata(metadata: Record<string, string | string[] | null>): Song;
 
   changeMetadata(
@@ -562,7 +594,11 @@ Or set the song key before changing key:
     return chordDefinitions;
   }
 
-  /** The song's metadata. Single value is string, multiple values is array of unique values. */
+  /**
+   * The song's metadata. When there is only one value for an entry, the value is a string. Else, the value is
+   * an array containing all unique values for the entry.
+   * @type {Metadata}
+   */
   get metadata(): Metadata {
     if (!this._metadata) {
       this._metadata = this.getMetadata();
@@ -601,7 +637,20 @@ Or set the song key before changing key:
     return new ChordDefinitionSet(this.getChordDefinitions());
   }
 
-  /** Change song contents inline. Return new Line to replace, `null` to remove. */
+  /**
+   * Change the song contents inline. Return a new {@link Line} to replace it. Return `null` to remove it.
+   * @example
+   * // remove lines with only Tags:
+   * song.mapLines((line) => {
+   *   if (line.items.every(item => item instanceof Tag)) {
+   *     return null;
+   *   }
+   *
+   *   return line;
+   * });
+   * @param {MapLinesCallback} func the callback function
+   * @returns {Song} the changed song
+   */
   mapLines(func: (_line: Line) => Line | null): Song {
     const clonedSong = new Song();
     const builder = new SongBuilder(clonedSong);
