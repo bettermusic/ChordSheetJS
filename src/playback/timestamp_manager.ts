@@ -36,10 +36,33 @@ export interface TimestampManagerOptions {
 
 type EventCallback = (...args: any[]) => void;
 
+class SimpleEventEmitter {
+  private handlers = new Map<string, Set<EventCallback>>();
+
+  on(event: string, callback: EventCallback): () => void {
+    if (!this.handlers.has(event)) {
+      this.handlers.set(event, new Set());
+    }
+    this.handlers.get(event)!.add(callback);
+    return () => this.handlers.get(event)?.delete(callback);
+  }
+
+  protected emit(event: string, ...args: any[]): void {
+    this.handlers.get(event)?.forEach((cb) => {
+      try {
+        cb(...args);
+      } catch (error) {
+        // eslint-disable-next-line no-console
+        console.error(`Error in ${event} handler:`, error);
+      }
+    });
+  }
+}
+
 /**
  * Manages timestamp synchronization and scrolling for audio-synced chord sheets
  */
-export class TimestampManager {
+export class TimestampManager extends SimpleEventEmitter {
   private container: HTMLElement;
 
   private options: TimestampManagerOptions;
@@ -50,11 +73,10 @@ export class TimestampManager {
 
   private currentEntry: TimestampEntry | null = null;
 
-  private eventHandlers = new Map<string, Set<EventCallback>>();
-
   private scrollContainer: HTMLElement | null = null;
 
   constructor(container: HTMLElement, options: TimestampManagerOptions = {}) {
+    super();
     this.container = container;
     this.options = {
       autoScroll: false,
@@ -328,7 +350,6 @@ export class TimestampManager {
    * Clean up and remove event listeners
    */
   dispose(): void {
-    this.eventHandlers.clear();
     this.entries = [];
     this.currentEntry = null;
   }
@@ -406,42 +427,6 @@ export class TimestampManager {
   static fromTimestamps(timestamps: number[]): StatelessTimestampTracker {
     // eslint-disable-next-line no-use-before-define
     return new StatelessTimestampTracker(timestamps);
-  }
-
-  /**
-   * Register an event handler
-   */
-  private on(event: string, callback: EventCallback): () => void {
-    if (!this.eventHandlers.has(event)) {
-      this.eventHandlers.set(event, new Set());
-    }
-
-    this.eventHandlers.get(event)!.add(callback);
-
-    // Return unsubscribe function
-    return () => {
-      const handlers = this.eventHandlers.get(event);
-      if (handlers) {
-        handlers.delete(callback);
-      }
-    };
-  }
-
-  /**
-   * Emit an event
-   */
-  private emit(event: string, ...args: any[]): void {
-    const handlers = this.eventHandlers.get(event);
-    if (handlers) {
-      handlers.forEach((callback) => {
-        try {
-          callback(...args);
-        } catch (error) {
-          // eslint-disable-next-line no-console
-          console.error(`Error in ${event} handler:`, error);
-        }
-      });
-    }
   }
 }
 
