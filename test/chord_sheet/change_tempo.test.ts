@@ -1,4 +1,6 @@
 import ChordLyricsPair from '../../src/chord_sheet/chord_lyrics_pair';
+import { heredoc } from '../util/utilities';
+
 import Line from '../../src/chord_sheet/line';
 import { ChordProParser, Song } from '../../src';
 
@@ -50,10 +52,12 @@ describe('Song.changeTempo', () => {
 
   describe('with ChordPro parsing', () => {
     it('scales timestamps when slowing down (120 BPM → 60 BPM)', () => {
-      const chordSheet = `{timestamp: 0:10}
-[C]Hello [G]World
-{timestamp: 0:20}
-[Am]Second [F]line`;
+      const chordSheet = heredoc`
+        {timestamp: 0:10}
+        [C]Hello [G]World
+        {timestamp: 0:20}
+        [Am]Second [F]line
+      `;
 
       const song = new ChordProParser().parse(chordSheet);
       const adjustedSong = song.changeTempo(120, 60);
@@ -68,10 +72,12 @@ describe('Song.changeTempo', () => {
     });
 
     it('scales timestamps when speeding up (100 BPM → 200 BPM)', () => {
-      const chordSheet = `{timestamp: 0:30}
-[C]Verse line
-{timestamp: 1:00}
-[G]Another line`;
+      const chordSheet = heredoc`
+        {timestamp: 0:30}
+        [C]Verse line
+        {timestamp: 1:00}
+        [G]Another line
+      `;
 
       const song = new ChordProParser().parse(chordSheet);
       const adjustedSong = song.changeTempo(100, 200);
@@ -100,8 +106,10 @@ describe('Song.changeTempo', () => {
     });
 
     it('handles multiple timestamps for repeating sections', () => {
-      const chordSheet = `{timestamp: 0:10|1:10}
-[C]Chorus line`;
+      const chordSheet = heredoc`
+        {timestamp: 0:10|1:10}
+        [C]Chorus line
+      `;
 
       const song = new ChordProParser().parse(chordSheet);
       const adjustedSong = song.changeTempo(120, 60);
@@ -124,10 +132,12 @@ describe('Song.changeTempo', () => {
 
   describe('with ratio option', () => {
     it('scales timestamps by the given ratio', () => {
-      const chordSheet = `{timestamp: 0:10}
-[C]Hello
-{timestamp: 0:20}
-[G]World`;
+      const chordSheet = heredoc`
+        {timestamp: 0:10}
+        [C]Hello
+        {timestamp: 0:20}
+        [G]World
+      `;
 
       const song = new ChordProParser().parse(chordSheet);
       const adjustedSong = song.changeTempo({ ratio: 1.5 });
@@ -148,8 +158,10 @@ describe('Song.changeTempo', () => {
 
   describe('preserves original song', () => {
     it('does not mutate the original song', () => {
-      const chordSheet = `{timestamp: 0:10}
-[C]Hello`;
+      const chordSheet = heredoc`
+        {timestamp: 0:10}
+        [C]Hello
+      `;
 
       const song = new ChordProParser().parse(chordSheet);
       const lineWithContent = song.lines.find((l) => l.items.length > 0);
@@ -172,8 +184,10 @@ describe('Song.changeTempo', () => {
     });
 
     it('handles same tempo (no change)', () => {
-      const chordSheet = `{timestamp: 0:10}
-[C]Hello`;
+      const chordSheet = heredoc`
+        {timestamp: 0:10}
+        [C]Hello
+      `;
 
       const song = new ChordProParser().parse(chordSheet);
       const adjustedSong = song.changeTempo(120, 120);
