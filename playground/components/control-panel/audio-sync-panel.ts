@@ -9,9 +9,9 @@ import { TimestampEntry, TimestampManager } from '../../../src/index';
 export class AudioSyncPanel extends HTMLElement {
   private manager: TimestampManager | null = null;
 
-  private isExpanded = true;
+  private isExpanded = false;
 
-  private autoScrollEnabled = true;
+  private autoScrollEnabled = false;
 
   private scrollOffset = 100;
 
