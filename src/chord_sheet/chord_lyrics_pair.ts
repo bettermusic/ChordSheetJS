@@ -15,6 +15,13 @@ class ChordLyricsPair {
   annotation: string | null;
 
   /**
+   * Inline timestamps in seconds. Supports multiple timestamps for repeating sections.
+   * @member
+   * @type {number[]}
+   */
+  timestamps: number[] = [];
+
+  /**
    * Initialises a ChordLyricsPair
    * @param {string} chords The chords
    * @param {string | null} lyrics The lyrics
@@ -59,11 +66,21 @@ class ChordLyricsPair {
   }
 
   /**
+   * Indicates whether the ChordLyricsPair has timestamps
+   * @returns {boolean}
+   */
+  hasTimestamps(): boolean {
+    return this.timestamps.length > 0;
+  }
+
+  /**
    * Returns a deep copy of the ChordLyricsPair, useful when programmatically transforming a song
    * @returns {ChordLyricsPair}
    */
   clone(): ChordLyricsPair {
-    return new ChordLyricsPair(this.chords, this.lyrics, this.annotation);
+    const cloned = new ChordLyricsPair(this.chords, this.lyrics, this.annotation);
+    cloned.timestamps = [...this.timestamps];
+    return cloned;
   }
 
   toString(): string {

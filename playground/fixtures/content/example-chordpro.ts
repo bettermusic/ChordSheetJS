@@ -212,4 +212,48 @@ No, He [Bb]won't`,
 
 `,
   },
+  {
+    name: 'Timestamp Demo',
+    content: `{title: Timestamp Demo}
+{subtitle: Audio sync with multi-timestamp support}
+{artist: ChordSheetJS}
+{key: C}
+{tempo: 120}
+{time: 4/4}
+
+{c: Intro}
+{tm: 0:00}[C] [G] [Am] [F]
+
+{sov: Verse 1}
+{tm: 0:04}[C]Welcome to the timestamp demo
+{tm: 0:08}[G]Each line syncs to playback time
+{tm: 0:12}[Am]Hit play to watch it scroll
+{tm: 0:16}[F]No audio file needed
+{eov}
+
+{soc: Chorus}
+{tm: 0:20|0:52}[C]This line appears twice in the song
+{tm: 0:24|0:56}[G]Using pipe-delimited timestamps
+{tm: 0:28|1:00}[Am]Watch the repeat indicator
+{tm: 0:32|1:04}[F]Shows (1/2) then [C](2/2)
+{eoc}
+
+{sov: Verse 2}
+{tm: 0:36}[C]Second verse continues on
+{tm: 0:40}[G]Drag the slider to seek
+{tm: 0:44}[Am]Or let it play through
+{tm: 0:48}[F]Back to chorus next
+{eov}
+
+{c: Chorus}
+
+{sob: Bridge}
+{tm: 1:08}[Dm]Bridge section here
+{tm: 1:12}[G]Building to the end
+{eob}
+
+{c: Outro}
+{tm: 1:16}[C]And we're [G]done [C]
+`,
+  },
 ];

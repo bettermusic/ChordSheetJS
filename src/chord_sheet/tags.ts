@@ -186,6 +186,13 @@ export const TEMPO = 'tempo';
 export const TIME = 'time';
 
 /**
+ * Timestamp directive. Marks the audio playback time for a line or inline position.
+ * Supports pipe-delimited values for repeating sections: {timestamp: 0:16|1:20}
+ * @type {string}
+ */
+export const TIMESTAMP = 'timestamp';
+
+/**
  * Title meta directive. See https://www.chordpro.org/chordpro/directives-title/
  * @type {string}
  */

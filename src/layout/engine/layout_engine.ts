@@ -1,3 +1,4 @@
+import ChordLyricsPair from '../../chord_sheet/chord_lyrics_pair';
 import Item from '../../chord_sheet/item';
 import { ItemProcessor } from './item_processor';
 import { LayoutFactory } from './layout_factory';
@@ -29,6 +30,7 @@ interface HandleRepeatedSectionParams {
   skipIndices: Set<number>;
   startIndex: number;
   bodyParagraphs: Paragraph[];
+  cacheKey: string;
 }
 
 interface LayoutSimulationState {
@@ -54,6 +56,8 @@ export class LayoutEngine {
   private lineBreaker: LineBreaker;
 
   private sectionCache: Map<string, Paragraph> = new Map<string, Paragraph>();
+
+  private sectionOccurrenceCount: Map<string, number> = new Map<string, number>();
 
   constructor(
     private song: Song,
@@ -129,6 +133,7 @@ export class LayoutEngine {
     }
 
     this.sectionCache.clear();
+    this.sectionOccurrenceCount.clear();
 
     const processedParagraphs: Paragraph[] = [];
     const skipIndices = new Set<number>();
@@ -146,6 +151,7 @@ export class LayoutEngine {
 
     (this.song as any).renderParagraphs = processedParagraphs;
     this.sectionCache.clear();
+    this.sectionOccurrenceCount.clear();
   }
 
   private processParagraph(params: ProcessParagraphParams): void {
@@ -198,6 +204,7 @@ export class LayoutEngine {
       skipIndices: params.skipIndices,
       startIndex: params.index,
       bodyParagraphs: params.bodyParagraphs,
+      cacheKey,
     });
   }
 
@@ -211,7 +218,15 @@ export class LayoutEngine {
     }
 
     this.sectionCache.set(cacheKey, paragraph);
-    processedParagraphs.push(paragraph);
+
+    if (this.shouldDistributeTimestamps()) {
+      const occurrenceIndex = this.sectionOccurrenceCount.get(cacheKey) || 0;
+      this.sectionOccurrenceCount.set(cacheKey, occurrenceIndex + 1);
+      processedParagraphs.push(this.distributeParagraphTimestamps(paragraph, occurrenceIndex));
+    } else {
+      processedParagraphs.push(paragraph);
+    }
+
     return true;
   }
 
@@ -279,14 +294,22 @@ export class LayoutEngine {
   }
 
   private handleFullMode(params: HandleRepeatedSectionParams): void {
-    const { cachedParagraph, currentParagraph, processedParagraphs } = params;
+    const {
+      cachedParagraph, currentParagraph, processedParagraphs, cacheKey,
+    } = params;
     const mergedParagraph = new Paragraph();
 
     this.buildFullModeLines(currentParagraph, cachedParagraph).forEach((line) => {
       mergedParagraph.addLine(line);
     });
 
-    processedParagraphs.push(mergedParagraph);
+    if (this.shouldDistributeTimestamps()) {
+      const occurrenceIndex = this.sectionOccurrenceCount.get(cacheKey) || 0;
+      this.sectionOccurrenceCount.set(cacheKey, occurrenceIndex + 1);
+      processedParagraphs.push(this.distributeParagraphTimestamps(mergedParagraph, occurrenceIndex));
+    } else {
+      processedParagraphs.push(mergedParagraph);
+    }
   }
 
   private buildFullModeLines(currentParagraph: Paragraph, cachedParagraph: Paragraph): Line[] {
@@ -388,6 +411,74 @@ export class LayoutEngine {
     }
 
     return item;
+  }
+
+  /**
+   * Distribute timestamps across a paragraph for a specific occurrence index.
+   * For repeatedSections: 'full' mode, each occurrence gets only the timestamp
+   * at its occurrence index from pipe-delimited timestamp arrays.
+   *
+   * @param paragraph The paragraph to distribute timestamps for
+   * @param occurrenceIndex Which occurrence this is (0 = first, 1 = second, etc.)
+   * @returns A new paragraph with distributed timestamps
+   */
+  private distributeParagraphTimestamps(paragraph: Paragraph, occurrenceIndex: number): Paragraph {
+    const distributed = new Paragraph();
+
+    paragraph.lines.forEach((line) => {
+      const distributedLine = this.distributeLineTimestamps(line, occurrenceIndex);
+      distributed.addLine(distributedLine);
+    });
+
+    return distributed;
+  }
+
+  /**
+   * Distribute timestamps for a single line.
+   * Picks the timestamp at occurrenceIndex from each timestamp array,
+   * or drops if the array doesn't have enough entries.
+   */
+  private distributeLineTimestamps(line: Line, occurrenceIndex: number): Line {
+    const clonedLine = new Line({ type: line.type, items: [] });
+    clonedLine.timestamps = this.pickTimestampAtIndex(line.timestamps, occurrenceIndex);
+
+    line.items.forEach((item) => {
+      const distributedItem = this.distributeItemTimestamps(item, occurrenceIndex);
+      clonedLine.items.push(distributedItem);
+    });
+
+    return clonedLine;
+  }
+
+  /**
+   * Distribute timestamps for a single item (specifically ChordLyricsPair).
+   */
+  private distributeItemTimestamps(item: Item, occurrenceIndex: number): Item {
+    if (!(item instanceof ChordLyricsPair)) {
+      return this.cloneItem(item);
+    }
+
+    const cloned = item.clone();
+    cloned.timestamps = this.pickTimestampAtIndex(cloned.timestamps, occurrenceIndex);
+    return cloned;
+  }
+
+  private pickTimestampAtIndex(timestamps: number[], occurrenceIndex: number): number[] {
+    if (!timestamps || timestamps.length === 0) {
+      return [];
+    }
+    if (occurrenceIndex < timestamps.length) {
+      return [timestamps[occurrenceIndex]];
+    }
+    return [];
+  }
+
+  /**
+   * Check if timestamp distribution should be applied.
+   * Only applies in 'full' mode where sections are fully repeated.
+   */
+  private shouldDistributeTimestamps(): boolean {
+    return this.config.repeatedSections === 'full';
   }
 
   /**
@@ -507,11 +598,32 @@ export class LayoutEngine {
     paragraph: Paragraph,
     units: LineLayout[][],
   ): void {
+    // Collect timestamps from all lines in the paragraph
+    const timestamps = this.collectParagraphTimestamps(units);
+
     layouts.push({
       units,
       addSpacing: true,
       sectionType: paragraph.type,
+      timestamps,
     });
+  }
+
+  /**
+   * Collect all timestamps from line layouts in a paragraph
+   */
+  private collectParagraphTimestamps(units: LineLayout[][]): number[] | undefined {
+    const timestamps: number[] = [];
+
+    units.forEach((lineLayouts) => {
+      lineLayouts.forEach((lineLayout) => {
+        if (lineLayout.timestamps && lineLayout.timestamps.length > 0) {
+          timestamps.push(...lineLayout.timestamps);
+        }
+      });
+    });
+
+    return timestamps.length > 0 ? timestamps : undefined;
   }
 
   /**

@@ -11,6 +11,7 @@ import SoftLineBreak from '../chord_sheet/soft_line_break';
 import Song from '../chord_sheet/song';
 import Tag from '../chord_sheet/tag';
 import Ternary from '../chord_sheet/chord_pro/ternary';
+import { formatTimestamp } from '../utilities/timestamp_parser';
 
 /**
  * Formats a song into a ChordPro chord sheet
@@ -79,9 +80,33 @@ class ChordProFormatter extends Formatter {
   }
 
   formatLine(line: Line, metadata: Metadata): string {
-    return line.items
-      .map((item) => this.formatItem(item, metadata))
+    const parts: string[] = [];
+    const { timestampPrecision } = this.configuration;
+
+    // Add line-level timestamps if present
+    if (line.timestamps && line.timestamps.length > 0) {
+      const formattedTimestamps = line.timestamps
+        .map((ts) => formatTimestamp(ts, timestampPrecision))
+        .join('|');
+      parts.push(`{timestamp: ${formattedTimestamps}}\n`);
+    }
+
+    // Format all items in the line
+    const itemsFormatted = line.items
+      .map((item) => {
+        // Add inline timestamps for ChordLyricsPair
+        if (item instanceof ChordLyricsPair && item.timestamps && item.timestamps.length > 0) {
+          const formattedTimestamps = item.timestamps
+            .map((ts) => formatTimestamp(ts, timestampPrecision))
+            .join('|');
+          return `{timestamp: ${formattedTimestamps}}${this.formatItem(item, metadata)}`;
+        }
+        return this.formatItem(item, metadata);
+      })
       .join('');
+
+    parts.push(itemsFormatted);
+    return parts.join('');
   }
 
   formatItem(item: Item, metadata: Metadata): string {

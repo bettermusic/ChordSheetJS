@@ -4,6 +4,7 @@ import './display-panel/formatter-display';
 import './control-panel/editor-controls';
 import './control-panel/formatter-controls';
 import './control-panel/config-controls';
+import './control-panel/audio-sync-panel';
 
 /**
  * Main application container
@@ -107,6 +108,10 @@ export class ChordPlaygroundApp extends HTMLElement {
           background-color: #f5f5f5;
         }
 
+        .audio-sync-panel {
+          /* Panel auto-hides when not MeasuredHTML */
+        }
+
         .display-container {
           flex: 1;
           overflow: auto;
@@ -140,6 +145,9 @@ export class ChordPlaygroundApp extends HTMLElement {
         <div class="right-panel">
           <div class="formatter-controls">
             <formatter-controls></formatter-controls>
+          </div>
+          <div class="audio-sync-panel">
+            <audio-sync-panel></audio-sync-panel>
           </div>
           <div class="display-container">
             <formatter-display></formatter-display>

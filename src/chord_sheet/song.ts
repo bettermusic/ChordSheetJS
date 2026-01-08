@@ -88,22 +88,53 @@ class Song extends MetadataAccessors {
     return this.selectRenderableItems(this.linesToParagraphs(expandedLines)) as Paragraph[];
   }
 
+  /**
+   * Get all timestamps from all lines in the song
+   * @returns {number[]} Sorted array of unique timestamps in seconds
+   */
+  getAllTimestamps(): number[] {
+    const timestamps = new Set<number>();
+
+    this.lines.forEach((line) => {
+      if (line.timestamps && line.timestamps.length > 0) {
+        line.timestamps.forEach((ts) => timestamps.add(ts));
+      }
+    });
+
+    return Array.from(timestamps).sort((a, b) => a - b);
+  }
+
   linesToParagraphs(lines: Line[]): Paragraph[] {
     let currentParagraph = new Paragraph();
     const paragraphs = [currentParagraph];
+    let pendingTimestamps: number[] = [];
+
     lines.forEach((line, index) => {
       const nextLine: Line | null = lines[index + 1] || null;
+
       if (line.isEmpty() || (line.isSectionEnd() && nextLine && !nextLine.isEmpty())) {
         currentParagraph = new Paragraph();
         paragraphs.push(currentParagraph);
       } else if (line.hasRenderableItems()) {
+        if (pendingTimestamps.length > 0) {
+          // eslint-disable-next-line no-param-reassign
+          line.timestamps = [...pendingTimestamps, ...line.timestamps];
+          pendingTimestamps = [];
+        }
+
         currentParagraph.addLine(line);
+      } else if (line.hasTimestamps()) {
+        pendingTimestamps.push(...line.timestamps);
       }
     });
+
     return paragraphs;
   }
 
-  /** Returns a deep clone of the song @returns {Song} */
+  /**
+   * Returns a deep clone of the song
+   * @returns {Song} The cloned song
+   */
   clone(): Song {
     const clone = new Song();
     clone.warnings = [...this.warnings];
@@ -630,6 +661,10 @@ Or set the song key before changing key:
       if (changedLine) {
         builder.addLine();
         changedLine.items.forEach((item) => builder.addItem(item));
+
+        if (changedLine.timestamps?.length > 0 && builder.currentLine) {
+          builder.currentLine.timestamps = [...changedLine.timestamps];
+        }
       }
     });
 
@@ -642,40 +677,79 @@ Or set the song key before changing key:
     notFoundCallback: (_song: Song) => Song,
   ): Song {
     let found = false;
-
     const updatedSong = this.mapItems((item) => {
       if (findCallback(item)) {
         found = true;
         return updateCallback(item);
       }
-
       return item;
     });
-
-    if (!found) {
-      return notFoundCallback(updatedSong);
-    }
-
-    return updatedSong;
+    return found ? updatedSong : notFoundCallback(updatedSong);
   }
 
   private removeItem(callback: (_item: Item) => boolean): Song {
     return this.mapLines((line) => {
       const { items } = line;
       const index = items.findIndex(callback);
-
-      if (index === -1) {
-        return line;
-      }
-
-      if (items.length === 1) {
-        return null;
-      }
-
-      return line.set({
-        items: [...items.slice(0, index), ...items.slice(index + 1)],
-      });
+      if (index === -1) return line;
+      if (items.length === 1) return null;
+      return line.set({ items: [...items.slice(0, index), ...items.slice(index + 1)] });
     });
+  }
+
+  private calculateTempoRatio(oldTempoOrOptions: number | { ratio: number }, newTempo?: number): number {
+    if (typeof oldTempoOrOptions === 'object') {
+      return oldTempoOrOptions.ratio;
+    }
+    if (typeof newTempo !== 'number') {
+      throw new Error('newTempo is required when oldTempo is provided');
+    }
+    if (oldTempoOrOptions <= 0 || newTempo <= 0) {
+      throw new Error('Tempo values must be positive numbers');
+    }
+    return oldTempoOrOptions / newTempo;
+  }
+
+  private scaleLineTimestamps(line: Line, ratio: number): void {
+    if (line.timestamps.length > 0) {
+      // eslint-disable-next-line no-param-reassign
+      line.timestamps = line.timestamps.map((ts) => ts * ratio);
+    }
+  }
+
+  private scaleInlineTimestamps(line: Line, ratio: number): void {
+    line.items.forEach((item) => {
+      if (item instanceof ChordLyricsPair && item.timestamps.length > 0) {
+        // eslint-disable-next-line no-param-reassign
+        item.timestamps = item.timestamps.map((ts) => ts * ratio);
+      }
+    });
+  }
+
+  /**
+   * Returns a copy of the song with all timestamps scaled according to a tempo change.
+   * The math is: `newTimestamp = oldTimestamp × (oldTempo / newTempo)`
+   * Examples: 120 BPM → 60 BPM: timestamps doubled; 120 BPM → 180 BPM: timestamps scaled to 2/3
+   * @example song.changeTempo(120, 100) or song.changeTempo({ ratio: 1.5 })
+   */
+  changeTempo(oldTempo: number, newTempo: number): Song;
+
+  changeTempo(options: { ratio: number }): Song;
+
+  changeTempo(
+    oldTempoOrOptions: number | { ratio: number },
+    newTempo?: number,
+  ): Song {
+    const ratio = this.calculateTempoRatio(oldTempoOrOptions, newTempo);
+    if (ratio <= 0) {
+      throw new Error('Ratio must be a positive number');
+    }
+    const clonedSong = this.clone();
+    clonedSong.lines.forEach((line) => {
+      this.scaleLineTimestamps(line, ratio);
+      this.scaleInlineTimestamps(line, ratio);
+    });
+    return clonedSong;
   }
 }
 

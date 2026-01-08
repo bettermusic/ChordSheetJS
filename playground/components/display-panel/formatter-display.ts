@@ -69,6 +69,7 @@ export class FormatterDisplay extends HTMLElement {
           font-family: inherit;
           height: 100%;
           width: 100%;
+          overflow: auto; /* Enable scrolling for auto-height content */
         }
 
         .text-content {
@@ -158,7 +159,10 @@ export class FormatterDisplay extends HTMLElement {
     document.addEventListener(APP_EVENTS.FORMATTER_CHANGED, this.handleFormatterChange);
 
     // Listen for formatter output updates
-    document.addEventListener('formatter-output-updated', this.handleOutputUpdate);
+    document.addEventListener(
+      'formatter-output-updated',
+      this.handleOutputUpdate as unknown as (e: Event) => void,
+    );
 
     // Listen for song key or capo changes
     document.addEventListener(APP_EVENTS.SONG_PARSED, this.handleSongParsed);
@@ -169,7 +173,10 @@ export class FormatterDisplay extends HTMLElement {
 
   removeEventListeners() {
     document.removeEventListener(APP_EVENTS.FORMATTER_CHANGED, this.handleFormatterChange);
-    document.removeEventListener('formatter-output-updated', this.handleOutputUpdate);
+    document.removeEventListener(
+      'formatter-output-updated',
+      this.handleOutputUpdate as unknown as (e: Event) => void,
+    );
     document.removeEventListener(APP_EVENTS.SONG_PARSED, this.handleSongParsed);
     document.removeEventListener(APP_EVENTS.FORMATTER_CONFIG_UPDATED, this.handleConfigUpdate);
   }
@@ -203,28 +210,22 @@ export class FormatterDisplay extends HTMLElement {
 
   handleOutputUpdate = (e: CustomEvent) => {
     if (e.detail && e.detail.content) {
-      console.log('Formatter output updated, updating display');
       this.updateDisplay(e.detail.content);
     }
   };
 
   handleSongParsed = () => {
-    console.log('Song parsed, may need to update display');
     // The formatter will handle updating the output in response to this event
     this.updateDisplay();
   };
 
   handleConfigUpdate = () => {
-    console.log('Formatter config updated');
-
     const { currentFormatter } = formatterState;
 
     if (currentFormatter === 'PDF') {
-      console.log('PDF formatter config changed, regenerating PDF');
       this.cleanupBlobUrls();
       this.generateAndDisplayPDF();
     } else if (currentFormatter === 'MeasuredHTML') {
-      console.log('MeasuredHTML formatter config changed, re-rendering');
       this.updateDisplay();
     }
     // For other formatters, the formatter-output-updated event will handle updates
@@ -308,6 +309,22 @@ export class FormatterDisplay extends HTMLElement {
     }
   }
 
+  // Public method to expose the content container for external use (e.g., TimestampManager)
+  getContentContainer(): HTMLElement | null {
+    return this.contentContainer;
+  }
+
+  // Dispatch a custom event when MeasuredHTML rendering completes
+  dispatchRenderComplete() {
+    const event = new CustomEvent('measured-html-rendered', {
+      bubbles: true,
+      composed: true,
+      detail: { container: this.contentContainer },
+    });
+    this.dispatchEvent(event);
+    console.log('Dispatched measured-html-rendered event');
+  }
+
   // Update the displayed content
   updateDisplay(content?: string) {
     if (!this.contentContainer) return;
@@ -318,12 +335,10 @@ export class FormatterDisplay extends HTMLElement {
       this.contentContainer.className = 'content-container';
       this.generateAndDisplayPDF();
     } else if (currentFormatter === 'MeasuredHTML') {
-      console.log('Updating MeasuredHTML display');
       let song = songState.parsedSong;
       if (song) {
         // Measure the container's dimensions
         const width = this.contentContainer.clientWidth;
-        const height = this.contentContainer.clientHeight; // 'auto';
 
         // Check if the container is visible
         if (width === 0) {
@@ -333,9 +348,10 @@ export class FormatterDisplay extends HTMLElement {
         }
 
         // Merge stored config with dynamic pageSize
+        // Use 'auto' height for continuous scrolling (needed for audio sync)
         const configWithPageSize = {
           ...formatterState.currentConfig,
-          pageSize: { width, height },
+          pageSize: { width, height: 'auto' },
         };
 
         const metadata = configWithPageSize.metadata || {};
@@ -347,11 +363,29 @@ export class FormatterDisplay extends HTMLElement {
         // Create and configure the formatter
         const formatter = new MeasuredHtmlFormatter(this.contentContainer);
         formatter.configure(configWithPageSize).format(song as Song);
+
+        // Inject generated CSS for highlighting
+        const generatedCSS = formatter.cssString();
+        if (generatedCSS) {
+          // Add or update the style element
+          let styleElement = this.shadowRoot?.getElementById('formatter-generated-css') as HTMLStyleElement;
+          if (!styleElement) {
+            styleElement = document.createElement('style');
+            styleElement.id = 'formatter-generated-css';
+            this.shadowRoot?.appendChild(styleElement);
+          }
+          styleElement.textContent = generatedCSS;
+        }
+
+        // Dispatch event after rendering completes
+        // Use setTimeout to ensure DOM updates are complete
+        setTimeout(() => this.dispatchRenderComplete(), 0);
       } else {
         this.contentContainer.innerHTML = '<div class="no-content">No song to display</div>';
       }
     } else {
       const displayContent = content || formatterState.formattedOutput || '';
+
       if (currentFormatter === 'HTML') {
         this.contentContainer.className = 'content-container html-content';
         this.contentContainer.innerHTML = displayContent;

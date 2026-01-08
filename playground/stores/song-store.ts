@@ -145,7 +145,6 @@ const songActions = {
 
   // Parse song content and update the store
   parseSongContent(content: string) {
-    console.log('Parsing song content:', content && `${content.substring(0, 30)}...`);
     const state = songStore.getState();
 
     // Check if already processing
@@ -153,7 +152,6 @@ const songActions = {
 
     // Check if app is ready before proceeding
     if (!initStore.isReady) {
-      console.log('App not ready, skipping song parsing');
       return null;
     }
 

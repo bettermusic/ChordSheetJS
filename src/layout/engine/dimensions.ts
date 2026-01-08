@@ -3,7 +3,7 @@ import { ColumnConfig, Margins, MeasurementBasedLayoutConfig } from '../../forma
 class Dimensions {
   pageWidth: number;
 
-  pageHeight: number;
+  pageHeight: number | 'auto';
 
   layoutConfig: MeasurementBasedLayoutConfig;
 
@@ -11,7 +11,7 @@ class Dimensions {
 
   constructor(
     pageWidth: number,
-    pageHeight: number,
+    pageHeight: number | 'auto',
     layoutConfig: MeasurementBasedLayoutConfig,
     columns: ColumnConfig,
   ) {
@@ -38,6 +38,10 @@ class Dimensions {
   }
 
   get maxY() {
+    // Return Infinity for auto height to prevent page breaks
+    if (this.pageHeight === 'auto') {
+      return Infinity;
+    }
     return this.pageHeight - this.margins.bottom;
   }
 

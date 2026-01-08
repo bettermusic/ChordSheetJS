@@ -5,6 +5,7 @@ import './chord-editor/config-editor';
 import './control-panel/editor-controls';
 import './control-panel/formatter-controls';
 import './control-panel/config-controls';
+import './control-panel/audio-sync-panel';
 import './display-panel/formatter-display';
 
 // Export main app component for direct usage
