@@ -60,20 +60,29 @@ class SongBuilder {
     return null;
   }
 
+  private applyPendingTimestamps(): void {
+    if (!this.currentLine || this.pendingTimestamps.length === 0) return;
+
+    this.currentLine.timestamps = [...this.pendingTimestamps];
+    this.pendingTimestamps = [];
+  }
+
+  private transferTimestampsFromEmptyLine(emptyLine: Line | null): void {
+    if (!this.currentLine || !emptyLine) return;
+    if (emptyLine.items.length > 0 || emptyLine.timestamps.length === 0) return;
+
+    this.currentLine.timestamps.push(...emptyLine.timestamps);
+    emptyLine.timestamps.splice(0, emptyLine.timestamps.length);
+  }
+
   addLine(line?: Line): Line {
-    if (line) {
-      this.currentLine = line;
-    } else {
-      this.currentLine = new Line();
-      this.lines.push(this.currentLine);
-    }
+    const previousLine = this.currentLine;
+    this.currentLine = line ?? new Line();
 
-    // Attach any pending line-level timestamps
-    if (this.pendingTimestamps.length > 0) {
-      this.currentLine.timestamps = [...this.pendingTimestamps];
-      this.pendingTimestamps = [];
-    }
+    if (!line) this.lines.push(this.currentLine);
 
+    this.applyPendingTimestamps();
+    this.transferTimestampsFromEmptyLine(previousLine);
     this.setCurrentProperties(this.sectionType, this.selector);
     this.currentLine.transposeKey = this.transposeKey ?? this.currentKey;
     this.currentLine.key = this.currentKey || this.song.getMetadata().getSingle(KEY);
@@ -141,15 +150,17 @@ class SongBuilder {
       return;
     }
 
-    // If we're currently building a line with content (inline context),
-    // these timestamps apply to the next ChordLyricsPair
     if (this.currentLine && this.currentLine.items.length > 0) {
       this.pendingInlineTimestamps = timestamps;
-    } else {
-      // Line-level timestamps (before any line content)
-      // The line will be created when content is added
-      this.pendingTimestamps = timestamps;
+      return;
     }
+
+    if (this.currentLine && this.currentLine.items.length === 0) {
+      this.currentLine.timestamps.push(...timestamps);
+      return;
+    }
+
+    this.pendingTimestamps = timestamps;
   }
 
   ensureLine(): void {

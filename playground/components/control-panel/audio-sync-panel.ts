@@ -6,6 +6,8 @@ import { TimestampEntry, TimestampManager } from '../../../src/index';
  * Web component for audio sync testing panel
  * Provides controls for testing TimestampManager with manual slider and audio playback
  */
+const DURATION_PADDING_AFTER_LAST_TIMESTAMP = 5;
+
 export class AudioSyncPanel extends HTMLElement {
   private manager: TimestampManager | null = null;
 
@@ -15,15 +17,21 @@ export class AudioSyncPanel extends HTMLElement {
 
   private scrollOffset = 100;
 
-  private lookAheadMs = 500; // Pre-scroll 500ms before timestamp
+  private lookAheadMs = 500;
 
-  private maxDuration = 300; // 5 minutes default
+  private maxDuration = 300;
 
   private currentTime = 0;
 
   private audioElement: HTMLAudioElement | null = null;
 
   private isPlaying = false;
+
+  private hasTimestamps = false;
+
+  private simulatedPlaybackRafId: number | null = null;
+
+  private simulatedPlaybackLastTickTime: number | null = null;
 
   // DOM references
   private containerElement: HTMLElement | null = null;
@@ -245,7 +253,7 @@ export class AudioSyncPanel extends HTMLElement {
                 id="audio-file"
                 accept="audio/*"
               />
-              <button id="play-pause" disabled>▶ Play</button>
+              <button id="play-pause">▶ Play</button>
             </div>
           </div>
 
@@ -402,14 +410,10 @@ export class AudioSyncPanel extends HTMLElement {
     this.audioElement = new Audio();
     this.audioElement.src = URL.createObjectURL(file);
 
-    // Set up audio event listeners
     this.audioElement.addEventListener('loadedmetadata', () => {
       if (this.audioElement && this.sliderElement) {
         this.maxDuration = this.audioElement.duration;
         this.sliderElement.max = String(this.maxDuration);
-      }
-      if (this.playPauseButton) {
-        this.playPauseButton.disabled = false;
       }
     });
 
@@ -418,16 +422,22 @@ export class AudioSyncPanel extends HTMLElement {
   };
 
   handlePlayPause = () => {
-    if (!this.audioElement) return;
-
     if (this.isPlaying) {
-      this.audioElement.pause();
+      if (this.audioElement) {
+        this.audioElement.pause();
+      } else {
+        this.stopSimulatedPlayback();
+      }
       this.isPlaying = false;
       if (this.playPauseButton) {
         this.playPauseButton.textContent = '▶ Play';
       }
     } else {
-      this.audioElement.play();
+      if (this.audioElement) {
+        this.audioElement.play();
+      } else {
+        this.startSimulatedPlayback();
+      }
       this.isPlaying = true;
       if (this.playPauseButton) {
         this.playPauseButton.textContent = '⏸ Pause';
@@ -471,9 +481,8 @@ export class AudioSyncPanel extends HTMLElement {
     this.reinitTimestampManager();
   };
 
-  // Helper methods
   updateVisibility() {
-    const isVisible = formatterState.currentFormatter === 'MeasuredHTML';
+    const isVisible = formatterState.currentFormatter === 'MeasuredHTML' && this.hasTimestamps;
     this.style.display = isVisible ? 'block' : 'none';
   }
 
@@ -505,39 +514,55 @@ export class AudioSyncPanel extends HTMLElement {
   }
 
   initTimestampManager() {
-    // Clean up existing manager
     this.cleanup();
 
     const container = this.getFormatterContainer();
     if (!container) {
-      console.warn('Cannot initialize TimestampManager: container not found');
+      this.hasTimestamps = false;
+      this.updateVisibility();
       this.updateTimestampInfo(null, 0);
       return;
     }
 
     try {
-      // The container itself is the scrollable element
       this.manager = new TimestampManager(container, {
         autoScroll: this.autoScrollEnabled,
         scrollOffset: this.scrollOffset,
         scrollThreshold: this.scrollOffset,
         highlightClass: 'cs-highlighted',
         scrollBehavior: 'smooth',
-        scrollContainer: container, // Explicitly set the scroll container
-        lookAheadMs: this.lookAheadMs, // Pre-scroll before timestamp
+        scrollContainer: container,
+        lookAheadMs: this.lookAheadMs,
       });
 
-      // Set up entry change listener
       this.manager.onEntryChange((entry) => {
         this.updateTimestampInfo(entry, this.manager?.getTimestamps().length || 0);
       });
 
-      const timestamps = this.manager.getTimestamps();
-      this.updateTimestampInfo(null, timestamps.length);
+      const entries = this.manager.getTimestamps();
+      this.hasTimestamps = entries.length > 0;
+      this.updateVisibility();
+      this.updateTimestampInfo(null, entries.length);
 
-      console.log('TimestampManager initialized with', timestamps.length, 'timestamps');
-    } catch (error) {
-      console.error('Error initializing TimestampManager:', error);
+      if (this.hasTimestamps && !this.audioElement) {
+        const maxTimestamp = Math.max(...entries.map((e) => e.timestamp));
+        this.maxDuration = maxTimestamp + DURATION_PADDING_AFTER_LAST_TIMESTAMP;
+        if (this.sliderElement) {
+          this.sliderElement.max = String(this.maxDuration);
+        }
+        if (this.currentTime > this.maxDuration) {
+          this.currentTime = 0;
+          this.updateTimeDisplay(0);
+          if (this.sliderElement) {
+            this.sliderElement.value = '0';
+          }
+        }
+      }
+
+      this.manager.setCurrentTime(this.currentTime);
+    } catch (_error) {
+      this.hasTimestamps = false;
+      this.updateVisibility();
       this.updateTimestampInfo(null, 0);
     }
   }
@@ -601,7 +626,57 @@ export class AudioSyncPanel extends HTMLElement {
     `;
   }
 
+  startSimulatedPlayback() {
+    this.manager?.setCurrentTime(this.currentTime);
+    const currentEntry = this.manager?.getCurrentEntry() ?? null;
+    this.updateTimestampInfo(currentEntry, this.manager?.getTimestamps().length || 0);
+    this.simulatedPlaybackLastTickTime = performance.now();
+    const tick = (now: number) => {
+      if (!this.isPlaying || this.audioElement) {
+        this.stopSimulatedPlayback();
+        return;
+      }
+
+      const deltaSeconds = (now - (this.simulatedPlaybackLastTickTime || now)) / 1000;
+      this.simulatedPlaybackLastTickTime = now;
+      this.currentTime = Math.min(this.currentTime + deltaSeconds, this.maxDuration);
+
+      if (this.sliderElement) {
+        this.sliderElement.value = String(this.currentTime);
+      }
+      this.updateTimeDisplay(this.currentTime);
+      this.manager?.setCurrentTime(this.currentTime);
+
+      if (this.currentTime >= this.maxDuration) {
+        this.handleSimulatedPlaybackEnded();
+        return;
+      }
+
+      this.simulatedPlaybackRafId = requestAnimationFrame(tick);
+    };
+
+    this.simulatedPlaybackRafId = requestAnimationFrame(tick);
+  }
+
+  stopSimulatedPlayback() {
+    if (this.simulatedPlaybackRafId !== null) {
+      cancelAnimationFrame(this.simulatedPlaybackRafId);
+      this.simulatedPlaybackRafId = null;
+    }
+    this.simulatedPlaybackLastTickTime = null;
+  }
+
+  handleSimulatedPlaybackEnded() {
+    this.stopSimulatedPlayback();
+    this.isPlaying = false;
+    if (this.playPauseButton) {
+      this.playPauseButton.textContent = '▶ Play';
+    }
+  }
+
   cleanup() {
+    this.stopSimulatedPlayback();
+
     if (this.manager) {
       this.manager.dispose();
       this.manager = null;
@@ -614,6 +689,7 @@ export class AudioSyncPanel extends HTMLElement {
     }
 
     this.isPlaying = false;
+    this.hasTimestamps = false;
   }
 }
 
